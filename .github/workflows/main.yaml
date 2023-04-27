@@ -39,12 +39,7 @@ jobs:
       - uses: actions/setup-python@v3
       - name: default - setup venv
         run: python3 -m venv .venv
-      - name: default - install meson and ninja
-        run: |
-            ${{ matrix.script_file }}
-            pip install meson ninja
       - name: default - install pip deps
-        if: ${{ !matrix.useMsys }}
         run: |
             ${{ matrix.script_file }}
             pip install -r requirements.txt
@@ -52,13 +47,19 @@ jobs:
       - name: generate the sources
         run: | 
             ${{ matrix.script_file }}
-            python3 ./getSources.py
+            python3 ./genSources.py
             
       - name: default - Prepare MSVC
         if: ${{ !matrix.useMsys && matrix.os == 'windows-latest' }}
         uses: bus1/cabuild/action/msdevshell@v1
         with:
             architecture: x64
+      
+      - name: default - install meson and ninja
+        if: ${{ !matrix.useMsys }}
+        run: | 
+            pipx install meson
+            pipx install ninja
       
       - name: default - setup the project
         if: ${{ !matrix.useMsys }}
@@ -71,7 +72,6 @@ jobs:
       - name: default - test the project
         if: ${{ !matrix.useMsys }}
         run: meson test --verbose -C output/build
-    
     
       - uses: msys2/setup-msys2@v2
         if: ${{ matrix.useMsys }}
