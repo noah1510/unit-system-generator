@@ -1,4 +1,4 @@
-#include "unit_system_{{ unit_name }}.hpp"
+#include "unit_system/{{ unit_name }}.hpp"
 
 using namespace sakurajin::unit_system;
 
