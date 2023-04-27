@@ -49,4 +49,4 @@ class MesonConfig:
         # copy the subprojects folder
         subprojects_dir = os.path.join(template_dir, 'subprojects')
         distutils.dir_util.copy_tree(subprojects_dir, os.path.join(out_dir, 'subprojects'))
-        
+

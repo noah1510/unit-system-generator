@@ -161,6 +161,7 @@ if __name__ == "__main__":
         output_header = os.path.realpath(os.path.join(base_dir, 'include'))
     distutils.dir_util.copy_tree(includes_folder, output_header)
 
+    # generate all meson build system files
     meson_conf = generators.meson.MesonConfig(
         '0.7.0',
         args['exportMacro'],
