@@ -14,7 +14,7 @@
 
 namespace sakurajin{
     namespace unit_system{
-        class {{ export_macro }}{{ unit_name }} : public unit_t<{{ unit_id }}>{
+        class {{ export_macro }} {{ unit_name }} : public unit_t<{{ unit_id }}>{
         public:
             {{ unit_name }}();
             {{ unit_name }}(unit_t<{{ unit_id }}> val);
@@ -25,13 +25,13 @@ namespace sakurajin{
         {% if create_literals %}
 
         #ifndef UNIT_SYSTEM_NO_STD
-        {{ export_macro }}std::ostream& operator<<(std::ostream& os, const {{ unit_name }}& t);
+        {{ export_macro }} std::ostream& operator<<(std::ostream& os, const {{ unit_name }}& t);
         #endif
 
         inline namespace literals{
             {% for literal in literals %}
-            {{ export_macro }}{{ unit_name }} operator "" _{{ literal.name }}(long double val);
-            {{ export_macro }}{{ unit_name }} operator "" _{{ literal.name }}(unsigned long long int val);
+            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.name }}(long double val);
+            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.name }}(unsigned long long int val);
             {% endfor %}
         }
         {% endif %}

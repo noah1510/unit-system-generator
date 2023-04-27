@@ -44,7 +44,7 @@ namespace sakurajin{
         //   8 for energy (J) instead of 322011
         //   801 for Power (W) instead of 3220111
         template <std::size_t identifier>
-        class {{ export_macro }}unit_t{
+        class {{ export_macro }} unit_t{
         public:
             const long double multiplier;
             long double value = 0;
@@ -93,14 +93,14 @@ namespace sakurajin{
         //changes multiplier and offset
         //This is needed primarily for temperatures
         template <std::size_t identifier>
-        {{ export_macro }}unit_t<identifier> unit_cast(const unit_t<identifier>& unit, long double new_multiplier = 1, long double new_offset = 0){
+        {{ export_macro }} unit_t<identifier> unit_cast(const unit_t<identifier>& unit, long double new_multiplier = 1, long double new_offset = 0){
             auto valBase0 = (unit.value + unit.offset) * unit.multiplier;
             unit_t<identifier> retval{valBase0/new_multiplier-new_offset, new_multiplier, new_offset};
             return retval;
         }
 
         template <std::size_t identifier>
-        {{ export_macro }}unit_t<identifier> clamp(const unit_t<identifier>& unit, const unit_t<identifier>& lower, const unit_t<identifier>& upper){
+        {{ export_macro }} unit_t<identifier> clamp(const unit_t<identifier>& unit, const unit_t<identifier>& lower, const unit_t<identifier>& upper){
 
             auto _lower = unit_cast(lower, unit.multiplier, unit.offset);
             auto _upper = unit_cast(upper, unit.multiplier, unit.offset);
@@ -111,12 +111,12 @@ namespace sakurajin{
         }
 
         template <std::size_t identifier>
-        {{ export_macro }}unit_t<identifier> abs(const unit_t<identifier>& unit){
+        {{ export_macro }} unit_t<identifier> abs(const unit_t<identifier>& unit){
             return unit.value < 0 ? -unit : unit;
         }
 
         template<std::intmax_t _Num, std::intmax_t _Den = 1>
-        {{ export_macro }}long double multiplier(std::ratio<_Num, _Den>){
+        {{ export_macro }} long double multiplier(std::ratio<_Num, _Den>){
             long double num = static_cast<long double>(_Num);
             long double den = static_cast<long double>(_Den);
             return num/den;

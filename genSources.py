@@ -45,13 +45,13 @@ if __name__ == "__main__":
 
     # define the 'exportMacro' argument, which is optional and has a default value of ''
     parser.add_argument(
-        "--exportMacro",
+        "--noExportMacro",
         help="the export macro that should be used for the types",
         required=False,
-        default='',
+        default='UNIT_SYSTEM_EXPORT_MACRO',
         dest='exportMacro',
         action='store_const',
-        const='UNIT_SYSTEM_EXPORT_MACRO '
+        const=''
     )
 
     # define the 'printOutFiles' argument, which is a flag that indicates whether
