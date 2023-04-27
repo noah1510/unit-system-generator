@@ -1,6 +1,7 @@
 import json
 import os.path
 import argparse
+import distutils.dir_util
 
 import generators.utils
 import generators.specials
@@ -68,12 +69,12 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     # get the directory containing the script
-    script_dir = os.path.realpath(os.path.dirname(__file__))
-    base_dir = os.path.join(script_dir, 'output')
+    main_script_dir = os.path.realpath(os.path.dirname(__file__))
+    base_dir = os.path.join(main_script_dir, 'output')
 
     # get the path of the templates directory
-    template_dir = os.path.join(script_dir, 'templates')
-    type_data_dir = os.path.join(script_dir, 'type data')
+    template_dir = os.path.join(main_script_dir, 'templates')
+    type_data_dir = os.path.join(main_script_dir, 'type data')
 
     # get the value of the 'printOutFiles' argument
     printFiles = args['printOutFiles']
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     # subdirectory of the 'unit-system-adruino' directory
     if args['genArduino']:
         # get the path of the 'src' subdirectory of the 'unit-system-adruino' directory
-        arduino_src_dir = os.path.join(script_dir, 'unit-system-adruino')
+        arduino_src_dir = os.path.join(main_script_dir, 'unit-system-adruino')
         arduino_src_dir = os.path.join(arduino_src_dir, 'src')
 
         # if the 'outDir' argument was not provided, set the 'outDir' to the 'src' directory
@@ -151,3 +152,11 @@ if __name__ == "__main__":
         base_dir,
         printFiles
     )
+
+    # copy the general includes file to the output directory
+    includes_folder = os.path.realpath(os.path.join(main_script_dir, 'include'))
+    if outDir != '':
+        output_header = os.path.realpath(os.path.join(outDir, 'include'))
+    else:
+        output_header = os.path.realpath(os.path.join(base_dir, 'include'))
+    distutils.dir_util.copy_tree(includes_folder, output_header)
