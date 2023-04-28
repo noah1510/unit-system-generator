@@ -1,9 +1,6 @@
 name: "main-ci"
 
-on:
-  push:
-    branches:
-      - '*'
+on: [push]
 
 jobs:
   build_matrix:
@@ -108,8 +105,8 @@ jobs:
           name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}
           path: build
 
-  pre-release:
-    name: "Pre Release latest"
+  releases:
+    name: "Release"
     runs-on: "ubuntu-22.04"
     needs: build_matrix
     steps:
@@ -117,20 +114,22 @@ jobs:
       - uses: actions/setup-python@v3
       - name: setup environment and generate sources
         run: |
+            pipx install meson ninja
             python3 -m venv .venv
             source ./.venv/bin/activate
-            pip install meson ninja
             pip install -r requirements.txt
             python3 ./genSources.py
       - name: setup and compile sources
         run: |
-            mkdir sources
+            mkdir sources-meson
             cd output
-            meson setup -Dno_pip_install=true -Dbuild_tests=false -Dprefix=$(pwd)/../sources build
+            meson setup -Dno_pip_install=true -Dbuild_tests=false -Dprefix=$(pwd)/../sources-meson build
             meson compile -C build
             meson install -C build
       
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: "Release latest"
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
@@ -138,4 +137,26 @@ jobs:
           title: "Development Build"
           files: |
             LICENSE
+            sources-meson
+            
+      - name: "release candidate"
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && endsWith(github.ref_name, '-rc') }}
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          files: |
+            LICENSE
+            sources-meson
+            
+      - name: "release"
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && !endsWith(github.ref_name, '-rc') }}
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            LICENSE
+            sources-meson
+  
 
