@@ -4,7 +4,12 @@
 using namespace sakurajin::unit_system;
 using namespace sakurajin::unit_system::literals;
 
+#ifdef LED_BUILTIN
 const int LED = LED_BUILTIN;
+#else
+const int LED = 16;
+#endif
+
 time_si t_on  = 500_ms; /* time as milliseconds */
 time_si t_off = 0.5_s;  /* time as seconds      */
 

@@ -29,14 +29,14 @@ class UnitLiteral(Dict):
         # If the input dictionary contains a 'multiplier' key, set the multiplier attribute
         # to the corresponding value, otherwise set it to 1.0
         if 'multiplier' in _data:
-            self.multiplier = _data['multiplier']
+            self.multiplier = float(_data['multiplier'])
         else:
             self.multiplier = 1.0
 
         # If the input dictionary contains an 'offset' key, set the offset attribute
         # to the corresponding value, otherwise set it to 0.0
         if 'offset' in _data:
-            self.offset = _data['offset']
+            self.offset = float(_data['offset'])
         else:
             self.offset = 0.0
 

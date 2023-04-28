@@ -12,10 +12,6 @@
 #endif
 {% endif %}
 
-#ifndef UNIT_SYSTEM_NO_STD
-#include <iostream>
-#endif
-
 namespace sakurajin{
     namespace unit_system{
         class {{ export_macro }} {{ unit_name }} : public unit_t<{{ unit_id }}>{
@@ -28,7 +24,7 @@ namespace sakurajin{
         };
         {% if create_literals %}
 
-        #ifndef UNIT_SYSTEM_NO_STD
+        #ifndef UNIT_SYSTEM_NO_IOSTREAM
         {{ export_macro }} std::ostream& operator<<(std::ostream& os, const {{ unit_name }}& t);
         #endif
 

@@ -13,7 +13,9 @@
     #define UNIT_SYSTEM_NO_CMATH
     #define UNIT_SYSTEM_NO_ALGORITHM
     #define UNIT_SYSTEM_NO_RATIO
-#else    
+    #define UNIT_SYSTEM_NO_IOSTREAM
+    #define UNIT_SYSTEM_NO_CHRONO
+#else
     #if __has_include("cstddef")
         #undef UNIT_SYSTEM_NO_CSTDDEF
     #else
@@ -37,6 +39,18 @@
     #else
         #define UNIT_SYSTEM_NO_RATIO
     #endif
+    
+    #if __has_include("iostream")
+        #undef UNIT_SYSTEM_NO_IOSTREAM
+    #else
+        #define UNIT_SYSTEM_NO_IOSTREAM
+    #endif
+    
+    #if __has_include("chrono")
+        #undef UNIT_SYSTEM_NO_CHRONO
+    #else
+        #define UNIT_SYSTEM_NO_CHRONO
+    #endif
 #endif
     
 
@@ -44,9 +58,11 @@
     namespace std{
         #include <stddef.h>
     }
+    #define UNIT_SYSTEM_SIZE_T unsigned long long
 #else
     #include <cstddef>
-#endif    
+    #define UNIT_SYSTEM_SIZE_T std::size_t
+#endif  
 
 #ifdef UNIT_SYSTEM_NO_CMATH
     namespace std{
@@ -79,17 +95,17 @@
 #endif
 
 #ifdef UNIT_SYSTEM_NO_RATIO
-    namespace std{
     
-        #include <stdint.h>
-        
-        
-        template <intmax_t num, intmax_t den = 1>
+    #include <stdint.h>
+    #define UNIT_SYSTEM_INTMAX intmax_t
+    
+    namespace std{
+        template <intmax_t numerator, intmax_t denumerator = 1>
         class ratio {
         public:
-            typedef ratio<num, den> type;
-            static constexpr intmax_t n = num;
-            static constexpr intmax_t d = den;
+            typedef ratio<numerator, denumerator> type;
+            static constexpr intmax_t n = numerator;
+            static constexpr intmax_t d = denumerator;
         };
         
         typedef ratio<1,       1000000000000000000> atto;
@@ -112,6 +128,13 @@
     }
 #else
     #include <ratio>
+     #define UNIT_SYSTEM_INTMAX std::intmax_t
 #endif
 
+#ifndef UNIT_SYSTEM_NO_IOSTREAM
+#include <iostream>
+#endif
 
+#ifndef UNIT_SYSTEM_NO_CHRONO
+#include <chrono>
+#endif

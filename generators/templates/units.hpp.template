@@ -10,8 +10,7 @@
 {% endif %}
 {% endfor %}
 
-#ifndef UNIT_SYSTEM_NO_STD
-#include <chrono>
+#ifndef UNIT_SYSTEM_NO_CHRONO
 namespace sakurajin{
     namespace unit_system{
         template<class Rep, class Period = std::ratio<1> >
