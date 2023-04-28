@@ -107,7 +107,7 @@ jobs:
 
   arduino_matix:
     runs-on: ubuntu-latest
-    
+    if: ${{ github.ref_name == 'arduino' }}
     strategy:
       fail-fast: false
       matrix:
@@ -206,33 +206,6 @@ jobs:
         with:
           name: build-artifact
           path: .
-    
-    
-  pio_matrix:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ["ubuntu-20.04", "ubuntu-22.04", "macos-latest", "windows-latest"]
-        buildType: ["static", "shared"]
-        useMsys: [true, false]
-        exclude:
-          - useMsys: true
-            os: "ubuntu-20.04"
-          - useMsys: true
-            os: "ubuntu-22.04"
-          - useMsys: true
-            os: "macos-latest"
-        include:
-          - script_file: "source ./.venv/bin/activate"
-            os: "ubuntu-20.04"
-          - script_file: "source ./.venv/bin/activate"
-            os: "ubuntu-22.04"
-          - script_file: "source ./.venv/bin/activate"
-            os: "macos-latest"
-          - script_file: ".venv/Scripts/activate.ps1"
-            os: "windows-latest"
-          - setupExtras: "-Db_lto=false -Dgtest:b_lto=false"
-            os: "windows-latest"
           
   releases:
     name: "Release"
