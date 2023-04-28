@@ -19,8 +19,13 @@
     #endif
 
     namespace std{
-        using size_t = unsigned long long;
-        using intmax_t = long long;
+        #ifndef size_t
+            using size_t = unsigned long long;
+        #endif
+        
+        #ifndef
+            using intmax_t = long long;
+        #endif
         
         template <typename T>
         T abs(T var){

@@ -3,7 +3,7 @@ name: "main-ci"
 on: [push]
 
 jobs:
-  dektop_matrix:
+  desktop_matrix:
     strategy:
       fail-fast: false
       matrix:
@@ -221,7 +221,7 @@ jobs:
   releases:
     name: "Release"
     runs-on: "ubuntu-22.04"
-    needs: dektop_matrix
+    needs: [desktop_matrix, arduino_matix]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
