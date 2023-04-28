@@ -46,7 +46,7 @@ class ArduinoConfig:
             self.unit_strings,
         )
 
-        fill_dict['disable_std']: True
+        fill_dict['disable_std'] = True
 
         # generate the header files for the unit system library
         generators.specials.create_headers(

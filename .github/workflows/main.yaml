@@ -234,14 +234,10 @@ jobs:
             pip install -r requirements.txt
             python3 ./genSources.py --outDir=output_meson
             python3 ./genSources.py --arduino --outDir=output_arduino
-      - name: setup and compile meson sources
+      - name: compress sources into archives
         run: |
-            mkdir sources-meson
-            cd output_meson
-            meson setup -Dbuild_tests=disabled -Dprefix=$(pwd)/../sources-meson build
-            meson compile -C build
-            meson install -C build
-      
+            tar --zstd -cf unit_system_meson.tar.zstd output_meson LICENSE
+            tar --zstd -cf unit_system_arduino.tar.zstd output_arduino LICENSE
       - name: "Release latest"
         uses: "marvinpinto/action-automatic-releases@latest"
         if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
@@ -251,9 +247,8 @@ jobs:
           prerelease: true
           title: "Development Build"
           files: |
-            LICENSE
-            sources-meson
-            output_arduino
+            unit_system_meson.tar.zstd
+            unit_system_arduino.tar.zstd
             
       - name: "release candidate"
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -262,9 +257,8 @@ jobs:
           repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
           prerelease: true
           files: |
-            LICENSE
-            sources-meson
-            output_arduino
+            unit_system_meson.tar.zstd
+            unit_system_arduino.tar.zstd
             
       - name: "release"
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -273,8 +267,7 @@ jobs:
           repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            LICENSE
-            sources-meson
-            output_arduino
+            unit_system_meson.tar.zstd
+            unit_system_arduino.tar.zstd
   
 
