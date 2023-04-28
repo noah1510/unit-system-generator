@@ -4,38 +4,85 @@
 #error "do not directly include the std workarounds!"
 #endif
 
-#ifndef UNIT_SYSTEM_NO_STD
-    #include <cstddef>
-    #include <cmath>
-    #include <algorithm>
-    #include <ratio>
-#else
-    #ifdef abs
-        #undef abs
-    #endif
+#ifndef __has_include
+    #define UNIT_SYSTEM_NO_HAS_INCLUDE
+#endif
 
-    #ifdef max
-        #undef max
+#ifdef UNIT_SYSTEM_NO_HAS_INCLUDE
+    #define UNIT_SYSTEM_NO_CSTDDEF
+    #define UNIT_SYSTEM_NO_CMATH
+    #define UNIT_SYSTEM_NO_ALGORITHM
+    #define UNIT_SYSTEM_NO_RATIO
+#else    
+    #if __has_include("cstddef")
+        #undef UNIT_SYSTEM_NO_CSTDDEF
+    #else
+        #define UNIT_SYSTEM_NO_CSTDDEF
     #endif
+    
+    #if __has_include("cmath")
+        #undef UNIT_SYSTEM_NO_CMATH
+    #else
+        #define UNIT_SYSTEM_NO_CMATH
+    #endif
+    
+    #if __has_include("algorithm")
+        #undef UNIT_SYSTEM_NO_ALGORITHM
+    #else
+        #define UNIT_SYSTEM_NO_ALGORITHM
+    #endif
+    
+    #if __has_include("ratio")
+        #undef UNIT_SYSTEM_NO_RATIO
+    #else
+        #define UNIT_SYSTEM_NO_RATIO
+    #endif
+#endif
+    
 
+#ifdef UNIT_SYSTEM_NO_CSTDDEF
     namespace std{
-        #ifndef size_t
-            using size_t = unsigned long long;
-        #endif
-        
-        #ifndef
-            using intmax_t = long long;
-        #endif
-        
-        template <typename T>
-        T abs(T var){
-            return var > 0 ? var : -var;
+        #include <stddef.h>
+    }
+#else
+    #include <cstddef>
+#endif    
+
+#ifdef UNIT_SYSTEM_NO_CMATH
+    namespace std{
+        #include <math.h>
+    }
+#else
+    #include <cmath>
+#endif
+
+#ifdef UNIT_SYSTEM_NO_ALGORITHM
+    #ifndef max
+        namespace std{
+            template <typename T>
+            T max(T v1, T v2){
+                return v1 > v2 ? v1 : v2;
+            }
         }
-        
-        template <typename T>
-        T max(T v1, T v2){
-            return v1 > v2 ? v1 : v2;
+    #endif
+    
+    #ifndef abs
+        namespace std{
+            template <typename T>
+            T abs(T var){
+                return var > 0 ? var : -var;
+            }
         }
+    #endif
+#else
+    #include <algorithm>
+#endif
+
+#ifdef UNIT_SYSTEM_NO_RATIO
+    namespace std{
+    
+        #include <stdint.h>
+        
         
         template <intmax_t num, intmax_t den = 1>
         class ratio {
@@ -61,7 +108,10 @@
         typedef ratio<            1000000000000, 1> tera;
         typedef ratio<         1000000000000000, 1> peta;
         typedef ratio<      1000000000000000000, 1> exa;
-  
-    }
 
+    }
+#else
+    #include <ratio>
 #endif
+
+

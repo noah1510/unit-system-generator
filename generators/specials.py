@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 from typing import Dict, List
@@ -121,10 +120,8 @@ def fill_from_files(
     fill_dict = {
         'export_macro': export_macro,
         'units': unit_strings,
-        'disable_std': False,
         'combinations': combinations,
         'constants': constants,
     }
 
     return fill_dict
-
