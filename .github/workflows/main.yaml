@@ -3,7 +3,7 @@ name: "main-ci"
 on: [push]
 
 jobs:
-  build_matrix:
+  dektop_matrix:
     strategy:
       fail-fast: false
       matrix:
@@ -105,16 +105,146 @@ jobs:
           name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}
           path: build
 
+  arduino_matix:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          - fqbn: arduino:avr:uno
+            platforms: |
+              - name: arduino:avr
+
+          - fqbn: arduino:samd:mkr1000
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:samd:mkrzero
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:samd:mkrwifi1010
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:samd:mkrfox1200
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:samd:mkrwan1300
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:samd:mkrwan1310
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:samd:mkrgsm1400
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:samd:mkrnb1500
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:samd:mkrvidor4000
+            platforms: |
+              - name: arduino:samd
+          - fqbn: arduino:mbed_portenta:envie_m7
+            platforms: |
+              - name: arduino:mbed_portenta
+          - fqbn: arduino:mbed_portenta:envie_m4
+            platforms: |
+              - name: arduino:mbed_portenta
+          - fqbn: arduino:mbed_nano:nano33ble
+            platforms: |
+              - name: arduino:mbed_nano
+          - fqbn: arduino:mbed_nano:nanorp2040connect
+            platforms: |
+              - name: arduino:mbed_nano
+          - fqbn: arduino:mbed_edge:edge_control
+            platforms: |
+              - name: arduino:mbed_edge
+          - fqbn: esp32:esp32:esp32
+            platforms: |
+              - name: esp32:esp32
+                source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          - fqbn: rp2040:rp2040:rpipico
+            platforms: |
+              - name: rp2040:rp2040
+                source-url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+            
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: setup python
+        uses: actions/setup-python@v4
+        with:
+            python-version: '3.11'
+            
+      - name: create venv and install deps
+        run: | 
+          python3 -m venv .venv
+          source ./.venv/bin/activate
+          pip install pyserial
+          pip install -r requirements.txt
+      
+      - name: generate the arduino sources
+        run: |
+          source ./.venv/bin/activate
+          python3 ./
+        
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          fqbn: ${{ matrix.board.fqbn }}
+          platforms: ${{ matrix.board.platforms }}
+          libraries: ${{ env.LIBRARIES }}
+          enable-deltas-report: true
+          sketch-paths: "examples/english"
+          sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
+          cli-compile-flags: |
+            - --warnings
+            - default
+        
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: build-artifact
+          path: .
+    
+    
+  pio_matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-20.04", "ubuntu-22.04", "macos-latest", "windows-latest"]
+        buildType: ["static", "shared"]
+        useMsys: [true, false]
+        exclude:
+          - useMsys: true
+            os: "ubuntu-20.04"
+          - useMsys: true
+            os: "ubuntu-22.04"
+          - useMsys: true
+            os: "macos-latest"
+        include:
+          - script_file: "source ./.venv/bin/activate"
+            os: "ubuntu-20.04"
+          - script_file: "source ./.venv/bin/activate"
+            os: "ubuntu-22.04"
+          - script_file: "source ./.venv/bin/activate"
+            os: "macos-latest"
+          - script_file: ".venv/Scripts/activate.ps1"
+            os: "windows-latest"
+          - setupExtras: "-Db_lto=false -Dgtest:b_lto=false"
+            os: "windows-latest"
+          
   releases:
     name: "Release"
     runs-on: "ubuntu-22.04"
-    needs: build_matrix
+    needs: dektop_matrix
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
       - name: setup environment and generate sources
         run: |
-            pipx install meson ninja
+            pipx install meson
+            pipx install ninja
             python3 -m venv .venv
             source ./.venv/bin/activate
             pip install -r requirements.txt
