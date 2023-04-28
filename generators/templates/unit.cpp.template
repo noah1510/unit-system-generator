@@ -1,4 +1,8 @@
+{%if force_flat_headers %}
+#include "{{ unit_name }}.hpp"
+{% else %}
 #include "unit_system/{{ unit_name }}.hpp"
+{% endif %}
 
 using namespace sakurajin::unit_system;
 

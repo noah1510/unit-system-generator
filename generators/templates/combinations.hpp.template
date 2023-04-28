@@ -1,6 +1,11 @@
 #pragma once
 
+{%if force_flat_headers %}
+#include "units.hpp"
+{% else %}
 #include "unit_system/units.hpp"
+{% endif %}
+
 {% if export_macro %}
 #ifndef {{ export_macro }}
     #define {{ export_macro }}

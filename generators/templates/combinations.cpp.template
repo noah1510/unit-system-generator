@@ -1,4 +1,9 @@
+{% if force_flat_headers %}
+#include "combinations.hpp"
+{%else%}
 #include "unit_system/combinations.hpp"
+{% endif %}
+
 {% for combination in combinations %}
 sakurajin::unit_system::{{ combination[2] }} sakurajin::unit_system::operator*(const sakurajin::unit_system::{{ combination[0] }}& v1, const sakurajin::unit_system::{{ combination[1] }}& v2){
     {{ combination[0] }} _v1 = sakurajin::unit_system::unit_cast(v1,v1.multiplier,0);

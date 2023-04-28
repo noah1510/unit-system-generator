@@ -12,7 +12,13 @@
     #define UNIT_SYSTEM_NO_STD
 #endif
 {% endif %}
+
+{%if force_flat_headers %}
+#include "std_implements.hpp"
+{%else%}
 #include "unit_system/std_implements.hpp"
+{%endif%}
+
 
 namespace sakurajin{
     namespace unit_system{

@@ -38,17 +38,6 @@ if __name__ == "__main__":
         type=str,
     )
 
-    # define the 'exportMacro' argument, which is optional and has a default value of ''
-    parser.add_argument(
-        "--noExportMacro",
-        help="the export macro that should be used for the types",
-        required=False,
-        default='UNIT_SYSTEM_EXPORT_MACRO',
-        dest='exportMacro',
-        action='store_const',
-        const=''
-    )
-
     # define the 'printOutFiles' argument, which is a flag that indicates whether
     # the generated files should be printed
     parser.add_argument(
@@ -65,10 +54,11 @@ if __name__ == "__main__":
 
     # get the directory containing the script
     main_script_dir = os.path.realpath(os.path.dirname(__file__))
-    base_dir = os.path.join(main_script_dir, 'output')
 
-    # get the value of the 'outDir' argument
-    outDir = args['outDir']
+    if args['outDir'] == '':
+        base_dir = os.path.join(main_script_dir, 'output')
+    else:
+        base_dir = os.path.join(main_script_dir, args['outDir'])
 
     # if the 'genArduino' flag is set to True, use the arduino generator
     # otherwise, use the meson generator
@@ -77,10 +67,6 @@ if __name__ == "__main__":
         arduino_src_dir = os.path.join(main_script_dir, 'unit-system-adruino')
         arduino_src_dir = os.path.join(arduino_src_dir, 'src')
 
-        # if the 'outDir' argument was not provided, set the 'outDir' to the 'src' directory
-        if outDir == '':
-            outDir = arduino_src_dir
-
         # set the 'genStd' flag to False
         genStd = False
 
@@ -88,9 +74,7 @@ if __name__ == "__main__":
         # generate all meson build system files
         meson_conf = generators.meson.MesonConfig(
             '0.7.0',
-            args['exportMacro'],
             main_script_dir,
-            outDir,
             base_dir,
             args['printOutFiles']
         )

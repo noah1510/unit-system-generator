@@ -1,5 +1,4 @@
 import os
-import argparse
 import json
 from typing import List, Dict
 
@@ -55,10 +54,11 @@ class Unit:
         unit_id: int,  # the unit ID of the unit
         literals: List[UnitLiteral],  # a list of UnitLiteral objects that represent the literals for the unit
         export_macro: str,  # the export macro for the unit
-        out_dir: os.path,  # the output directory for the unit
         base_dir: os.path,  # the base directory that is used out_dir is empty
+        create_subdir=True,  # whether to create a subdirectory for the unit
         include_subdir='include',  # the subdirectory for the header files (defaults to 'include')
         src_subdir='src',  # the subdirectory for the source files (defaults to 'src')
+        force_flat_headers=False,  # whether to force the header files to be in the same directory as the source files
     ):
         self.name = name
         # If the base name is an empty string or None, set the base_name attribute to the name of the unit system,
@@ -70,21 +70,22 @@ class Unit:
         self.unit_id = unit_id
         self.literals = literals
         self.export_macro = export_macro
-        self.out_dir = out_dir
+        self.create_subdir = create_subdir
         self.include_subdir = include_subdir
         self.src_subdir = src_subdir
         self.base_dir = base_dir
+        self.force_flat_headers = force_flat_headers
 
     # returns the path to the header file for the unit system
     def get_header_path(self) -> str:
         # If an output directory was specified, use it, otherwise use the default output directory
-        if self.out_dir:
-            path = self.out_dir
-        else:
-            path = os.path.join(self.base_dir, self.include_subdir)
-        
-        path = os.path.join(path, 'unit_system')
-        
+        path = self.base_dir
+        if self.create_subdir:
+            path = os.path.join(path, self.include_subdir)
+
+        if not self.force_flat_headers:
+            path = os.path.join(path, 'unit_system')
+
         # Append the name of the unit system and the .hpp file extension
         # to the output directory to get the path to the header file
         path = os.path.join(path, self.name + '.hpp')
@@ -96,10 +97,9 @@ class Unit:
     # returns the path to the source file for the unit system
     def get_source_path(self) -> str:
         # If an output directory was specified, use it, otherwise use the default output directory
-        if self.out_dir:
-            path = self.out_dir
-        else:
-            path = os.path.join(self.base_dir, self.src_subdir)
+        path = self.base_dir
+        if self.create_subdir:
+            path = os.path.join(path, self.src_subdir)
         
         # Append the name of the unit system and the .cpp file extension
         # to the output directory to get the path to the source file
@@ -123,18 +123,19 @@ class Unit:
             # the literals for the unit system
             'create_literals': len(self.literals) > 0,  # create literals if there is at least one
             'export_macro': self.export_macro,  # the export macro for the unit system
+            'force_flat_headers': self.force_flat_headers,  # whether to force the header files to be in the same
         }
 
         # generate the header
         generators.utils.fill_template(
-            os.path.join(template_dir, 'header.template'),  # the path to the header template file
+            os.path.join(template_dir, 'unit.hpp.template'),  # the path to the header template file
             fill_dict,  # the values to fill into the template
             self.get_header_path()  # the path to the output header file
         )
 
         # generate the source
         generators.utils.fill_template(
-            os.path.join(template_dir, 'source.template'),  # the path to the source template file
+            os.path.join(template_dir, 'unit.cpp.template'),  # the path to the source template file
             fill_dict,  # the values to fill into the template
             self.get_source_path()  # the path to the output source file
         )
@@ -147,11 +148,8 @@ def unit_from_json(json_object_str: Dict, base_dir: str) -> Unit:
     base_name = json_object_str['base_name']
     unit_id = json_object_str['unit_id']
     export_macro = ''
-    out_dir = ''
     if 'export_macro' in json_object_str:
         export_macro = json_object_str['export_macro']
-    if 'out_dir' in json_object_str:
-        out_dir = json_object_str['out_dir']
 
     # Use the get() method to get the 'literals' value from the JSON object string,
     # with an empty list as the default value
@@ -161,13 +159,12 @@ def unit_from_json(json_object_str: Dict, base_dir: str) -> Unit:
     literals = [UnitLiteral(literal) for literal in literals]
 
     # Return a Unit object, using keyword arguments to specify the names of the arguments
-    return Unit(name, base_name, unit_id, literals, export_macro, out_dir, base_dir)
+    return Unit(name, base_name, unit_id, literals, export_macro, base_dir)
 
 
 def units_from_file(
         file_location: os.path,
         base_dir: os.path,
-        out_dir: os.path,
         export_macro: str,
         print_files: bool = False
 ) -> (List[Unit], List[str]):
@@ -178,7 +175,6 @@ def units_from_file(
     # update the export macro and output directory for each unit
     for unit in units:
         unit.export_macro = export_macro
-        unit.out_dir = out_dir
         unit.base_dir = base_dir
 
     unit_strings = []

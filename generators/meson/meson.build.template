@@ -6,7 +6,7 @@ project(
         'warning_level=3'
     ],
     version : '{{ version }}',
-    meson_version: '>= 1.0.0',
+    meson_version: '>= 1.1.0',
 )
 
 #set windows linker argument
@@ -27,9 +27,7 @@ sources = [
     {% for unit_name in units %}
     'src/{{ unit_name }}.cpp',
     {% endfor %}
-    {% if hasCombinations %}
     'src/combinations.cpp',
-    {% endif %}
 ]
 
 unit_system = library(
@@ -50,10 +48,20 @@ unit_system_dep = declare_dependency(
 pkg = import('pkgconfig')
 pkg.generate(unit_system, subdirs: 'unit_system')
 
-install_subdir('include', install_dir : 'include', strip_directory: true)
+{% for unit_name in units %}
+    install_headers('include/unit_system/{{ unit_name }}.hpp', subdir : 'unit-system')
+{% endfor %}
+
+install_headers('include/unit_system/combinations.hpp', subdir : 'unit-system')
+install_headers('include/unit_system/constants.hpp', subdir : 'unit-system')
+install_headers('include/unit_system/unit_t.hpp', subdir : 'unit-system')
+install_headers('include/unit_system/units.hpp', subdir : 'unit-system')
+install_headers('include/unit_system/std_implements.hpp', subdir : 'unit-system')
+install_headers('include/unit_system.hpp')
 
 meson.override_dependency('unit-system', unit_system_dep)
 
-if get_option('force_build_tests') or (get_option('build_tests') and not meson.is_subproject())
+build_tests = get_option('build_tests').enable_auto_if(not meson.is_subproject())
+if build_tests.enabled()
     subdir('tests')
 endif
