@@ -80,7 +80,7 @@ class Unit:
     def get_header_path(self) -> str:
         # If an output directory was specified, use it, otherwise use the default output directory
         path = self.base_dir
-        if self.create_subdir:
+        if self.create_subdir and not self.force_flat_headers:
             path = os.path.join(path, self.include_subdir)
 
         if not self.force_flat_headers:
@@ -98,7 +98,7 @@ class Unit:
     def get_source_path(self) -> str:
         # If an output directory was specified, use it, otherwise use the default output directory
         path = self.base_dir
-        if self.create_subdir:
+        if self.create_subdir and not self.force_flat_headers:
             path = os.path.join(path, self.src_subdir)
         
         # Append the name of the unit system and the .cpp file extension
@@ -142,7 +142,11 @@ class Unit:
 
 
 # This function takes a JSON object string as its argument and returns a Unit object
-def unit_from_json(json_object_str: Dict, base_dir: str) -> Unit:
+def unit_from_json(
+        json_object_str: Dict,
+        base_dir: str,
+        create_subdir: bool = True,
+        force_flat_headers: bool = False,) -> Unit:
     # Extract the values from the JSON object string and assign them to variables
     name = json_object_str['name']
     base_name = json_object_str['base_name']
@@ -159,18 +163,29 @@ def unit_from_json(json_object_str: Dict, base_dir: str) -> Unit:
     literals = [UnitLiteral(literal) for literal in literals]
 
     # Return a Unit object, using keyword arguments to specify the names of the arguments
-    return Unit(name, base_name, unit_id, literals, export_macro, base_dir)
+    return Unit(
+        name,
+        base_name,
+        unit_id,
+        literals,
+        export_macro,
+        base_dir,
+        create_subdir=create_subdir,
+        force_flat_headers=force_flat_headers,
+    )
 
 
 def units_from_file(
         file_location: os.path,
         base_dir: os.path,
         export_macro: str,
-        print_files: bool = False
+        print_files: bool = False,
+        create_subdir: bool = True,
+        force_flat_headers: bool = False,
 ) -> (List[Unit], List[str]):
 
     json_string = generators.utils.load_file_to_string(file_location)
-    units = [unit_from_json(unit, base_dir) for unit in json.loads(json_string)]
+    units = [unit_from_json(unit, base_dir, create_subdir, force_flat_headers) for unit in json.loads(json_string)]
 
     # update the export macro and output directory for each unit
     for unit in units:

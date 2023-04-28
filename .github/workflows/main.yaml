@@ -221,12 +221,13 @@ jobs:
             python3 -m venv .venv
             source ./.venv/bin/activate
             pip install -r requirements.txt
-            python3 ./genSources.py
-      - name: setup and compile sources
+            python3 ./genSources.py --outDir=output_meson
+            python3 ./genSources.py --arduino --outDir=output_arduino
+      - name: setup and compile meson sources
         run: |
             mkdir sources-meson
-            cd output
-            meson setup -Dno_pip_install=true -Dbuild_tests=disabled -Dprefix=$(pwd)/../sources-meson build
+            cd output_meson
+            meson setup -Dbuild_tests=disabled -Dprefix=$(pwd)/../sources-meson build
             meson compile -C build
             meson install -C build
       
@@ -241,6 +242,7 @@ jobs:
           files: |
             LICENSE
             sources-meson
+            output_arduino
             
       - name: "release candidate"
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -251,6 +253,7 @@ jobs:
           files: |
             LICENSE
             sources-meson
+            output_arduino
             
       - name: "release"
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -261,5 +264,6 @@ jobs:
           files: |
             LICENSE
             sources-meson
+            output_arduino
   
 
