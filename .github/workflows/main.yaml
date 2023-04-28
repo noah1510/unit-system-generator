@@ -226,7 +226,7 @@ jobs:
         run: |
             mkdir sources-meson
             cd output
-            meson setup -Dno_pip_install=true -Dbuild_tests=false -Dprefix=$(pwd)/../sources-meson build
+            meson setup -Dno_pip_install=true -Dbuild_tests=disabled -Dprefix=$(pwd)/../sources-meson build
             meson compile -C build
             meson install -C build
       
