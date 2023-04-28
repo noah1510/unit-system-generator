@@ -37,7 +37,8 @@ class ArduinoConfig:
             self.source_dir,
             self.export_macro,
             self.print_files,
-            create_subdir=False
+            create_subdir=False,
+            use_alternate_names=True
         )
 
         fill_dict = generators.specials.fill_from_files(

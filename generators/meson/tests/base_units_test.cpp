@@ -9,8 +9,6 @@ using namespace sakurajin::unit_system::constants;
 TEST( base_units_tests, time_test ) {
     
     const auto t1 = 1_ms;
-    const auto t2 = unit_cast(t1*1000, 1);
-    
     EXPECT_UNIT_EQ(t1*1000, 1.0_s);
 }
 

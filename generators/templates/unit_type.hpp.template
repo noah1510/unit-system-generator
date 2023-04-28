@@ -265,11 +265,13 @@ namespace sakurajin{
 }
 
 #ifndef UNIT_SYSTEM_NO_ALGORITHM
+#ifndef UNIT_SYSTEM_NO_CMATH
 template<std::size_t identifier>
 sakurajin::unit_system::unit_t<identifier> std::abs(const sakurajin::unit_system::unit_t<identifier>& unit){
     auto inv = -unit;
     return unit > inv ? unit : inv;
 }
+#endif
 #endif
 
 #endif

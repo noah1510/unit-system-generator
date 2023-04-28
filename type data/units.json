@@ -115,6 +115,7 @@
       },
       {
         "name": "C",
+        "alternative": "Celsius",
         "multiplier": 1e0,
         "offset": 273.15
       }
@@ -307,6 +308,7 @@
     "literals": [
       {
         "name": "N",
+        "alternative": "Newton",
         "multiplier": 1.0
       }
     ]

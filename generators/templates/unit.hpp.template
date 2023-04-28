@@ -34,8 +34,14 @@ namespace sakurajin{
 
         inline namespace literals{
             {% for literal in literals %}
+            {% if use_alternate_names %}
+            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.alternative }}(long double val);
+            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
+            {% else %}
             {{ export_macro }} {{ unit_name }} operator "" _{{ literal.name }}(long double val);
             {{ export_macro }} {{ unit_name }} operator "" _{{ literal.name }}(unsigned long long int val);
+            {% endif %}
+            
             {% endfor %}
         }
         {% endif %}

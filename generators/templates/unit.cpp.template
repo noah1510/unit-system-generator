@@ -21,6 +21,15 @@ std::ostream& ::sakurajin::unit_system::operator<<(std::ostream& os, const ::sak
 
 {% if create_literals %}
 {% for literal in literals %}
+{% if use_alternate_names %}
+{{ unit_name }} literals::operator "" _{{ literal.alternative }}(long double len){
+    return {{ unit_name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
+}
+
+{{ unit_name }} literals::operator "" _{{ literal.alternative }}(unsigned long long int len){
+    return {{ unit_name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
+}
+{% else %}
 {{ unit_name }} literals::operator "" _{{ literal.name }}(long double len){
     return {{ unit_name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
 }
@@ -28,5 +37,6 @@ std::ostream& ::sakurajin::unit_system::operator<<(std::ostream& os, const ::sak
 {{ unit_name }} literals::operator "" _{{ literal.name }}(unsigned long long int len){
     return {{ unit_name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
 }
+{% endif %}
 {% endfor %}
 {% endif %}

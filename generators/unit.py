@@ -19,6 +19,13 @@ class UnitLiteral(Dict):
         super().__init__(_data)
         # Set the name attribute to the value of the 'name' key in the input dictionary
         self.name = _data['name']
+
+        # Set the alternative name that should be used on problematic platforms
+        if 'alternative' in _data:
+            self.alternative = _data['alternative']
+        else:
+            self.alternative = self.name
+
         # If the input dictionary contains a 'multiplier' key, set the multiplier attribute
         # to the corresponding value, otherwise set it to 1.0
         if 'multiplier' in _data:
@@ -59,6 +66,7 @@ class Unit:
         include_subdir='include',  # the subdirectory for the header files (defaults to 'include')
         src_subdir='src',  # the subdirectory for the source files (defaults to 'src')
         force_flat_headers=False,  # whether to force the header files to be in the same directory as the source files
+        use_alternate_names=False,  # whether to use alternate names for literals on problematic platforms
     ):
         self.name = name
         # If the base name is an empty string or None, set the base_name attribute to the name of the unit system,
@@ -75,6 +83,7 @@ class Unit:
         self.src_subdir = src_subdir
         self.base_dir = base_dir
         self.force_flat_headers = force_flat_headers
+        self.use_alternate_names = use_alternate_names
 
     # returns the path to the header file for the unit system
     def get_header_path(self) -> str:
@@ -124,6 +133,7 @@ class Unit:
             'create_literals': len(self.literals) > 0,  # create literals if there is at least one
             'export_macro': self.export_macro,  # the export macro for the unit system
             'force_flat_headers': self.force_flat_headers,  # whether to force the header files to be in the same
+            'use_alternate_names': self.use_alternate_names,  # whether to use alternate names for literals
         }
 
         # generate the header
@@ -146,7 +156,9 @@ def unit_from_json(
         json_object_str: Dict,
         base_dir: str,
         create_subdir: bool = True,
-        force_flat_headers: bool = False,) -> Unit:
+        force_flat_headers: bool = False,
+        use_alternate_names: bool = False,
+) -> Unit:
     # Extract the values from the JSON object string and assign them to variables
     name = json_object_str['name']
     base_name = json_object_str['base_name']
@@ -172,6 +184,7 @@ def unit_from_json(
         base_dir,
         create_subdir=create_subdir,
         force_flat_headers=force_flat_headers,
+        use_alternate_names=use_alternate_names,
     )
 
 
@@ -182,10 +195,17 @@ def units_from_file(
         print_files: bool = False,
         create_subdir: bool = True,
         force_flat_headers: bool = False,
+        use_alternate_names: bool = False,
 ) -> (List[Unit], List[str]):
 
     json_string = generators.utils.load_file_to_string(file_location)
-    units = [unit_from_json(unit, base_dir, create_subdir, force_flat_headers) for unit in json.loads(json_string)]
+    units = [unit_from_json(
+        unit,
+        base_dir,
+        create_subdir=create_subdir,
+        force_flat_headers=force_flat_headers,
+        use_alternate_names=use_alternate_names,
+    ) for unit in json.loads(json_string)]
 
     # update the export macro and output directory for each unit
     for unit in units:
