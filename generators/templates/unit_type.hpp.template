@@ -109,12 +109,7 @@ namespace sakurajin{
 
             return unit_t<identifier>{val, unit.multiplier, unit.offset};
         }
-
-        template <std::size_t identifier>
-        {{ export_macro }} unit_t<identifier> abs(const unit_t<identifier>& unit){
-            return unit.value < 0 ? -unit : unit;
-        }
-
+        
         template<std::intmax_t _Num, std::intmax_t _Den = 1>
         {{ export_macro }} long double multiplier(std::ratio<_Num, _Den>){
             long double num = static_cast<long double>(_Num);
@@ -228,9 +223,7 @@ namespace sakurajin{
             template <std::size_t identifier>
             bool unit_t<identifier>::operator==(const unit_t<identifier>& other) const{
                 const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-                auto delta = value-retval.value;
-                auto epsilon = 0.000001 * std::max(std::abs(value), std::abs(retval.value));
-                return std::abs(delta) < epsilon;
+                return value == retval.value;
             }
 
             template <std::size_t identifier>
@@ -270,5 +263,13 @@ namespace sakurajin{
 
     }
 }
+
+#ifndef UNIT_SYSTEM_NO_ALGORITHM
+template<std::size_t identifier>
+sakurajin::unit_system::unit_t<identifier> std::abs(const sakurajin::unit_system::unit_t<identifier>& unit){
+    auto inv = -unit;
+    return unit > inv ? unit : inv;
+}
+#endif
 
 #endif
