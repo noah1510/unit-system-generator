@@ -47,6 +47,8 @@ class ArduinoConfig:
             self.unit_strings,
         )
 
+        fill_dict['target'] = 'arduino'
+
         # generate the header files for the unit system library
         generators.embedded.specials.create_headers(
             fill_dict,

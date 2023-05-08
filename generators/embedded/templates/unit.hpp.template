@@ -24,10 +24,6 @@ namespace sakurajin{
         };
         {% if create_literals %}
 
-        #ifndef UNIT_SYSTEM_NO_IOSTREAM
-        {{ export_macro }} std::ostream& operator<<(std::ostream& os, const {{ unit_name }}& t);
-        #endif
-
         inline namespace literals{
             {% for literal in literals %}
             {% if use_alternate_names %}

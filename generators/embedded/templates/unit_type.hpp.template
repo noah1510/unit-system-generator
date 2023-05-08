@@ -108,13 +108,6 @@ namespace sakurajin{
 
             return unit_t<identifier>{val, unit.multiplier, unit.offset};
         }
-        
-        template<UNIT_SYSTEM_INTMAX numerator, UNIT_SYSTEM_INTMAX denumerator = 1>
-        {{ export_macro }} long double multiplier(std::ratio<numerator, denumerator>){
-            long double num = static_cast<long double>(numerator);
-            long double den = static_cast<long double>(denumerator);
-            return num/den;
-        }
 
         //All of the constructors
         template <UNIT_SYSTEM_SIZE_T identifier>
@@ -262,15 +255,5 @@ namespace sakurajin{
 
     }
 }
-
-#ifndef UNIT_SYSTEM_NO_ALGORITHM
-#ifndef UNIT_SYSTEM_NO_CMATH
-template<UNIT_SYSTEM_SIZE_T identifier>
-sakurajin::unit_system::unit_t<identifier> std::abs(const sakurajin::unit_system::unit_t<identifier>& unit){
-    auto inv = -unit;
-    return unit > inv ? unit : inv;
-}
-#endif
-#endif
 
 #endif
