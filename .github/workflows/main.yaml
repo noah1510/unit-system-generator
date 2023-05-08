@@ -3,7 +3,7 @@ name: "main-ci"
 on: [push]
 
 jobs:
-  desktop_matrix:
+  meson_cpp17_matrix:
     strategy:
       fail-fast: false
       matrix:
@@ -119,44 +119,19 @@ jobs:
           - fqbn: arduino:avr:uno
             platforms: |
               - name: arduino:avr
-
+          - fqbn: arduino:megaavr:nona4809
+            platforms: |
+              - name: arduino:megaavr
           - fqbn: arduino:samd:mkr1000
             platforms: |
               - name: arduino:samd
           - fqbn: arduino:samd:mkrzero
             platforms: |
               - name: arduino:samd
-          - fqbn: arduino:samd:mkrwifi1010
-            platforms: |
-              - name: arduino:samd
-          - fqbn: arduino:samd:mkrfox1200
-            platforms: |
-              - name: arduino:samd
-          - fqbn: arduino:samd:mkrwan1300
-            platforms: |
-              - name: arduino:samd
-          - fqbn: arduino:samd:mkrwan1310
-            platforms: |
-              - name: arduino:samd
-          - fqbn: arduino:samd:mkrgsm1400
-            platforms: |
-              - name: arduino:samd
-          - fqbn: arduino:samd:mkrnb1500
-            platforms: |
-              - name: arduino:samd
-          - fqbn: arduino:samd:mkrvidor4000
-            platforms: |
-              - name: arduino:samd
           - fqbn: arduino:mbed_portenta:envie_m7
             platforms: |
               - name: arduino:mbed_portenta
-          - fqbn: arduino:mbed_portenta:envie_m4
-            platforms: |
-              - name: arduino:mbed_portenta
           - fqbn: arduino:mbed_nano:nano33ble
-            platforms: |
-              - name: arduino:mbed_nano
-          - fqbn: arduino:mbed_nano:nanorp2040connect
             platforms: |
               - name: arduino:mbed_nano
           - fqbn: arduino:mbed_edge:edge_control
@@ -252,7 +227,7 @@ jobs:
   releases:
     name: "Release"
     runs-on: "ubuntu-22.04"
-    needs: [desktop_matrix, arduino_matix]
+    needs: [meson_cpp17_matrix, arduino_matix, pio_matrix]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
@@ -300,5 +275,26 @@ jobs:
           files: |
             unit_system_meson.tar.zstd
             unit_system_arduino.tar.zstd
-  
 
+  push_release_repos:
+    name: "publish release to repos"
+    runs-on: "ubuntu-22.04"
+    if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && !endsWith(github.ref_name, '-rc') }}
+    needs: [ releases ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: setup environment and generate sources
+        run: |
+          pipx install meson
+          pipx install ninja
+          python3 -m venv .venv
+          source ./.venv/bin/activate
+          pip install -r requirements.txt
+          python3 ./genSources.py --outDir=output_meson
+          python3 ./genSources.py --arduino --outDir=output_arduino
+      - name: compress sources into archives
+        run: |
+          tar --zstd -cf unit_system_meson.tar.zstd output_meson LICENSE
+          tar --zstd -cf unit_system_arduino.tar.zstd output_arduino LICENSE
+        
