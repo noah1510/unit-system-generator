@@ -57,7 +57,7 @@ class MesonConfig(generators.target.Target):
         )
 
         # copy the meson options file
-        generators.utils.copy_file_to(self.target_dir, self.target_dir, 'meson_options.txt')
+        generators.utils.copy_file_to(self.target_dir, self.base_dir, 'meson_options.txt')
 
         # copy the tests
         generators.utils.copy_folder_to(self.target_dir, self.base_dir, 'tests')
