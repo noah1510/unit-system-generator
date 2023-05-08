@@ -1,14 +1,13 @@
 import os
 
 import generators.utils
+import generators.target
+import generators.unit
 import generators.Cpp17.unit
 import generators.Cpp17.specials
 
-import distutils.file_util
-import distutils.dir_util
 
-
-class MesonConfig:
+class MesonConfig(generators.target.Target):
     def __init__(
             self,
             version: str,
@@ -16,37 +15,30 @@ class MesonConfig:
             base_dir: os.path,
             print_files: bool = False
     ):
-        self.version = version
-        self.export_macro = 'UNIT_SYSTEM_EXPORT_MACRO'
-        self.main_script_dir = main_script_dir
-        self.base_dir = base_dir
-        self.print_files = print_files
-
-        script_dir = os.path.realpath(os.path.dirname(__file__))
-        self.template_dir = os.path.join(script_dir, 'meson')
-        self.type_location = os.path.join(main_script_dir, 'type data')
-
-        self.units = []
-        self.unit_strings = []
-        self.hasCombinations = True
+        super().__init__(
+            version,
+            main_script_dir,
+            base_dir,
+            print_files,
+            enable_export_macro=True,
+            target_name='meson',
+            script_dir=os.path.realpath(os.path.dirname(__file__))
+        )
 
     def generate_sources(self):
-        self.units, self.unit_strings = generators.Cpp17.unit.units_from_file(
+        self.units, self.unit_strings = generators.unit.units_from_file(
             os.path.join(self.type_location, 'units.json'),
             self.base_dir,
             self.export_macro,
-            self.print_files
+            self.print_files,
+            unit_type=generators.Cpp17.unit.UnitCpp17
         )
 
-        fill_dict = generators.Cpp17.specials.fill_from_files(
-            self.type_location,
-            self.export_macro,
-            self.unit_strings
-        )
+        self.generate_fill_dict()
 
         # generate the header files for the unit system library
         generators.Cpp17.specials.create_headers(
-            fill_dict,
+            self.fill_dict,
             self.base_dir
         )
 
@@ -55,7 +47,7 @@ class MesonConfig:
         # Fill in the "meson.build.template" file with the data in `fill_dict`
         # and write the output to the "meson.build" file in the output directory.
         generators.utils.fill_template(
-            os.path.join(self.template_dir, 'meson.build.template'),
+            os.path.join(self.target_dir, 'meson.build.template'),
             {
                 'version': self.version,
                 'export_macro': self.export_macro,
@@ -65,17 +57,16 @@ class MesonConfig:
         )
 
         # copy the meson options file
-        meson_options = os.path.join(self.template_dir, 'meson_options.txt')
-        distutils.file_util.copy_file(meson_options, os.path.join(self.base_dir, 'meson_options.txt'))
+        generators.utils.copy_file_to(self.target_dir, self.target_dir, 'meson_options.txt')
 
         # copy the tests
-        tests_dir = os.path.join(self.template_dir, 'tests')
-        distutils.dir_util.copy_tree(tests_dir, os.path.join(self.base_dir, 'tests'))
+        generators.utils.copy_folder_to(self.target_dir, self.base_dir, 'tests')
 
         # copy the subprojects folder
-        subprojects_dir = os.path.join(self.template_dir, 'subprojects')
-        distutils.dir_util.copy_tree(subprojects_dir, os.path.join(self.base_dir, 'subprojects'))
+        generators.utils.copy_folder_to(self.target_dir, self.base_dir, 'subprojects')
 
-    def generate(self):
-        self.generate_sources()
-        self.generate_system()
+        # copy the README.md file
+        generators.utils.copy_file_to(self.template_dir, self.base_dir, 'README.md')
+
+        # copy the LICENSE file
+        generators.utils.copy_file_to(self.template_dir, self.base_dir, 'LICENSE')

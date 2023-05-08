@@ -32,6 +32,7 @@ if __name__ == "__main__":
     # define the 'outDir' argument, which is optional, should be a string, and has a default value of ''
     parser.add_argument(
         "--outDir",
+        "-o",
         help="Put all files in the same given directory. This overwrites the baseDir.",
         required=False,
         default='',

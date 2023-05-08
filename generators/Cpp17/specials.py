@@ -1,6 +1,5 @@
-import json
 import os
-from typing import Dict, List
+from typing import Dict
 
 import generators.utils
 
@@ -100,28 +99,3 @@ def create_headers(
         print(os.path.join(header_dir, 'constants.hpp'))
         print(os.path.join(header_dir, 'std_implements.hpp'))
         print(os.path.join(header_dir, 'unit_system.hpp'))
-
-
-def fill_from_files(
-        type_location: os.path,
-        export_macro: str,
-        unit_strings: List[str],
-) -> Dict:
-
-    # load the 'combinations.json' file and parse its contents as a JSON string
-    json_string = generators.utils.load_file_to_string(os.path.join(type_location, 'combinations.json'))
-    combinations = [[comb['factor1'], comb['factor2'], comb['product']] for comb in json.loads(json_string)]
-
-    # load the 'constants.json' file and parse its contents as a JSON string
-    json_string = generators.utils.load_file_to_string(os.path.join(type_location, 'constants.json'))
-    constants = [constant for constant in json.loads(json_string)]
-
-    # create a dictionary containing the values that will be used to generate the header files
-    fill_dict = {
-        'export_macro': export_macro,
-        'units': unit_strings,
-        'combinations': combinations,
-        'constants': constants,
-    }
-
-    return fill_dict

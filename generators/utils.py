@@ -1,8 +1,62 @@
 # loads the contents of a file at the given filepath as a string
+import distutils.dir_util
+import distutils.file_util
+import json
 import os
-from typing import Dict
+from typing import Dict, List
 
 import jinja2
+
+
+# copies a file from the given input location to the given output folder
+# if no filename is given, the input_location is assumed to be a file
+# and the filename is taken from that
+# if a filename is given, the input_location is assumed to be a folder
+def copy_file_to(input_location: os.path, output_folder: os.path, filename: str = ''):
+    if filename == '':
+        filename = os.path.basename(input_location)
+    else:
+        input_location = os.path.join(input_location, filename)
+
+    output_location = os.path.join(output_folder, filename)
+    distutils.file_util.copy_file(input_location, output_location)
+
+
+# copies a folder from the given input location to the given output folder
+# if a folder_name is given, a folder_name with folder_name from the input_location is copied
+def copy_folder_to(input_location: os.path, output_path: os.path, folder_name: str = ''):
+    if folder_name == '':
+        folder_name = os.path.basename(input_location)
+    else:
+        input_location = os.path.join(input_location, folder_name)
+
+    output_location = os.path.join(output_path, folder_name)
+    distutils.dir_util.copy_tree(input_location, output_location)
+
+
+def fill_from_files(
+        type_location: os.path,
+        export_macro: str,
+        unit_strings: List[str],
+) -> Dict:
+
+    # load the 'combinations.json' file and parse its contents as a JSON string
+    json_string = load_file_to_string(os.path.join(type_location, 'combinations.json'))
+    combinations = [[comb['factor1'], comb['factor2'], comb['product']] for comb in json.loads(json_string)]
+
+    # load the 'constants.json' file and parse its contents as a JSON string
+    json_string = load_file_to_string(os.path.join(type_location, 'constants.json'))
+    constants = [constant for constant in json.loads(json_string)]
+
+    # create a dictionary containing the values that will be used to generate the header files
+    fill_dict = {
+        'export_macro': export_macro,
+        'units': unit_strings,
+        'combinations': combinations,
+        'constants': constants,
+    }
+
+    return fill_dict
 
 
 def load_file_to_string(filepath: os.path) -> str:
