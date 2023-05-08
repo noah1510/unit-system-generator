@@ -1,8 +1,8 @@
 import os
 
 import generators.utils
-import generators.unit
-import generators.specials
+import generators.Cpp17.unit
+import generators.Cpp17.specials
 
 import distutils.file_util
 import distutils.dir_util
@@ -31,21 +31,21 @@ class MesonConfig:
         self.hasCombinations = True
 
     def generate_sources(self):
-        self.units, self.unit_strings = generators.unit.units_from_file(
+        self.units, self.unit_strings = generators.Cpp17.unit.units_from_file(
             os.path.join(self.type_location, 'units.json'),
             self.base_dir,
             self.export_macro,
             self.print_files
         )
 
-        fill_dict = generators.specials.fill_from_files(
+        fill_dict = generators.Cpp17.specials.fill_from_files(
             self.type_location,
             self.export_macro,
             self.unit_strings
         )
 
         # generate the header files for the unit system library
-        generators.specials.create_headers(
+        generators.Cpp17.specials.create_headers(
             fill_dict,
             self.base_dir
         )

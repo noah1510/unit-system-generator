@@ -1,8 +1,8 @@
 import os
 
 import generators.utils
-import generators.unit
-import generators.specials
+import generators.embedded.unit
+import generators.embedded.specials
 
 import distutils.file_util
 import distutils.dir_util
@@ -32,7 +32,7 @@ class ArduinoConfig:
         self.hasCombinations = True
 
     def generate_sources(self):
-        self.units, self.unit_strings = generators.unit.units_from_file(
+        self.units, self.unit_strings = generators.embedded.unit.units_from_file(
             os.path.join(self.type_location, 'units.json'),
             self.source_dir,
             self.export_macro,
@@ -41,14 +41,14 @@ class ArduinoConfig:
             use_alternate_names=True
         )
 
-        fill_dict = generators.specials.fill_from_files(
+        fill_dict = generators.embedded.specials.fill_from_files(
             self.type_location,
             self.export_macro,
             self.unit_strings,
         )
 
         # generate the header files for the unit system library
-        generators.specials.create_headers(
+        generators.embedded.specials.create_headers(
             fill_dict,
             self.source_dir,
             create_subdir=False
