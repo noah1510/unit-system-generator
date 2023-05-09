@@ -64,6 +64,9 @@ class MesonConfig(generators.target.Target):
 
         # copy the subprojects folder
         generators.utils.copy_folder_to(self.target_dir, self.base_dir, 'subprojects')
+        
+        # copy the .github folder
+        generators.utils.copy_folder_to(self.target_dir, self.base_dir, '.github')
 
         # copy the README.md file
         generators.utils.copy_file_to(self.template_dir, self.base_dir, 'README.md')

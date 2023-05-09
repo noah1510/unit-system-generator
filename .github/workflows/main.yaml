@@ -261,22 +261,12 @@ jobs:
             unit_system_meson.tar.zstd
             unit_system_arduino.tar.zstd
             
-      - name: "release candidate"
-        uses: "marvinpinto/action-automatic-releases@latest"
-        if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && contains(github.ref_name, '-rc') }}
-        with:
-          repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
-          prerelease: true
-          files: |
-            unit_system_meson.tar.zstd
-            unit_system_arduino.tar.zstd
-            
       - name: "release"
         uses: "marvinpinto/action-automatic-releases@latest"
-        if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && !contains(github.ref_name, '-rc') }}
+        if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
         with:
           repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
-          prerelease: false
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
           files: |
             unit_system_meson.tar.zstd
             unit_system_arduino.tar.zstd
@@ -310,9 +300,9 @@ jobs:
         uses: s0/git-publish-subdir-action@master
         env:
           REPO: git@github.com:noah1510/unit-system.git
-          BRANCH: stable
+          BRANCH: main
           FOLDER: output_meson
-          SSH_PRIVATE_KEY: ${{ secrets.ARDUINO_DEPLOY_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.MESON_DEPLOY_KEY }}
           TAG: ${{ github.ref_name }}
       - name: compress sources into archives
         run: |
