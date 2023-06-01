@@ -67,7 +67,7 @@ if __name__ == "__main__":
     if args['genArduino']:
         # generate arduino files
         meson_conf = generators.embedded.arduino.ArduinoConfig(
-            '0.7.0',
+            '0.7.1',
             main_script_dir,
             base_dir,
             args['printOutFiles']
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     else:
         # generate all meson build system files
         meson_conf = generators.Cpp17.meson.MesonConfig(
-            '0.7.0',
+            '0.7.1',
             main_script_dir,
             base_dir,
             args['printOutFiles']
