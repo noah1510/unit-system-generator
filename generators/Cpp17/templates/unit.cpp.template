@@ -28,11 +28,11 @@ std::ostream& ::sakurajin::unit_system::operator<<(std::ostream& os, const ::sak
     return {{ unit_name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
 }
 {% else %}
-{{ unit_name }} literals::operator "" _{{ literal.name }}(long double len){
+{{ unit_name }} literals::operator "" _{{ literal.udl }}(long double len){
     return {{ unit_name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
 }
 
-{{ unit_name }} literals::operator "" _{{ literal.name }}(unsigned long long int len){
+{{ unit_name }} literals::operator "" _{{ literal.udl }}(unsigned long long int len){
     return {{ unit_name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
 }
 {% endif %}

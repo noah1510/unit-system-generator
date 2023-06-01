@@ -19,12 +19,19 @@ class UnitLiteral(Dict):
         super().__init__(_data)
         # Set the name attribute to the value of the 'name' key in the input dictionary
         self.name = _data['name']
+        self.code_literal = _data['code_literal']
+
+        # Set the UDL that should be used for the literal instead of the normal literal
+        if 'udl_override' in _data:
+            self.udl = _data['udl_override']
+        else:
+            self.udl = self.code_literal
 
         # Set the alternative name that should be used on problematic platforms
-        if 'alternative' in _data:
-            self.alternative = _data['alternative']
+        if 'code_alternative' in _data:
+            self.alternative = _data['code_alternative']
         else:
-            self.alternative = self.name
+            self.alternative = self.udl
 
         # If the input dictionary contains a 'multiplier' key, set the multiplier attribute
         # to the corresponding value, otherwise set it to 1.0
@@ -115,7 +122,7 @@ def unit_from_json(
 ):
     # Extract the values from the JSON object string and assign them to variables
     name = json_object_str['name']
-    base_name = json_object_str['base_name']
+    base_name = json_object_str['base_literal']
     unit_id = json_object_str['unit_id']
 
     # Use the get() method to get the 'literals' value from the JSON object string,
@@ -124,6 +131,10 @@ def unit_from_json(
 
     # Use a list comprehension to create the 'literals' list
     literals = [UnitLiteral(literal) for literal in literals]
+    try:
+        literals = generate_prefixed_literals(literals, json_object_str)
+    except KeyError:
+        pass
 
     # Return a Unit object, using keyword arguments to specify the names of the arguments
     return unit_type(
@@ -137,6 +148,41 @@ def unit_from_json(
         force_flat_headers=force_flat_headers,
         use_alternate_names=use_alternate_names,
     )
+
+
+def generate_prefixed_literals(
+        literals: List[UnitLiteral],
+        json_object_str: Dict,
+) -> List[UnitLiteral]:
+
+    if 'generated_multipliers' not in json_object_str:
+        return literals
+
+    # get the prefixes that should be generated
+    all_literals = literals
+    prefixes = json_object_str['generated_multipliers']
+    for literal in literals:
+        if literal.name in prefixes:
+            prefixes_to_generate = prefixes[literal.name]
+            for prefix in prefixes_to_generate:
+                try:
+                    multiplier, code_literal = generators.utils.Prefix.from_string(prefix)
+                except ValueError as Error:
+                    print(Error)
+                    raise ValueError(
+                        f'Invalid prefix {prefix} for unit {literal.name} in unit system {json_object_str["name"]}'
+                    )
+
+                prefix_json = {
+                    "name": prefix + literal.name,
+                    "multiplier": multiplier * literal.multiplier,
+                    "code_literal": code_literal + literal.code_literal,
+                    "code_alternative": code_literal + literal.alternative,
+                    "offset": literal.offset,
+                }
+                all_literals.append(UnitLiteral(prefix_json))
+
+    return all_literals
 
 
 def units_from_file(

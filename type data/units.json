@@ -1,121 +1,118 @@
 [
   {
     "name": "time_si",
-    "base_name": "seconds",
+    "base_literal": "second",
     "unit_id": 1,
     "literals": [
       {
-        "name": "a",
+        "name": "year",
+        "code_literal":"a",
         "multiplier": 31536000000
       },
       {
-        "name": "d",
+        "name": "day",
+        "code_literal": "d",
         "multiplier": 86400000
       },
       {
-        "name": "h",
+        "name": "hour",
+        "code_literal": "h",
         "multiplier": 3600
       },
       {
         "name": "minute",
+        "code_literal": "m",
+        "udl_override": "minute",
         "multiplier": 60
       },
       {
-        "name": "s",
+        "name": "second",
+        "code_literal": "s",
         "multiplier": 1e0
-      },
-      {
-        "name": "ms",
-        "multiplier": 1e-3
-      },
-      {
-        "name": "ns",
-        "multiplier": 1e-6
-      },
-      {
-        "name": "us",
-        "multiplier": 1e-9
-      },
-      {
-        "name": "fs",
-        "multiplier": 1e-12
       }
-    ]
+    ],
+    "generated_multipliers": {
+      "second": [
+        "milli",
+        "micro",
+        "nano",
+        "pico",
+        "femto",
+        "atto"
+      ]
+    }
   },
   {
     "name": "length",
-    "base_name": "meter",
+    "base_literal": "metre",
     "unit_id": 2,
     "literals": [
       {
-        "name": "km",
-        "multiplier": 1e3
-      },
-      {
-        "name": "m",
+        "name": "metre",
+        "code_literal": "m",
         "multiplier": 1e0
-      },
-      {
-        "name": "dm",
-        "multiplier": 1e-1
-      },
-      {
-        "name": "cm",
-        "multiplier": 1e-2
-      },
-      {
-        "name": "mm",
-        "multiplier": 1e-3
-      },
-      {
-        "name": "um",
-        "multiplier": 1e-6
-      },
-      {
-        "name": "nm",
-        "multiplier": 1e-9
       }
-    ]
+    ],
+    "generated_multipliers": {
+      "metre": [
+        "kilo",
+        "deci",
+        "centi",
+        "milli",
+        "micro",
+        "nano",
+        "pico",
+        "femto",
+        "atto"
+      ]
+    }
   },
   {
     "name": "mass",
-    "base_name": "kilogram",
+    "base_literal": "kilogram",
     "unit_id": 3,
     "literals": [
       {
-        "name": "t",
+        "name": "tonne",
+        "code_literal": "t",
         "multiplier": 1e3
       },
       {
-        "name": "kg",
+        "name": "kilogram",
+        "code_literal": "kg",
         "multiplier": 1e0
       },
       {
-        "name": "g",
+        "name": "gram",
+        "code_literal": "g",
         "multiplier": 1e-3
-      },
-      {
-        "name": "mg",
-        "multiplier": 1e-6
-      },
-      {
-        "name": "ug",
-        "multiplier": 1e-9
       }
-    ]
+    ],
+    "generated_multipliers": {
+      "gram": [
+        "milli",
+        "micro",
+        "nano",
+        "pico",
+        "femto",
+        "atto"
+      ]
+    }
   },
   {
     "name": "temperature",
-    "base_name": "Kelvin",
+    "base_literal": "Kelvin",
     "unit_id": 4,
     "literals": [
       {
-        "name": "K",
+        "name": "Kelvin",
+        "code_literal": "K",
         "multiplier": 1e0
       },
       {
-        "name": "C",
-        "alternative": "Celsius",
+        "name": "Celsius",
+        "code_literal": "C",
+        "code_alternative": "Celsius",
         "multiplier": 1e0,
         "offset": 273.15
       }
@@ -123,204 +120,259 @@
   },
   {
     "name": "amount",
-    "base_name": "things",
+    "base_literal": "things",
     "unit_id": 5,
     "literals": [
       {
-        "name": "mol",
+        "name": "mole",
+        "code_literal": "mol",
         "multiplier": 6.02214076e23
       },
       {
         "name": "things",
+        "code_literal": "things",
         "multiplier": 1e0
       }
     ]
   },
   {
     "name": "electric_current",
-    "base_name": "Ampere",
+    "base_literal": "Ampere",
     "unit_id": 6,
     "literals": [
       {
-        "name": "MA",
-        "multiplier": 1e6
-      },
-      {
-        "name": "kA",
-        "multiplier": 1e3
-      },
-      {
-        "name": "A",
-        "multiplier": 1e-0
-      },
-      {
-        "name": "mA",
-        "multiplier": 1e-3
-      },
-      {
-        "name": "uA",
-        "multiplier": 1e-6
-      },
-      {
-        "name": "nA",
-        "multiplier": 1e-9
+        "name": "Ampere",
+        "code_literal": "A",
+        "multiplier": 1e0
       }
-    ]
+    ],
+    "generated_multipliers": {
+      "Ampere": [
+        "peta",
+        "tera",
+        "giga",
+        "mega",
+        "kilo",
+        "milli",
+        "micro",
+        "nano",
+        "pico",
+        "femto",
+        "atto"
+      ]
+    }
   },
   {
     "name": "luminous_intensity",
-    "base_name": "candela",
+    "base_literal": "candela",
     "unit_id": 7,
     "literals": [
       {
-        "name": "cd",
-        "multiplier": 1e-0
+        "name": "candela",
+        "code_literal": "cd",
+        "multiplier": 1e0
       }
     ]
   },
   {
     "name": "energy",
-    "base_name": "Joules",
+    "base_literal": "Joules",
     "unit_id": 8,
     "literals": [
       {
-        "name": "MJ",
-        "multiplier": 1e6
-      },
-      {
-        "name": "kJ",
-        "multiplier": 1e3
-      },
-      {
-        "name": "J",
+        "name": "Joules",
+        "code_literal": "J",
         "multiplier": 1e0
       },
       {
-        "name": "Nm",
+        "name": "Newton-metre",
+        "code_literal": "Nm",
         "multiplier": 1e0
       },
       {
-        "name": "kWh",
-        "multiplier": 3600000
+        "name": "electronvolt",
+        "code_literal": "eV",
+        "multiplier": 1.602176634e-19
       },
       {
-        "name": "Wh",
+        "name": "Watt-hour",
+        "code_literal": "Wh",
         "multiplier": 3600
       },
       {
-        "name": "GeV",
-        "multiplier": 1.602176565e-10
-      },
-      {
-        "name": "MeV",
-        "multiplier": 1.602176565e-13
-      },
-      {
-        "name": "keV",
-        "multiplier": 1.602176565e-16
-      },
-      {
-        "name": "eV",
-        "multiplier": 1.602176565e-19
+        "name": "Watt-second",
+        "code_literal": "Ws",
+        "multiplier": 1e0
       }
-    ]
+    ],
+    "generated_multipliers": {
+      "Joules": [
+        "peta",
+        "tera",
+        "giga",
+        "mega",
+        "kilo",
+        "milli",
+        "micro",
+        "nano",
+        "pico",
+        "femto",
+        "atto"
+      ],
+      "Newton-metre": [
+        "giga",
+        "mega",
+        "kilo",
+        "milli",
+        "micro"
+      ],
+      "electronvolt": [
+        "peta",
+        "tera",
+        "giga",
+        "mega",
+        "kilo",
+        "milli",
+        "micro"
+      ],
+      "Watt-hour": [
+        "peta",
+        "tera",
+        "giga",
+        "mega",
+        "kilo"
+      ]
+    }
   },
   {
     "name": "power",
-    "base_name": "Watt",
+    "base_literal": "Watt",
     "unit_id": 801,
     "literals": [
       {
-        "name": "GW",
-        "multiplier": 1e9
-      },
-      {
-        "name": "MW",
-        "multiplier": 1e6
-      },
-      {
-        "name": "kW",
-        "multiplier": 1e3
-      },
-      {
-        "name": "W",
+        "name": "Watt",
+        "code_literal": "W",
         "multiplier": 1e0
-      },
-      {
-        "name": "mW",
-        "multiplier": 1e-3
       }
-    ]
+    ],
+    "generated_multipliers": {
+      "Watt": [
+        "peta",
+        "tera",
+        "giga",
+        "mega",
+        "kilo",
+        "milli",
+        "micro",
+        "nano",
+        "pico",
+        "femto",
+        "atto"
+      ]
+    }
   },
   {
     "name": "speed",
-    "base_name": "meter per second",
+    "base_literal": "metre per second",
     "unit_id": 201,
     "literals": [
       {
-        "name": "kmph",
-        "multiplier": 0.27777777777777777777777777777
+        "name": "metre per second",
+        "code_literal": "mps",
+        "multiplier": 1e0
       },
       {
-        "name": "mps",
-        "multiplier": 1e0
+        "name": "kilo metre per second",
+        "code_literal": "kmph",
+        "multiplier": 0.27777777777777777777777777777
       }
     ]
   },
   {
     "name": "acceleration",
-    "base_name": "meter per second^2",
+    "base_literal": "metre per second^2",
     "unit_id": 2011,
     "literals": [
       {
-        "name": "G",
-        "multiplier": 9.81
+        "name": "metre per second^2",
+        "code_literal": "mps2",
+        "multiplier": 1e0
       },
       {
-        "name": "mps2",
-        "multiplier": 1e0
+        "name": "standard  gravity",
+        "code_literal": "g",
+        "udl_override": "G",
+        "multiplier": 9.80665
       }
     ]
   },
   {
     "name": "area",
-    "base_name": "meters^2",
+    "base_literal": "metre^2",
     "unit_id": 22,
     "literals": [
       {
-        "name": "km2",
-        "multiplier": 1e6
-      },
-      {
-        "name": "m2",
+        "name": "metre^2",
+        "code_literal": "m2",
         "multiplier": 1e0
       },
       {
-        "name": "mm2",
-        "multiplier": 1e-6
+        "name": "are",
+        "code_literal": "are",
+        "multiplier": 1e2
+      },
+      {
+        "name": "hectare",
+        "code_literal": "hectare",
+        "multiplier": 1e4
       }
-    ]
+    ],
+    "generated_multipliers": {
+      "metre^2": [
+        "kilo^2",
+        "milli^2",
+        "micro^2",
+        "nano^2"
+      ]
+    }
   },
   {
     "name": "force",
-    "base_name": "Newton",
+    "base_literal": "Newton",
     "unit_id": 32011,
     "literals": [
       {
-        "name": "N",
-        "alternative": "Newton",
-        "multiplier": 1.0
+        "name": "Newton",
+        "code_literal": "N",
+        "code_alternative": "Newton",
+        "multiplier": 1e0
       }
-    ]
+    ],
+    "generated_multipliers": {
+      "Newton": [
+        "peta",
+        "tera",
+        "giga",
+        "mega",
+        "kilo",
+        "milli",
+        "micro",
+        "nano",
+        "pico",
+        "femto",
+        "atto"
+      ]
+    }
   },
   {
     "name": "momentum",
-    "base_name": "kilogram * meter per second",
+    "base_literal": "kilogram-meter per second",
     "unit_id": 3201,
     "literals": [
       {
-        "name": "kgmps",
-        "multiplier": 1.0
+        "name": "kilogram-meter per second",
+        "code_literal": "kgmps",
+        "multiplier": 1e0
       }
     ]
   }

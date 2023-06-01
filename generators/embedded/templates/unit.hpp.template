@@ -30,8 +30,8 @@ namespace sakurajin{
             {{ export_macro }} {{ unit_name }} operator "" _{{ literal.alternative }}(long double val);
             {{ export_macro }} {{ unit_name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
             {% else %}
-            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.name }}(long double val);
-            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.name }}(unsigned long long int val);
+            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.udl }}(long double val);
+            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.udl }}(unsigned long long int val);
             {% endif %}
             
             {% endfor %}
