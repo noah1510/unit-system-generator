@@ -35,17 +35,16 @@ jobs:
       - name: install deps in venv
         run: pipenv install
       - name: default - install meson and ninja
-        if: ${{ !useMsys }}
+        if: ${{ !matrix.useMsys }}
         run: |
           pipx install meson
           pipx install ninja
 
       - name: generate the sources
-        shell: 'pwsh'
         run: pipenv run python3 ./genSources.py
 
       - name: windows - Prepare MSVC
-        if: ${{ matrix.useMsys != 'true' && matrix.os == 'windows-latest' }}
+        if: ${{ !matrix.useMsys && matrix.os == 'windows-latest' }}
         uses: bus1/cabuild/action/msdevshell@v1
         with:
           architecture: x64
@@ -63,18 +62,33 @@ jobs:
             mingw-w64-x86_64-ninja
             mingw-w64-x86_64-pkg-config
 
-      - name: setup the project
-        shell: ${{ 'msys2 {0}' if matrix.useMsys else 'pwsh' }}
+      - name: setup the project - default
+        if: ${{ !matrix.useMsys }}
+        working-directory: output
+        run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} build
+      - name: setup the project - msys2
+        if: ${{ matrix.useMsys }}
+        shell: 'msys2 {0}'
         working-directory: output
         run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} build
 
-      - name: compile the project
-        shell: ${{ 'msys2 {0}' if matrix.useMsys else 'pwsh' }}
+      - name: compile the project - default
+        if: ${{ !matrix.useMsys }}
+        working-directory: output
+        run: meson compile -C build
+      - name: compile the project - msys2
+        if: ${{ matrix.useMsys }}
+        shell: 'msys2 {0}'
         working-directory: output
         run: meson compile -C build
 
-      - name: test the project
-        shell: ${{ 'msys2 {0}' if matrix.useMsys else 'pwsh' }}
+      - name: test the project - default
+        if: ${{ !matrix.useMsys }}
+        working-directory: output
+        run: meson test --verbose -C build
+      - name: test the project - msys2
+        if: ${{ matrix.useMsys }}
+        shell: 'msys2 {0}'
         working-directory: output
         run: meson test --verbose -C build
 
