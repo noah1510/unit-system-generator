@@ -1,5 +1,12 @@
 on:
   workflow_call:
+    secrets:
+      CI_GITHUB_TOKEN:
+        required: true
+      MESON_DEPLOY_KEY:
+        required: true
+      ARDUINO_DEPLOY_KEY:
+        required: true
 
 jobs:
   upload_matrix:
@@ -11,11 +18,11 @@ jobs:
           - name: "meson"
             args: ""
             repo: "git@github.com:noah1510/unit-system.git"
-            key: ${{ secrets.MESON_DEPLOY_KEY }}
+            key: secrets.MESON_DEPLOY_KEY
           - name: "arduino"
             args: "--arduino"
             repo: "git@github.com:noah1510/unit-system-adruino.git"
-            key: ${{ secrets.ARDUINO_DEPLOY_KEY }}
+            key: secrets.ARDUINO_DEPLOY_KEY
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
