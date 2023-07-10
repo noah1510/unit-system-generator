@@ -1,0 +1,33 @@
+on:
+  workflow_call:
+
+jobs:
+  pio_matrix:
+    runs-on: "ubuntu-22.04"
+    strategy:
+      fail-fast: false
+      matrix:
+        boards:
+          - name: esp32dev
+          - name: d1_mini
+          - name: uno
+          - name: ATmega1280
+          - name: leonardo
+          - name: due
+          - name: teensy41
+          - name: bluefruitmicro
+
+        examples:
+          - name: simple_time
+          - name: advanced_time
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: setup environment and generate sources
+        run: |
+          pipx install platformio
+          pip install pipenv
+          pipenv install
+          pipenv run python3 ./genSources.py --arduino
+      - name: compile example
+        run: PLATFORMIO_CI_SRC="output/examples/${{ matrix.examples.name }}/${{ matrix.examples.name }}.ino" pio ci --lib="output" -b ${{ matrix.boards.name }}

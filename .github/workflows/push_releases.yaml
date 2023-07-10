@@ -1,0 +1,38 @@
+on:
+  workflow_call:
+
+jobs:
+  upload_matrix:
+    runs-on: "ubuntu-22.04"
+    strategy:
+      fail-fast: false
+      matrix:
+        generateArgs:
+          - name: "meson"
+            args: ""
+            repo: "git@github.com:noah1510/unit-system.git"
+            key: ${{ secrets.MESON_DEPLOY_KEY }}
+          - name: "arduino"
+            args: "--arduino"
+            repo: "git@github.com:noah1510/unit-system-adruino.git"
+            key: ${{ secrets.ARDUINO_DEPLOY_KEY }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.11"
+          cache: "pipenv"
+      - name: install pipenv
+        run: pip install pipenv
+      - name: install script deps
+        run: pipenv install
+      - name: generate sources
+        run: pipenv run python3 ./genSources.py ${{ matrix.generateArgs.args }} -o output
+      - name: commit and push changes to ${{ matrix.generateArgs.name }}
+        uses: s0/git-publish-subdir-action@master
+        env:
+          REPO: ${{ matrix.generateArgs.repo }}
+          BRANCH: main
+          FOLDER: output
+          SSH_PRIVATE_KEY: ${{ matrix.generateArgs.key }}
+          TAG: ${{ github.ref_name }}

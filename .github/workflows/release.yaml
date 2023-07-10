@@ -1,0 +1,46 @@
+on:
+  workflow_call:
+
+jobs:
+  releases:
+    name: "Release"
+    runs-on: "ubuntu-22.04"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.11"
+          cache: "pipenv"
+      - name: setup environment and generate sources
+        run: |
+          pipx install meson
+          pipx install ninja
+          pip install pipenv
+          pipenv install
+          pipenv run python3 ./genSources.py --outDir=output_meson
+          pipenv run python3 ./genSources.py --arduino --outDir=output_arduino
+      - name: compress sources into archives
+        run: |
+          tar --zstd -cf unit_system_meson.tar.zstd output_meson LICENSE
+          tar --zstd -cf unit_system_arduino.tar.zstd output_arduino LICENSE
+      - name: "Release latest"
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
+        with:
+          repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            unit_system_meson.tar.zstd
+            unit_system_arduino.tar.zstd
+
+      - name: "release"
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
+        with:
+          repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
+          files: |
+            unit_system_meson.tar.zstd
+            unit_system_arduino.tar.zstd

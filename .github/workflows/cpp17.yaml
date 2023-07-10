@@ -1,0 +1,85 @@
+on:
+  workflow_call:
+
+
+jobs:
+  meson_cpp17_matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-20.04", "ubuntu-22.04", "macos-latest", "windows-latest"]
+        buildType: ["static", "shared"]
+        useMsys: [true, false]
+        exclude:
+          - useMsys: true
+            os: "ubuntu-20.04"
+          - useMsys: true
+            os: "ubuntu-22.04"
+          - useMsys: true
+            os: "macos-latest"
+        include:
+          - setupExtras: "-Db_lto=false -Dgtest:b_lto=false"
+            os: "windows-latest"
+
+    name: ${{ matrix.os }} ${{ matrix.buildType }} msys ${{ matrix.useMsys }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+          cache: 'pipenv'
+
+      - name: install pipenv
+        run: pip install pipenv
+      - name: install deps in venv
+        run: pipenv install
+      - name: default - install meson and ninja
+        if: ${{ !useMsys }}
+        run: |
+          pipx install meson
+          pipx install ninja
+
+      - name: generate the sources
+        shell: 'pwsh'
+        run: pipenv run python3 ./genSources.py
+
+      - name: windows - Prepare MSVC
+        if: ${{ matrix.useMsys != 'true' && matrix.os == 'windows-latest' }}
+        uses: bus1/cabuild/action/msdevshell@v1
+        with:
+          architecture: x64
+
+      - name: windows - Prepare MSYS2
+        uses: msys2/setup-msys2@v2
+        if: ${{ matrix.useMsys }}
+        with:
+          update: true
+          install: >-
+            base-devel
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-meson
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+
+      - name: setup the project
+        shell: ${{ 'msys2 {0}' if matrix.useMsys else 'pwsh' }}
+        working-directory: output
+        run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} build
+
+      - name: compile the project
+        shell: ${{ 'msys2 {0}' if matrix.useMsys else 'pwsh' }}
+        working-directory: output
+        run: meson compile -C build
+
+      - name: test the project
+        shell: ${{ 'msys2 {0}' if matrix.useMsys else 'pwsh' }}
+        working-directory: output
+        run: meson test --verbose -C build
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}
+          path: build
