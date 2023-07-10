@@ -34,14 +34,22 @@ jobs:
         run: pip install pipenv
       - name: install deps in venv
         run: pipenv install
+      - name: update pipenv
+        run: pipenv update
+      - name: list pipenv packages
+        run: pipenv graph
       - name: default - install meson and ninja
         if: ${{ !matrix.useMsys }}
         run: |
           pipx install meson
           pipx install ninja
 
-      - name: generate the sources
+      - name: generate the sources - default
+        if: ${{runner.os != 'windows-latest'}}
         run: pipenv run python3 ./genSources.py
+      - name: generate the sources - windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: pipenv run py ./genSources.py
 
       - name: windows - Prepare MSVC
         if: ${{ !matrix.useMsys && matrix.os == 'windows-latest' }}
