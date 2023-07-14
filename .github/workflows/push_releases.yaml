@@ -33,6 +33,9 @@ jobs:
         run: pipenv install
       - name: generate sources
         run: pipenv run python3 ./genSources.py ${{ matrix.generateArgs.args }} -o output
+      - name: append git sha to README.md
+        run: |
+          echo "generated from generator git_sha: ${{ github.sha }}" >> output/README.md
       - name: put the meson ssh key to env
         if: ${{ matrix.generateArgs.name == 'meson' }}
         run: |
