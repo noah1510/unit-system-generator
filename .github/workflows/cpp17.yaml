@@ -4,6 +4,10 @@ on:
 
 jobs:
   meson_cpp17_matrix:
+    env:
+      PYTHONIOENCODING: 'utf-8'
+      PYTHONLEGACYWINDOWSSTDIO: 'utf-8'
+      PYTHONUTF8: '1'
     strategy:
       fail-fast: false
       matrix:
@@ -45,7 +49,7 @@ jobs:
           pipx install ninja
 
       - name: generate the sources - default
-        if: ${{runner.os != 'windows-latest'}}
+        if: ${{ matrix.os != 'windows-latest' }}
         run: pipenv run python3 ./genSources.py
       - name: generate the sources - windows
         if: ${{ matrix.os == 'windows-latest' }}
