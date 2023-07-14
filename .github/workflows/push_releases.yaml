@@ -35,10 +35,18 @@ jobs:
         run: pipenv run python3 ./genSources.py ${{ matrix.generateArgs.args }} -o output
       - name: put the meson ssh key to env
         if: ${{ matrix.generateArgs.name == 'meson' }}
-        run: echo "{ssh_key}={${{ secrets.MESON_DEPLOY_KEY }}}" >> "$GITHUB_ENV"
+        run: |
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "ssh_key<<$EOF" >> "$GITHUB_ENV"
+          echo "${{ secrets.MESON_DEPLOY_KEY }}" >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
       - name: put the arduino ssh key to env
         if: ${{ matrix.generateArgs.name == 'arduino' }}
-        run: echo "{ssh_key}={${{ secrets.ARDUINO_DEPLOY_KEY }}}" >> "$GITHUB_ENV"
+        run: |
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "ssh_key<<$EOF" >> "$GITHUB_ENV"
+          echo "${{ secrets.ARDUINO_DEPLOY_KEY }}" >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
       - name: commit and push changes to ${{ matrix.generateArgs.name }}
         uses: s0/git-publish-subdir-action@master
         env:
