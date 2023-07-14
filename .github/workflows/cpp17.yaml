@@ -49,11 +49,7 @@ jobs:
           pipx install ninja
 
       - name: generate the sources - default
-        if: ${{ matrix.os != 'windows-latest' }}
-        run: pipenv run python3 ./genSources.py
-      - name: generate the sources - windows
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: pipenv run py ./genSources.py
+        run: pipenv run python ./genSources.py
 
       - name: windows - Prepare MSVC
         if: ${{ !matrix.useMsys && matrix.os == 'windows-latest' }}
