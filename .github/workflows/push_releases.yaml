@@ -33,9 +33,6 @@ jobs:
         run: pipenv install
       - name: generate sources
         run: pipenv run python3 ./genSources.py ${{ matrix.generateArgs.args }} -o output
-      - name: append git sha to README.md
-        run: |
-          echo "generated from generator git_sha: ${{ github.sha }}" >> output/README.md
       - name: put the meson ssh key to env
         if: ${{ matrix.generateArgs.name == 'meson' }}
         run: |
@@ -51,6 +48,15 @@ jobs:
           echo "${{ secrets.ARDUINO_DEPLOY_KEY }}" >> "$GITHUB_ENV"
           echo "$EOF" >> "$GITHUB_ENV"
       - name: commit and push changes to ${{ matrix.generateArgs.name }}
+        if: ${{ github.ref_type == 'branch'}}
+        uses: s0/git-publish-subdir-action@master
+        env:
+          REPO: ${{ matrix.generateArgs.repo }}
+          BRANCH: ${{ github.ref_name }}
+          FOLDER: output
+          SSH_PRIVATE_KEY: ${{ env.ssh_key }}
+      - name: commit and push changes to ${{ matrix.generateArgs.name }}
+        if: ${{ github.ref_type != 'branch' }}
         uses: s0/git-publish-subdir-action@master
         env:
           REPO: ${{ matrix.generateArgs.repo }}
