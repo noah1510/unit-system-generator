@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import generators.utils
 import generators.target
@@ -11,8 +12,8 @@ class MesonConfig(generators.target.Target):
     def __init__(
             self,
             version: str,
-            main_script_dir: os.path,
-            base_dir: os.path,
+            main_script_dir: Path,
+            base_dir: Path,
             print_files: bool = False
     ):
         super().__init__(
@@ -22,12 +23,12 @@ class MesonConfig(generators.target.Target):
             print_files,
             enable_export_macro=True,
             target_name='meson',
-            script_dir=os.path.realpath(os.path.dirname(__file__))
+            script_dir=Path(os.path.dirname(__file__)).absolute().expanduser()
         )
 
     def generate_sources(self):
         self.units, self.unit_strings = generators.unit.units_from_file(
-            os.path.join(self.type_location, 'units.json'),
+            self.type_location / 'units.json',
             self.base_dir,
             self.export_macro,
             self.print_files,
@@ -47,13 +48,13 @@ class MesonConfig(generators.target.Target):
         # Fill in the "meson.build.template" file with the data in `fill_dict`
         # and write the output to the "meson.build" file in the output directory.
         generators.utils.fill_template(
-            os.path.join(self.target_dir, 'meson.build.template'),
+            self.target_dir / 'meson.build.template',
             {
                 'version': self.version,
                 'export_macro': self.export_macro,
                 'units': self.unit_strings,
             },
-            os.path.join(self.base_dir, 'meson.build')
+            self.base_dir / 'meson.build'
         )
 
         # copy the meson options file

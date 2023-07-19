@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 from typing import List, Dict
 
 import generators.utils
@@ -68,7 +69,7 @@ class Unit:
             unit_id: int,  # the unit ID of the unit
             literals: List[UnitLiteral],  # a list of UnitLiteral objects that represent the literals for the unit
             export_macro: str,  # the export macro for the unit
-            base_dir: os.path,  # the base directory that is used out_dir is empty
+            base_dir: Path,  # the base directory that is used out_dir is empty
             create_subdir=True,  # whether to create a subdirectory for the unit
             include_subdir='include',  # the subdirectory for the header files (defaults to 'include')
             src_subdir='src',  # the subdirectory for the source files (defaults to 'src')
@@ -113,7 +114,7 @@ class Unit:
 # This function takes a JSON object string as its argument and returns a Unit object
 def unit_from_json(
         json_object_str: Dict,
-        base_dir: str,
+        base_dir: Path,
         create_subdir: bool = True,
         force_flat_headers: bool = False,
         use_alternate_names: bool = False,
@@ -186,8 +187,8 @@ def generate_prefixed_literals(
 
 
 def units_from_file(
-        file_location: os.path,
-        base_dir: os.path,
+        file_location: Path,
+        base_dir: Path,
         export_macro: str,
         print_files: bool = False,
         create_subdir: bool = True,

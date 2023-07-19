@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import generators.utils
 import generators.target
@@ -11,8 +12,8 @@ class ArduinoConfig(generators.target.Target):
     def __init__(
             self,
             version: str,
-            main_script_dir: os.path,
-            base_dir: os.path,
+            main_script_dir: Path,
+            base_dir: Path,
             print_files: bool = False
     ):
         super().__init__(
@@ -22,14 +23,14 @@ class ArduinoConfig(generators.target.Target):
             print_files,
             enable_export_macro=False,
             target_name='arduino',
-            script_dir=os.path.realpath(os.path.dirname(__file__))
+            script_dir=Path(os.path.dirname(__file__)).absolute().expanduser()
         )
 
-        self.source_dir = os.path.join(base_dir, 'src')
+        self.source_dir = base_dir / 'src'
 
     def generate_sources(self):
         self.units, self.unit_strings = generators.unit.units_from_file(
-            os.path.join(self.type_location, 'units.json'),
+            self.type_location / 'units.json',
             self.source_dir,
             self.export_macro,
             self.print_files,
@@ -52,9 +53,9 @@ class ArduinoConfig(generators.target.Target):
         # Fill in the "meson.build.template" file with the data in `fill_dict`
         # and write the output to the "meson.build" file in the output directory.
         generators.utils.fill_template(
-            os.path.join(self.target_dir, 'library.properties.template'),
+            self.target_dir / 'library.properties.template',
             {'version': self.version},
-            os.path.join(self.base_dir, 'library.properties')
+            self.base_dir / 'library.properties'
         )
 
         # copy the .github folder

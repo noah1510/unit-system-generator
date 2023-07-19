@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 from typing import List, Dict
 
 import generators.utils
@@ -26,7 +27,7 @@ class UnitCpp17(generators.unit.Unit):
         unit_id: int,  # the unit ID of the unit
         literals: List[generators.unit.UnitLiteral],  # a list of UnitLiteral objects that represent the literals
         export_macro: str,  # the export macro for the unit
-        base_dir: os.path,  # the base directory that is used out_dir is empty
+        base_dir: Path,  # the base directory that is used out_dir is empty
         create_subdir=True,  # whether to create a subdirectory for the unit
         include_subdir='include',  # the subdirectory for the header files (defaults to 'include')
         src_subdir='src',  # the subdirectory for the source files (defaults to 'src')
@@ -48,42 +49,42 @@ class UnitCpp17(generators.unit.Unit):
         )
 
     # returns the path to the header file for the unit system
-    def get_header_path(self) -> str:
+    def get_header_path(self) -> Path:
         # If an output directory was specified, use it, otherwise use the default output directory
         path = self.base_dir
         if self.create_subdir and not self.force_flat_headers:
-            path = os.path.join(path, self.include_subdir)
+            path = path / self.include_subdir
 
         if not self.force_flat_headers:
-            path = os.path.join(path, 'unit_system')
+            path = path / 'unit_system'
 
         # Append the name of the unit system and the .hpp file extension
         # to the output directory to get the path to the header file
-        path = os.path.join(path, self.name + '.hpp')
+        path = path / (self.name + '.hpp')
         
         # create any missing directories in the path
         os.makedirs(os.path.dirname(path), exist_ok=True)
         return path
 
     # returns the path to the source file for the unit system
-    def get_source_path(self) -> str:
+    def get_source_path(self) -> Path:
         # If an output directory was specified, use it, otherwise use the default output directory
         path = self.base_dir
         if self.create_subdir and not self.force_flat_headers:
-            path = os.path.join(path, self.src_subdir)
+            path = path / self.src_subdir
         
         # Append the name of the unit system and the .cpp file extension
         # to the output directory to get the path to the source file
-        path = os.path.join(path, self.name + '.cpp')
+        path = path / (self.name + '.cpp')
 
         # create any missing directories in the path
         os.makedirs(os.path.dirname(path), exist_ok=True)
         return path
 
     # generates the source files for a given unit system
-    def generate(self, print_files: bool=False):
+    def generate(self, print_files: bool = False):
         # the directory containing the template files
-        template_dir = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'templates')
+        template_dir = Path(os.path.dirname(__file__)).absolute().expanduser() / 'templates'
 
         # the values to fill into the templates
         fill_dict = {
@@ -100,14 +101,14 @@ class UnitCpp17(generators.unit.Unit):
 
         # generate the header
         generators.utils.fill_template(
-            os.path.join(template_dir, 'unit.hpp.template'),  # the path to the header template file
+            template_dir / 'unit.hpp.template',  # the path to the header template file
             fill_dict,  # the values to fill into the template
             self.get_header_path()  # the path to the output header file
         )
 
         # generate the source
         generators.utils.fill_template(
-            os.path.join(template_dir, 'unit.cpp.template'),  # the path to the source template file
+            template_dir / 'unit.cpp.template',  # the path to the source template file
             fill_dict,  # the values to fill into the template
             self.get_source_path()  # the path to the output source file
         )

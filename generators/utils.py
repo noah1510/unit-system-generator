@@ -14,26 +14,35 @@ import generators.combination
 # if no filename is given, the input_location is assumed to be a file
 # and the filename is taken from that
 # if a filename is given, the input_location is assumed to be a folder
-def copy_file_to(input_location: os.path, output_folder: os.path, filename: str = ''):
+def copy_file_to(input_location: Path, output_folder: Path, filename: str = ''):
     if filename == '':
-        filename = os.path.basename(input_location)
+        filename = input_location.name
     else:
-        input_location = os.path.join(input_location, filename)
+        input_location = input_location / filename
 
-    output_location = os.path.join(output_folder, filename)
-    distutils.file_util.copy_file(input_location, output_location)
+    input_location = input_location.expanduser()
+    if not input_location.exists():
+        raise FileNotFoundError(f'File {input_location} does not exist')
+
+    output_location = output_folder / filename
+    distutils.file_util.copy_file(str(input_location), str(output_location))
 
 
 # copies a folder from the given input location to the given output folder
 # if a folder_name is given, a folder_name with folder_name from the input_location is copied
-def copy_folder_to(input_location: os.path, output_path: os.path, folder_name: str = ''):
+def copy_folder_to(input_location: Path, output_path: Path, folder_name: str = ''):
     if folder_name == '':
-        folder_name = os.path.basename(input_location)
+        if not input_location.is_dir():
+            raise ValueError('input_location must be a folder if no folder_name is given')
+        folder_name = input_location.name
     else:
-        input_location = os.path.join(input_location, folder_name)
+        input_location = input_location / folder_name
+        if input_location.exists() and not input_location.is_dir():
+            raise ValueError('input_location/folder_name must be a folder')
 
-    output_location = os.path.join(output_path, folder_name)
-    distutils.dir_util.copy_tree(input_location, output_location)
+    input_location = input_location.expanduser()
+    output_location = output_path / folder_name
+    distutils.dir_util.copy_tree(str(input_location), str(output_location))
 
 
 def fill_from_files(
@@ -46,7 +55,7 @@ def fill_from_files(
     combinations = generators.combination.load_all_combinations(type_location / 'combinations.json')
 
     # load the 'constants.json' file and parse its contents as a JSON string
-    json_string = load_file_to_string(os.path.join(type_location, 'constants.json'))
+    json_string = load_file_to_string(type_location / 'constants.json')
     constants = [constant for constant in json.loads(json_string)]
 
     # create a dictionary containing the values that will be used to generate the header files
@@ -60,7 +69,7 @@ def fill_from_files(
     return fill_dict
 
 
-def load_file_to_string(filepath: os.path) -> str:
+def load_file_to_string(filepath: Path) -> str:
     # open the file for reading
     template_file = open(filepath, "r")
     # read the contents of the file
@@ -81,7 +90,7 @@ def fill_template_string(template_str: str, values: Dict) -> str:
 
 
 # fills a template file at the given filepath with the given values
-def fill_template_file(filepath: os.path, values: Dict) -> str:
+def fill_template_file(filepath: Path, values: Dict) -> str:
     # load the template file as a string
     template_str = load_file_to_string(filepath)
     # fill the template string with the given values and return the result
@@ -89,7 +98,7 @@ def fill_template_file(filepath: os.path, values: Dict) -> str:
 
 
 # writes the given string to a file at the given filepath
-def write_str_to_file(data_str: str, outfile: os.path):
+def write_str_to_file(data_str: str, outfile: Path):
     # ensure the output directory exists
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
     # open the file for writing
@@ -101,7 +110,7 @@ def write_str_to_file(data_str: str, outfile: os.path):
 
 
 # fills a template file at the given filepath with the given values and writes the result to the output file
-def fill_template(infile: os.path, values: Dict, outfile: os.path):
+def fill_template(infile: Path, values: Dict, outfile: Path):
     # fill the template file with the given values
     filled_template = fill_template_file(infile, values)
     # write the filled template to the output file

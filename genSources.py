@@ -1,5 +1,6 @@
 import os.path
 import argparse
+from pathlib import Path
 
 import generators.Cpp17.meson
 import generators.embedded.arduino
@@ -55,12 +56,12 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     # get the directory containing the script
-    main_script_dir = os.path.realpath(os.path.dirname(__file__))
+    main_script_dir = Path(os.path.dirname(__file__)).absolute().expanduser()
 
     if args['outDir'] == '':
-        base_dir = os.path.join(main_script_dir, 'output')
+        base_dir = main_script_dir / 'output'
     else:
-        base_dir = os.path.join(main_script_dir, args['outDir'])
+        base_dir = main_script_dir / args['outDir']
 
     # if the 'genArduino' flag is set to True, use the arduino generator
     # otherwise, use the meson generator

@@ -11,12 +11,12 @@ class Target:
     def __init__(
             self,
             version: str,
-            main_script_dir: os.path,
-            base_dir: os.path,
+            main_script_dir: Path,
+            base_dir: Path,
             print_files: bool = False,
             enable_export_macro: bool = True,
             target_name: str = '',
-            script_dir: os.path = os.path.realpath(os.path.dirname(__file__)),
+            script_dir: Path = Path(os.path.dirname(__file__)).absolute().expanduser(),
     ):
         self.version = version
         self.target_name = target_name
@@ -29,9 +29,9 @@ class Target:
         self.base_dir = base_dir
         self.print_files = print_files
 
-        self.target_dir = os.path.join(script_dir, self.target_name)
-        self.template_dir = os.path.join(script_dir, 'templates')
-        self.type_location = os.path.join(main_script_dir, 'type data')
+        self.target_dir = script_dir / self.target_name
+        self.template_dir = script_dir / 'templates'
+        self.type_location = main_script_dir / 'type data'
 
         self.units = []
         self.unit_strings = []
@@ -40,7 +40,7 @@ class Target:
 
     def generate_fill_dict(self):
         self.fill_dict = generators.utils.fill_from_files(
-            Path(self.type_location),
+            self.type_location,
             self.export_macro,
             self.unit_strings
         )

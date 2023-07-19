@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Dict
 
 import generators.utils
@@ -16,79 +17,79 @@ import generators.utils
 # print_file: set to True to print the files that are generated
 def create_headers(
     fill_dict: Dict,
-    base_dir: os.path,
+    base_dir: Path,
     print_file=False,
     create_subdir=True,  # control if the src and include directories should be created
     force_flat_headers=False,  # control if the unit_system directory should be created
 ):
     # Get the absolute path of the script directory.
-    script_dir = os.path.realpath(os.path.dirname(__file__))
+    script_dir = Path(os.path.dirname(__file__)).absolute().expanduser()
 
     # Get the absolute path of the templates' directory, which is in the script directory.
-    template_dir = os.path.join(script_dir, 'templates')
+    template_dir = script_dir / 'templates'
 
     header_dir = base_dir
     header_base_dir = base_dir
     source_dir = base_dir
     if not force_flat_headers:
         if create_subdir:
-            header_base_dir = os.path.join(header_base_dir, 'include')
-            source_dir = os.path.join(source_dir, 'src')
+            header_base_dir = header_base_dir / 'include'
+            source_dir = source_dir / 'src'
 
-        header_dir = os.path.join(header_base_dir, 'unit_system')
+        header_dir = header_base_dir / 'unit_system'
 
     fill_dict["force_flat_headers"] = force_flat_headers
 
     # If `gen_unit_t` is `True`, fill in the "unit_type.template" file with the data in `fill_dict`
     # and write the output to the "unit_t.hpp" file in the output directory.
     generators.utils.fill_template(
-        os.path.join(template_dir, 'unit_type.hpp.template'),
+        template_dir / 'unit_type.hpp.template',
         fill_dict,
-        os.path.join(header_dir, 'unit_t.hpp')
+        header_dir / 'unit_t.hpp'
     )
 
     # If `gen_unit_header` is `True`, fill in the "units.template" file with the data in `fill_dict`
     # and write the output to the "units.hpp" file in the output directory.
     generators.utils.fill_template(
-        os.path.join(template_dir, 'units.hpp.template'),
+        template_dir / 'units.hpp.template',
         fill_dict,
-        os.path.join(header_dir, 'units.hpp')
+        header_dir / 'units.hpp'
     )
 
     # If `gen_combinations` is `True`, fill in the "header_combine.template" file with the data in `fill_dict`
     # and write the output to the "combinations.hpp" file in the output directory.
     generators.utils.fill_template(
-        os.path.join(template_dir, 'combinations.hpp.template'),
+        template_dir / 'combinations.hpp.template',
         fill_dict,
-        os.path.join(header_dir, 'combinations.hpp')
+        header_dir / 'combinations.hpp'
     )
 
     # Also fill in the "source_combine.template" file with the data in `fill_dict`
     # and write the output to the "combinations.cpp" file in the output directory.
     generators.utils.fill_template(
-        os.path.join(template_dir, 'combinations.cpp.template'),
+        template_dir / 'combinations.cpp.template',
         fill_dict,
-        os.path.join(source_dir, 'combinations.cpp')
+        source_dir / 'combinations.cpp'
     )
 
     # If `gen_constants` is `True`, fill in the "constants.template" file with the data in `fill_dict`
     # and write the output to the "constants.hpp" file in the output directory.
     generators.utils.fill_template(
-        os.path.join(template_dir, 'constants.hpp.template'),
+        template_dir / 'constants.hpp.template',
         fill_dict,
-        os.path.join(header_dir, 'constants.hpp')
+        header_dir / 'constants.hpp'
     )
 
     generators.utils.fill_template(
-        os.path.join(template_dir, 'std_implements.hpp.template'),
+        template_dir / 'std_implements.hpp.template',
         fill_dict,
-        os.path.join(header_dir, 'std_implements.hpp')
+        header_dir / 'std_implements.hpp'
     )
 
     generators.utils.fill_template(
-        os.path.join(template_dir, 'unit_system.hpp.template'),
+        template_dir / 'unit_system.hpp.template',
         fill_dict,
-        os.path.join(header_base_dir, 'unit_system.hpp')
+        header_base_dir / 'unit_system.hpp'
     )
 
     if print_file:
