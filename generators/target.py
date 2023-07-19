@@ -1,5 +1,8 @@
 import os
+from pathlib import Path
+
 import generators.utils
+
 
 # A class that represents a target for the code generator
 # This class is used to generalize the code generator so that more targets can be added easily
@@ -37,7 +40,7 @@ class Target:
 
     def generate_fill_dict(self):
         self.fill_dict = generators.utils.fill_from_files(
-            self.type_location,
+            Path(self.type_location),
             self.export_macro,
             self.unit_strings
         )

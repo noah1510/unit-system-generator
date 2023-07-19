@@ -3,9 +3,11 @@ import distutils.dir_util
 import distutils.file_util
 import json
 import os
+from pathlib import Path
 from typing import Dict, List
 
 import jinja2
+import generators.combination
 
 
 # copies a file from the given input location to the given output folder
@@ -35,14 +37,13 @@ def copy_folder_to(input_location: os.path, output_path: os.path, folder_name: s
 
 
 def fill_from_files(
-        type_location: os.path,
+        type_location: Path,
         export_macro: str,
         unit_strings: List[str],
 ) -> Dict:
 
     # load the 'combinations.json' file and parse its contents as a JSON string
-    json_string = load_file_to_string(os.path.join(type_location, 'combinations.json'))
-    combinations = [[comb['factor1'], comb['factor2'], comb['product']] for comb in json.loads(json_string)]
+    combinations = generators.combination.load_all_combinations(type_location / 'combinations.json')
 
     # load the 'constants.json' file and parse its contents as a JSON string
     json_string = load_file_to_string(os.path.join(type_location, 'constants.json'))
