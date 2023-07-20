@@ -1,9 +1,10 @@
 import os
-import json
 from pathlib import Path
 from typing import List, Dict
 
 import generators.utils
+import generators.python.python.prefixes
+import generators.combination
 
 
 # A class representing a unit literal.
@@ -51,80 +52,121 @@ class UnitLiteral(Dict):
 
 # A class representing a unit fo the unit system.
 #
-# Attributes:
+# Attributes of the data dictionary:
+#   required:
 #     name: The name of the unit.
+#     unit_id: The unique ID of the unit.
+#
+#   optional:
 #     base_name: The base name of the unit. If the base name is not provided, this will be
-#                   set to the value of the `name` attribute.
-#     unit_id: The unit ID of the unit.
+#                set to the value of the `name` attribute.
 #     literals: A list of `UnitLiteral` objects that represent the literals for the unit.
+#     combinations: A list of 'Combinations' objects that represent the combinations for the unit.
 #     export_macro: The export macro for the unit.
-#     out_dir: The output directory for the unit.
-#     include_subdir: The subdirectory for the header files (defaults to 'include').
-#     src_subdir: The subdirectory for the source files (defaults to 'src').
-class Unit:
+#     force_flat_headers: Whether to force the header files to be in the same directory as the source files
+#     use_alternate_names: Whether to use alternate names for literals on problematic platforms
+#     extra_data: A dictionary containing extra data that should be passed to the templates.
+#
+# other parameters:
+#     templates: A list of Templates that should be generated from this Unit.
+class Unit(Dict):
     def __init__(
             self,
-            name: str,  # the name of the unit
-            base_name: str,  # the base name of the unit
-            unit_id: int,  # the unit ID of the unit
-            literals: List[UnitLiteral],  # a list of UnitLiteral objects that represent the literals for the unit
-            export_macro: str,  # the export macro for the unit
-            base_dir: Path,  # the base directory that is used out_dir is empty
-            create_subdir=True,  # whether to create a subdirectory for the unit
-            include_subdir='include',  # the subdirectory for the header files (defaults to 'include')
-            src_subdir='src',  # the subdirectory for the source files (defaults to 'src')
-            force_flat_headers=False,
-            # whether to force the header files to be in the same directory as the source files
-            use_alternate_names=False,  # whether to use alternate names for literals on problematic platforms
+            data: Dict,
+            out_dir: Path = Path(),
+            templates: List[generators.utils.Template] = None,
     ):
-        self.name = name
+
+        # first check if all required keys are present and raise an error if they are not
+        if 'name' not in data:
+            raise ValueError('Unit must have a name')
+
+        if 'unit_id' not in data:
+            raise ValueError('Unit must have a unit ID')
+
         # If the base name is an empty string or None, set the base_name attribute to the name of the unit system,
         # otherwise set it to the given base name
-        if base_name == '' or base_name is None:
-            self.base_name = name
-        else:
-            self.base_name = base_name
-        self.unit_id = unit_id
-        self.literals = literals
-        self.export_macro = export_macro
-        self.create_subdir = create_subdir
-        self.include_subdir = include_subdir
-        self.src_subdir = src_subdir
-        self.base_dir = base_dir
-        self.force_flat_headers = force_flat_headers
-        self.use_alternate_names = use_alternate_names
+        if 'base_name' not in data or data['base_name'] == '' or data['base_name'] is None:
+            data['base_name'] = data['name']
 
-        # the values to fill into the templates
-        self.fill_dict = {
-            'unit_name': self.name,  # the name of the unit system
-            'unit_base_name': self.base_name,  # the base name of the unit system
-            'unit_id': self.unit_id,  # the unit ID of the unit system
-            'literals': self.literals,  # a list of UnitLiteral objects that represent
-            # the literals for the unit system
-            'create_literals': len(self.literals) > 0,  # create literals if there is at least one
-            'export_macro': self.export_macro,  # the export macro for the unit system
-            'force_flat_headers': self.force_flat_headers,  # whether to force the header files to be in the same
-            'use_alternate_names': self.use_alternate_names,  # whether to use alternate names for literals
-        }
+        super().__init__({
+            'name': data['name'],
+            'base_name': data['base_name'],
+            'unit_id': data['unit_id'],
+            'literals': data.get('literals', []),
+            'combinations': data.get('combinations', []),
+            'export_macro': data.get('export_macro', ''),
+            'force_flat_headers': data.get('force_flat_headers', False),
+            'use_alternate_names': data.get('use_alternate_names', False),
+            'extra_data': data.get('extra_data', {}),
+        })
+
+        self.out_dir = out_dir
+        self.templates = templates
+
+    def add_template(self, template: generators.utils.Template):
+        if self.templates is None:
+            self.templates = []
+
+        self.templates.append(template)
 
     def generate(self, print_files: bool = False):
-        return
+        if self.templates is None:
+            return
+
+        for template in self.templates:
+            template.fill_with(self)
+            if print_files:
+                print(template.output_file)
+
+
+def units_from_file(
+        main_script_dir: Path,
+        base_dir: Path,
+        export_macro: str,
+        print_files: bool = False,
+        create_subdir: bool = True,
+        force_flat_headers: bool = False,
+        use_alternate_names: bool = False,
+        unit_type: type(Unit) = Unit,
+) -> List[type(Unit)]:
+
+    file_location = main_script_dir / 'type data' / 'units.json'
+    units_file = generators.utils.File(file_location.expanduser().absolute())
+
+    # create a list of Unit objects from the JSON object string
+    units = [generators.unit.unit_from_json(
+        unit,
+        base_dir,
+        create_subdir=create_subdir,
+        force_flat_headers=force_flat_headers,
+        use_alternate_names=use_alternate_names,
+        unit_type=unit_type
+    ) for unit in units_file.read_json()]
+
+    # update the export macro and output directory for each unit
+    for unit in units:
+        unit.export_macro = export_macro
+        unit.output_dir = base_dir
+
+    # iterate over the units, generating the source files for each unit and
+    # appending the unit name to the 'unit_strings' list
+    for unit in units:
+        unit.generate(print_files)
+
+    return units
 
 
 # This function takes a JSON object string as its argument and returns a Unit object
 def unit_from_json(
         json_object_str: Dict,
-        base_dir: Path,
+        out_dir: Path,
         create_subdir: bool = True,
         force_flat_headers: bool = False,
         use_alternate_names: bool = False,
         export_macro: str = '',
         unit_type: type(Unit) = Unit,
 ):
-    # Extract the values from the JSON object string and assign them to variables
-    name = json_object_str['name']
-    base_name = json_object_str['base_literal']
-    unit_id = json_object_str['unit_id']
 
     # Use the get() method to get the 'literals' value from the JSON object string,
     # with an empty list as the default value
@@ -137,18 +179,18 @@ def unit_from_json(
     except KeyError:
         pass
 
+    json_object_str['literals'] = literals
+    json_object_str['export_macro'] = export_macro
+    extra_data = {
+        'out_dir': out_dir,
+        'create_subdir': create_subdir,
+        'force_flat_headers': force_flat_headers,
+        'use_alternate_names': use_alternate_names,
+    }
+    json_object_str['extra_data'] = extra_data
+
     # Return a Unit object, using keyword arguments to specify the names of the arguments
-    return unit_type(
-        name,
-        base_name,
-        unit_id,
-        literals,
-        export_macro,
-        base_dir,
-        create_subdir=create_subdir,
-        force_flat_headers=force_flat_headers,
-        use_alternate_names=use_alternate_names,
-    )
+    return unit_type(json_object_str, out_dir)
 
 
 def generate_prefixed_literals(
@@ -167,7 +209,7 @@ def generate_prefixed_literals(
             prefixes_to_generate = prefixes[literal.name]
             for prefix in prefixes_to_generate:
                 try:
-                    multiplier, code_literal = generators.utils.Prefix.from_string(prefix)
+                    multiplier, code_literal = generators.python.python.prefixes.Prefix.from_string(prefix)
                 except ValueError as Error:
                     print(Error)
                     raise ValueError(
@@ -186,38 +228,25 @@ def generate_prefixed_literals(
     return all_literals
 
 
-def units_from_file(
-        file_location: Path,
-        base_dir: Path,
+def fill_from_files(
+        type_location: Path,
         export_macro: str,
-        print_files: bool = False,
-        create_subdir: bool = True,
-        force_flat_headers: bool = False,
-        use_alternate_names: bool = False,
-        unit_type: type(Unit) = Unit,
-) -> (List[type(Unit)], List[str]):
+        units: List[Unit],
+) -> Dict:
 
-    json_string = generators.utils.load_file_to_string(file_location)
-    units = [generators.unit.unit_from_json(
-        unit,
-        base_dir,
-        create_subdir=create_subdir,
-        force_flat_headers=force_flat_headers,
-        use_alternate_names=use_alternate_names,
-        unit_type=unit_type
-    ) for unit in json.loads(json_string)]
+    # load the 'combinations.json' file and parse its contents as a JSON string
+    combinations = generators.combination.load_all_combinations(type_location / 'combinations.json')
 
-    # update the export macro and output directory for each unit
-    for unit in units:
-        unit.export_macro = export_macro
-        unit.base_dir = base_dir
+    # load the 'constants.json' file and parse its contents as a JSON string
+    constants_file = generators.utils.File(type_location / 'constants.json')
+    constants = [constant for constant in constants_file.read_json()]
 
-    unit_strings = []
+    # create a dictionary containing the values that will be used to generate the header files
+    fill_dict = {
+        'export_macro': export_macro,
+        'units': units,
+        'combinations': combinations,
+        'constants': constants,
+    }
 
-    # iterate over the units, generating the source files for each unit and
-    # appending the unit name to the 'unit_strings' list
-    for unit in units:
-        unit.generate(print_files)
-        unit_strings += [unit.name]
-
-    return units, unit_strings
+    return fill_dict
