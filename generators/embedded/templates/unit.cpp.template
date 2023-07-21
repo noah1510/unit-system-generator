@@ -1,34 +1,30 @@
-{%if force_flat_headers %}
-#include "{{ unit_name }}.hpp"
-{% else %}
-#include "unit_system/{{ unit_name }}.hpp"
-{% endif %}
+#include "unit_system/{{ name }}.hpp"
 
 using namespace sakurajin::unit_system;
 
-{{ unit_name }}::{{ unit_name }}(): {{ unit_name }}(0){}
-{{ unit_name }}::{{ unit_name }}(unit_t<{{ unit_id }}> val): {{ unit_name }}(val.value,val.multiplier){}
-{{ unit_name }}::{{ unit_name }}(long double val): {{ unit_name }}(val,1){}
-{{ unit_name }}::{{ unit_name }}(long double val, long double mult ): unit_t<{{ unit_id }}>(val,mult){}
-{{ unit_name }}::{{ unit_name }}(long double val, long double mult, long double offset ): unit_t<{{ unit_id }}>(val,mult,offset){}
+{{ name }}::{{ name }}(): {{ name }}(0){}
+{{ name }}::{{ name }}(unit_t<{{ unit_id }}> val): {{ name }}(val.value,val.multiplier){}
+{{ name }}::{{ name }}(long double val): {{ name }}(val,1){}
+{{ name }}::{{ name }}(long double val, long double mult ): unit_t<{{ unit_id }}>(val,mult){}
+{{ name }}::{{ name }}(long double val, long double mult, long double offset ): unit_t<{{ unit_id }}>(val,mult,offset){}
 
-{% if create_literals %}
+{% if literals|length > 0 %}
 {% for literal in literals %}
-{% if use_alternate_names %}
-{{ unit_name }} literals::operator "" _{{ literal.alternative }}(long double len){
-    return {{ unit_name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
+{% if extra_data.use_alternate_names %}
+{{ name }} literals::operator "" _{{ literal.alternative }}(long double len){
+    return {{ name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
 }
 
-{{ unit_name }} literals::operator "" _{{ literal.alternative }}(unsigned long long int len){
-    return {{ unit_name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
+{{ name }} literals::operator "" _{{ literal.alternative }}(unsigned long long int len){
+    return {{ name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
 }
 {% else %}
-{{ unit_name }} literals::operator "" _{{ literal.udl }}(long double len){
-    return {{ unit_name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
+{{ name }} literals::operator "" _{{ literal.udl }}(long double len){
+    return {{ name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
 }
 
-{{ unit_name }} literals::operator "" _{{ literal.udl }}(unsigned long long int len){
-    return {{ unit_name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
+{{ name }} literals::operator "" _{{ literal.udl }}(unsigned long long int len){
+    return {{ name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
 }
 {% endif %}
 {% endfor %}

@@ -16,17 +16,13 @@ class Target:
             main_script_dir: Path,
             output_dir: Path,
             print_files: bool = False,
-            enable_export_macro: bool = True,
+            extra_data: dict = None,
             target_name: str = '',
             script_dir: Path = Path(os.path.dirname(__file__)).absolute().expanduser(),
             unit_type: type(generators.unit.Unit) = generators.unit.Unit
     ):
         self.version = version
         self.target_name = target_name
-        if enable_export_macro:
-            self.export_macro = 'UNIT_SYSTEM_EXPORT_MACRO'
-        else:
-            self.export_macro = ''
 
         self.main_script_dir = main_script_dir
         self.output_dir = output_dir
@@ -36,6 +32,11 @@ class Target:
         self.template_dir = script_dir / 'templates'
         self.type_location = main_script_dir / 'type data'
 
+        if extra_data is None:
+            extra_data = {}
+
+        extra_data['output_dir'] = output_dir
+        self.extra_data = extra_data
         self.units: List[generators.unit.Unit] = []
         self.unit_type = unit_type
         self.hasCombinations = True
@@ -44,8 +45,8 @@ class Target:
     def generate_fill_dict(self):
         self.fill_dict = generators.unit.fill_from_files(
             self.type_location,
-            self.export_macro,
-            self.units
+            self.units,
+            extra_data=self.extra_data,
         )
 
         self.fill_dict['target'] = self.target_name
@@ -54,10 +55,9 @@ class Target:
     def generate_sources(self):
         self.units = generators.unit.units_from_file(
             self.main_script_dir,
-            self.output_dir,
-            self.export_macro,
             self.print_files,
-            unit_type=self.unit_type
+            extra_data=self.extra_data,
+            unit_type=self.unit_type,
         )
 
         self.generate_fill_dict()

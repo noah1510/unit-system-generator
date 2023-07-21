@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Dict
 
 import generators.Cpp17.unit
 import generators.embedded.unit
@@ -22,24 +23,30 @@ def get_target(
 
     match target_name:
         case 'meson':
+            extra_data_meson = {
+                'export_macro': 'UNIT_SYSTEM_EXPORT_MACRO'
+            }
             return generators.target.Target(
                 version,
                 main_script_dir,
                 output_dir,
                 print_files,
-                enable_export_macro=True,
+                extra_data=extra_data_meson,
                 target_name='meson',
                 script_dir=script_dir / 'Cpp17',
                 unit_type=generators.Cpp17.unit.UnitCpp17
             )
 
         case 'arduino':
+            extra_data_arduino = {
+                'use_alternate_names': True,
+            }
             return generators.target.Target(
                 version,
                 main_script_dir,
                 output_dir,
                 print_files,
-                enable_export_macro=False,
+                extra_data=extra_data_arduino,
                 target_name='arduino',
                 script_dir=script_dir / 'embedded',
                 unit_type=generators.embedded.unit.UnitEmbedded

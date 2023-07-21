@@ -73,7 +73,6 @@ class Unit(Dict):
     def __init__(
             self,
             data: Dict,
-            out_dir: Path = Path(),
             templates: List[generators.utils.Template] = None,
     ):
 
@@ -95,13 +94,9 @@ class Unit(Dict):
             'unit_id': data['unit_id'],
             'literals': data.get('literals', []),
             'combinations': data.get('combinations', []),
-            'export_macro': data.get('export_macro', ''),
-            'force_flat_headers': data.get('force_flat_headers', False),
-            'use_alternate_names': data.get('use_alternate_names', False),
             'extra_data': data.get('extra_data', {}),
         })
 
-        self.out_dir = out_dir
         self.templates = templates
 
     def add_template(self, template: generators.utils.Template):
@@ -122,12 +117,8 @@ class Unit(Dict):
 
 def units_from_file(
         main_script_dir: Path,
-        base_dir: Path,
-        export_macro: str,
         print_files: bool = False,
-        create_subdir: bool = True,
-        force_flat_headers: bool = False,
-        use_alternate_names: bool = False,
+        extra_data: Dict = None,
         unit_type: type(Unit) = Unit,
 ) -> List[type(Unit)]:
 
@@ -137,17 +128,9 @@ def units_from_file(
     # create a list of Unit objects from the JSON object string
     units = [generators.unit.unit_from_json(
         unit,
-        base_dir,
-        create_subdir=create_subdir,
-        force_flat_headers=force_flat_headers,
-        use_alternate_names=use_alternate_names,
+        extra_data=extra_data,
         unit_type=unit_type
     ) for unit in units_file.read_json()]
-
-    # update the export macro and output directory for each unit
-    for unit in units:
-        unit.export_macro = export_macro
-        unit.output_dir = base_dir
 
     # iterate over the units, generating the source files for each unit and
     # appending the unit name to the 'unit_strings' list
@@ -160,11 +143,7 @@ def units_from_file(
 # This function takes a JSON object string as its argument and returns a Unit object
 def unit_from_json(
         json_object_str: Dict,
-        out_dir: Path,
-        create_subdir: bool = True,
-        force_flat_headers: bool = False,
-        use_alternate_names: bool = False,
-        export_macro: str = '',
+        extra_data: Dict = None,
         unit_type: type(Unit) = Unit,
 ):
 
@@ -180,17 +159,14 @@ def unit_from_json(
         pass
 
     json_object_str['literals'] = literals
-    json_object_str['export_macro'] = export_macro
-    extra_data = {
-        'out_dir': out_dir,
-        'create_subdir': create_subdir,
-        'force_flat_headers': force_flat_headers,
-        'use_alternate_names': use_alternate_names,
-    }
+
+    if extra_data is None:
+        extra_data = {}
+
     json_object_str['extra_data'] = extra_data
 
     # Return a Unit object, using keyword arguments to specify the names of the arguments
-    return unit_type(json_object_str, out_dir)
+    return unit_type(json_object_str)
 
 
 def generate_prefixed_literals(
@@ -230,8 +206,8 @@ def generate_prefixed_literals(
 
 def fill_from_files(
         type_location: Path,
-        export_macro: str,
         units: List[Unit],
+        extra_data: Dict = None,
 ) -> Dict:
 
     # load the 'combinations.json' file and parse its contents as a JSON string
@@ -243,10 +219,10 @@ def fill_from_files(
 
     # create a dictionary containing the values that will be used to generate the header files
     fill_dict = {
-        'export_macro': export_macro,
         'units': units,
         'combinations': combinations,
         'constants': constants,
+        'extra_data': extra_data,
     }
 
     return fill_dict

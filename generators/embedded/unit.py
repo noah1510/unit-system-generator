@@ -10,10 +10,10 @@ class UnitEmbedded(generators.unit.Unit):
     def __init__(
         self,
         data: Dict,
-        out_dir: Path,
     ):
-        super().__init__(data, out_dir)
+        super().__init__(data)
 
+        self.out_dir = self.get('extra_data').get('output_dir')
         self.template_dir = Path(os.path.dirname(__file__)).absolute().expanduser() / 'templates'
         self.src_dir = self.out_dir / 'src'
         self.header_dir = self.out_dir / 'src' / 'unit_system'

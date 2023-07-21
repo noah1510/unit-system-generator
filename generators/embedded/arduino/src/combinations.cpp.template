@@ -1,8 +1,4 @@
-{% if force_flat_headers %}
-#include "combinations.hpp"
-{%else%}
 #include "unit_system/combinations.hpp"
-{% endif %}
 
 {% for combination in combinations %}
 sakurajin::unit_system::{{ combination.product }} sakurajin::unit_system::operator*(const sakurajin::unit_system::{{ combination.factor1 }}& v1, const sakurajin::unit_system::{{ combination.factor2 }}& v2){
