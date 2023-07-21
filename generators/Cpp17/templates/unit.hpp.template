@@ -6,13 +6,13 @@
 #include "unit_system/unit_t.hpp"
 {% endif %}
 
-#ifndef {{ extra_data.export_macro }}
-    #define {{ extra_data.export_macro }}
+#ifndef UNIT_SYSTEM_EXPORT_MACRO
+    #define UNIT_SYSTEM_EXPORT_MACRO
 #endif
 
 namespace sakurajin{
     namespace unit_system{
-        class {{ extra_data.export_macro }} {{ name }} : public unit_t<{{ unit_id }}>{
+        class UNIT_SYSTEM_EXPORT_MACRO {{ name }} : public unit_t<{{ unit_id }}>{
         public:
             {{ name }}();
             {{ name }}(unit_t<{{ unit_id }}> val);
@@ -21,17 +21,17 @@ namespace sakurajin{
             {{ name }}(long double val, long double mult, long double offset);
         };
 
-        {{ extra_data.export_macro }} std::ostream& operator<<(std::ostream& os, const {{ name }}& t);
+        UNIT_SYSTEM_EXPORT_MACRO std::ostream& operator<<(std::ostream& os, const {{ name }}& t);
 
         {% if literals|length > 0 %}
         inline namespace literals{
             {% for literal in literals %}
             {% if use_alternate_names %}
-            {{ extra_data.export_macro }} {{ name }} operator "" _{{ literal.alternative }}(long double val);
-            {{ extra_data.export_macro }} {{ name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
+            UNIT_SYSTEM_EXPORT_MACRO {{ name }} operator "" _{{ literal.alternative }}(long double val);
+            UNIT_SYSTEM_EXPORT_MACRO {{ name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
             {% else %}
-            {{ extra_data.export_macro }} {{ name }} operator "" _{{ literal.udl }}(long double val);
-            {{ extra_data.export_macro }} {{ name }} operator "" _{{ literal.udl }}(unsigned long long int val);
+            UNIT_SYSTEM_EXPORT_MACRO {{ name }} operator "" _{{ literal.udl }}(long double val);
+            UNIT_SYSTEM_EXPORT_MACRO {{ name }} operator "" _{{ literal.udl }}(unsigned long long int val);
             {% endif %}
             {% endfor %}
         }

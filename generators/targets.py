@@ -23,9 +23,7 @@ def get_target(
 
     match target_name:
         case 'meson':
-            extra_data_meson = {
-                'export_macro': 'UNIT_SYSTEM_EXPORT_MACRO'
-            }
+            extra_data_meson = {}
             return generators.target.Target(
                 version,
                 main_script_dir,

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef {{ extra_data.export_macro }}
-    #define {{ extra_data.export_macro }}
+#ifndef UNIT_SYSTEM_EXPORT_MACRO
+    #define UNIT_SYSTEM_EXPORT_MACRO
 #endif
 
 namespace sakurajin{

@@ -1,8 +1,8 @@
 #ifndef UNIT_SYSTEM_UNIT_TYPE_TEMPLATE
 #define UNIT_SYSTEM_UNIT_TYPE_TEMPLATE
 
-#ifndef {{ extra_data.export_macro }}
-    #define {{ extra_data.export_macro }}
+#ifndef UNIT_SYSTEM_EXPORT_MACRO
+    #define UNIT_SYSTEM_EXPORT_MACRO
 #endif
 
 #include "unit_system/std_implements.hpp"
@@ -37,7 +37,7 @@ namespace sakurajin{
         //   8 for energy (J) instead of 322011
         //   801 for Power (W) instead of 3220111
         template <size_t identifier>
-        class {{ extra_data.export_macro }} unit_t{
+        class UNIT_SYSTEM_EXPORT_MACRO unit_t{
         public:
             const long double multiplier;
             long double value = 0;
@@ -86,14 +86,14 @@ namespace sakurajin{
         //changes multiplier and offset
         //This is needed primarily for temperatures
         template <size_t identifier>
-        {{ extra_data.export_macro }} unit_t<identifier> unit_cast(const unit_t<identifier>& unit, long double new_multiplier = 1, long double new_offset = 0){
+        UNIT_SYSTEM_EXPORT_MACRO unit_t<identifier> unit_cast(const unit_t<identifier>& unit, long double new_multiplier = 1, long double new_offset = 0){
             auto valBase0 = (unit.value + unit.offset) * unit.multiplier;
             unit_t<identifier> retval{valBase0/new_multiplier-new_offset, new_multiplier, new_offset};
             return retval;
         }
 
         template <size_t identifier>
-        {{ extra_data.export_macro }} unit_t<identifier> clamp(const unit_t<identifier>& unit, const unit_t<identifier>& lower, const unit_t<identifier>& upper){
+        UNIT_SYSTEM_EXPORT_MACRO unit_t<identifier> clamp(const unit_t<identifier>& unit, const unit_t<identifier>& lower, const unit_t<identifier>& upper){
 
             auto _lower = unit_cast(lower, unit.multiplier, unit.offset);
             auto _upper = unit_cast(upper, unit.multiplier, unit.offset);
@@ -104,7 +104,7 @@ namespace sakurajin{
         }
         
         template<std::intmax_t numerator, std::intmax_t denumerator = 1>
-        {{ extra_data.export_macro }} long double multiplier(std::ratio<numerator, denumerator>){
+        UNIT_SYSTEM_EXPORT_MACRO long double multiplier(std::ratio<numerator, denumerator>){
             long double num = static_cast<long double>(numerator);
             long double den = static_cast<long double>(denumerator);
             return num/den;
