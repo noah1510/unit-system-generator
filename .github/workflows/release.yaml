@@ -20,12 +20,8 @@ jobs:
           pipx install ninja
           pip install pipenv
           pipenv install
-          pipenv run python3 ./genSources.py meson
-          pipenv run python3 ./genSources.py arduino
-      - name: compress sources into archives
-        run: |
-          tar --zstd -cf unit_system_meson.tar.zstd output_meson LICENSE
-          tar --zstd -cf unit_system_arduino.tar.zstd output_arduino LICENSE
+          pipenv run python3 ./genSources.py --archive meson
+          pipenv run python3 ./genSources.py --archive arduino
       - name: "Release latest"
         uses: "marvinpinto/action-automatic-releases@latest"
         if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
@@ -35,8 +31,8 @@ jobs:
           prerelease: true
           title: "Development Build"
           files: |
-            unit_system_meson.tar.zstd
-            unit_system_arduino.tar.zstd
+            unit_system_meson.tar.gz
+            unit_system_arduino.tar.gz
 
       - name: "release"
         uses: "marvinpinto/action-automatic-releases@latest"

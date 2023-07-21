@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import List
+import tarfile
 
 import generators.utils
 import generators.unit
@@ -77,3 +78,8 @@ class Target:
     def generate(self):
         self.generate_sources()
         self.generate_system()
+
+    def archive(self):
+        archive_name = self.main_script_dir / ('unit_system_' + self.target_name + '.tar.gz')
+        with tarfile.open(archive_name, 'w:gz') as tar:
+            tar.add(self.output_dir, arcname=self.target_name)

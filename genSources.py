@@ -18,6 +18,16 @@ if __name__ == "__main__":
         description=msg
     )
 
+    # create an archive flag, which is a flag to directly produce a release archive
+    parser.add_argument(
+        "--archive",
+        help="give this flag to generate a tar.zstd archive of the output directory",
+        required=False,
+        default=False,
+        dest='archive',
+        action='store_true',
+    )
+
     # define the 'outDir' argument, which is optional, should be a string, and has a default value of ''
     parser.add_argument(
         "--outDir",
@@ -66,3 +76,6 @@ if __name__ == "__main__":
     )
 
     generator_target.generate()
+
+    if args['archive']:
+        generator_target.archive()
