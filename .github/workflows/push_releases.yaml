@@ -19,7 +19,7 @@ jobs:
             args: ""
             repo: "git@github.com:noah1510/unit-system.git"
           - name: "arduino"
-            args: "--arduino"
+            args: ""
             repo: "git@github.com:noah1510/unit-system-adruino.git"
     steps:
       - uses: actions/checkout@v3
@@ -32,7 +32,7 @@ jobs:
       - name: install script deps
         run: pipenv install
       - name: generate sources
-        run: pipenv run python3 ./genSources.py ${{ matrix.generateArgs.args }} -o output
+        run: pipenv run python3 ./genSources.py ${{ matrix.generateArgs.args }} -o output ${{ matrix.generateArgs.name }}
       - name: put the meson ssh key to env
         if: ${{ matrix.generateArgs.name == 'meson' }}
         run: |

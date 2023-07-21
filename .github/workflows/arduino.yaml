@@ -61,7 +61,7 @@ jobs:
         run: pip install --ignore-installed --user pyserial
 
       - name: generate the arduino sources
-        run: pipenv run python3 ./genSources.py --arduino
+        run: pipenv run python3 ./genSources.py -o output arduino
 
       - name: Compile examples
         uses: arduino/compile-sketches@v1.1.0

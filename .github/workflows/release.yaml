@@ -20,8 +20,8 @@ jobs:
           pipx install ninja
           pip install pipenv
           pipenv install
-          pipenv run python3 ./genSources.py --outDir=output_meson
-          pipenv run python3 ./genSources.py --arduino --outDir=output_arduino
+          pipenv run python3 ./genSources.py meson
+          pipenv run python3 ./genSources.py arduino
       - name: compress sources into archives
         run: |
           tar --zstd -cf unit_system_meson.tar.zstd output_meson LICENSE

@@ -28,6 +28,6 @@ jobs:
           pipx install platformio
           pip install pipenv
           pipenv install
-          pipenv run python3 ./genSources.py --arduino
+          pipenv run python3 ./genSources.py -o output arduino
       - name: compile example
         run: PLATFORMIO_CI_SRC="output/examples/${{ matrix.examples.name }}/${{ matrix.examples.name }}.ino" pio ci --lib="output" -b ${{ matrix.boards.name }}
