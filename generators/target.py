@@ -18,6 +18,7 @@ class Target:
             print_files: bool = False,
             extra_data: dict = None,
             target_name: str = '',
+            per_unit_templates: List[generators.utils.File] = None,
             script_dir: Path = Path(os.path.dirname(__file__)).absolute().expanduser(),
             unit_type: type(generators.unit.Unit) = generators.unit.Unit
     ):
@@ -31,6 +32,7 @@ class Target:
         self.target_dir = script_dir / self.target_name
         self.template_dir = script_dir / 'templates'
         self.type_location = main_script_dir / 'type data'
+        self.per_unit_templates = per_unit_templates
 
         if extra_data is None:
             extra_data = {}
@@ -56,9 +58,13 @@ class Target:
         self.units = generators.unit.units_from_file(
             self.main_script_dir,
             self.print_files,
+            per_unit_templates=self.per_unit_templates,
             extra_data=self.extra_data,
             unit_type=self.unit_type,
         )
+
+        for unit in self.units:
+            unit.generate()
 
         self.generate_fill_dict()
 

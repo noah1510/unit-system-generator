@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
-from typing import Dict
 
-import generators.Cpp17.unit
-import generators.embedded.unit
 import generators.target
+import generators.utils
 
 
 def init_subparser(subparser):
@@ -24,6 +22,18 @@ def get_target(
     match target_name:
         case 'meson':
             extra_data_meson = {}
+            template_dir_cpp17 = script_dir / 'Cpp17' / 'templates'
+            unit_templates_meson = [
+                {
+                    'infile': generators.utils.File(template_dir_cpp17 / 'unit.cpp.template'),
+                    'out_dir': output_dir / 'src',
+                    'file_format': '{unit[name]}.cpp',
+                }, {
+                    'infile': generators.utils.File(template_dir_cpp17 / 'unit.hpp.template'),
+                    'out_dir': output_dir / 'include' / 'unit_system',
+                    'file_format': '{unit[name]}.hpp',
+                }
+            ]
             return generators.target.Target(
                 version,
                 main_script_dir,
@@ -32,10 +42,22 @@ def get_target(
                 extra_data=extra_data_meson,
                 target_name='meson',
                 script_dir=script_dir / 'Cpp17',
-                unit_type=generators.Cpp17.unit.UnitCpp17
+                per_unit_templates=unit_templates_meson,
             )
 
         case 'arduino':
+            template_dir_embedded = script_dir / 'embedded' / 'templates'
+            unit_templates_arduino = [
+                {
+                    'infile': generators.utils.File(template_dir_embedded / 'unit.cpp.template'),
+                    'out_dir': output_dir / 'src',
+                    'file_format': '{unit[name]}.cpp',
+                }, {
+                    'infile': generators.utils.File(template_dir_embedded / 'unit.hpp.template'),
+                    'out_dir': output_dir / 'src' / 'unit_system',
+                    'file_format': '{unit[name]}.hpp',
+                }
+            ]
             extra_data_arduino = {
                 'use_alternate_names': True,
             }
@@ -47,7 +69,7 @@ def get_target(
                 extra_data=extra_data_arduino,
                 target_name='arduino',
                 script_dir=script_dir / 'embedded',
-                unit_type=generators.embedded.unit.UnitEmbedded
+                per_unit_templates=unit_templates_arduino,
             )
         case _:
             raise ValueError(f'Unknown target: {target_name}')

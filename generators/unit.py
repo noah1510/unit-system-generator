@@ -119,6 +119,7 @@ def units_from_file(
         main_script_dir: Path,
         print_files: bool = False,
         extra_data: Dict = None,
+        per_unit_templates: List[Dict] = None,
         unit_type: type(Unit) = Unit,
 ) -> List[type(Unit)]:
 
@@ -135,7 +136,15 @@ def units_from_file(
     # iterate over the units, generating the source files for each unit and
     # appending the unit name to the 'unit_strings' list
     for unit in units:
-        unit.generate(print_files)
+        if per_unit_templates is not None:
+            for fileinfo in per_unit_templates:
+                infile = fileinfo['infile'].get()
+                out_dir = fileinfo['out_dir']
+
+                out_filename = fileinfo['file_format'].format(unit=unit)
+                out_path = out_dir / out_filename
+
+                unit.add_template(generators.utils.Template(infile, out_path))
 
     return units
 
