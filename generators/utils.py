@@ -100,6 +100,7 @@ class Template:
     def fill_with(self, values: Dict):
         if self.template_file.get().is_file():
             if self.template_file.get().suffix != '.template':
+                self.template_file.copy(self.output_file.get(), copy_as_subfile=False)
                 return
 
             try:

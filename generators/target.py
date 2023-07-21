@@ -49,6 +49,7 @@ class Target:
         )
 
         self.fill_dict['target'] = self.target_name
+        self.fill_dict['version'] = self.version
 
     def generate_sources(self):
         self.units = generators.unit.units_from_file(

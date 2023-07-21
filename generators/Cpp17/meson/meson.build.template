@@ -24,8 +24,8 @@ endif
 
 incdirs = include_directories('include')
 sources = [
-    {% for unit_name in units %}
-    'src/{{ unit_name }}.cpp',
+    {% for unit in units %}
+    'src/{{ unit.name }}.cpp',
     {% endfor %}
     'src/combinations.cpp',
 ]
@@ -48,8 +48,8 @@ unit_system_dep = declare_dependency(
 pkg = import('pkgconfig')
 pkg.generate(unit_system, subdirs: 'unit_system')
 
-{% for unit_name in units %}
-    install_headers('include/unit_system/{{ unit_name }}.hpp', subdir : 'unit-system')
+{% for unit in units %}
+    install_headers('include/unit_system/{{ unit.name }}.hpp', subdir : 'unit-system')
 {% endfor %}
 
 install_headers('include/unit_system/combinations.hpp', subdir : 'unit-system')

@@ -14,28 +14,27 @@
 
 namespace sakurajin{
     namespace unit_system{
-        class {{ export_macro }} {{ unit_name }} : public unit_t<{{ unit_id }}>{
+        class {{ export_macro }} {{ name }} : public unit_t<{{ unit_id }}>{
         public:
-            {{ unit_name }}();
-            {{ unit_name }}(unit_t<{{ unit_id }}> val);
-            explicit {{ unit_name }}(long double val);
-            {{ unit_name }}(long double val, long double mult);
-            {{ unit_name }}(long double val, long double mult, long double offset);
+            {{ name }}();
+            {{ name }}(unit_t<{{ unit_id }}> val);
+            explicit {{ name }}(long double val);
+            {{ name }}(long double val, long double mult);
+            {{ name }}(long double val, long double mult, long double offset);
         };
-        {% if create_literals %}
 
-        {{ export_macro }} std::ostream& operator<<(std::ostream& os, const {{ unit_name }}& t);
+        {{ export_macro }} std::ostream& operator<<(std::ostream& os, const {{ name }}& t);
 
+        {% if literals|length > 0 %}
         inline namespace literals{
             {% for literal in literals %}
             {% if use_alternate_names %}
-            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.alternative }}(long double val);
-            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
+            {{ export_macro }} {{ name }} operator "" _{{ literal.alternative }}(long double val);
+            {{ export_macro }} {{ name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
             {% else %}
-            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.udl }}(long double val);
-            {{ export_macro }} {{ unit_name }} operator "" _{{ literal.udl }}(unsigned long long int val);
+            {{ export_macro }} {{ name }} operator "" _{{ literal.udl }}(long double val);
+            {{ export_macro }} {{ name }} operator "" _{{ literal.udl }}(unsigned long long int val);
             {% endif %}
-            
             {% endfor %}
         }
         {% endif %}
