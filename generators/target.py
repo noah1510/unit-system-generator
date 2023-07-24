@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 import tarfile
 
 import generators.utils
@@ -17,29 +17,40 @@ class Target:
             main_script_dir: Path,
             output_dir: Path,
             print_files: bool = False,
-            extra_data: dict = None,
-            target_name: str = '',
-            per_unit_templates: List[generators.utils.File] = None,
-            script_dir: Path = Path(os.path.dirname(__file__)).absolute().expanduser(),
+            target_file: generators.utils.File = None,
             unit_type: type(generators.unit.Unit) = generators.unit.Unit
     ):
+        target_json = target_file.read_json()
         self.version = version
-        self.target_name = target_name
+        self.target_name = target_json['name']
+        self.target_group = target_json['group']
 
         self.main_script_dir = main_script_dir
         self.output_dir = output_dir
         self.print_files = print_files
 
+        script_dir = Path(os.path.dirname(__file__)).absolute().expanduser() / self.target_group
         self.target_dir = script_dir / self.target_name
-        self.template_dir = script_dir / 'templates'
+        self.generic_dir = script_dir / 'generic'
+        self.template_dir = script_dir / 'per_unit'
         self.type_location = main_script_dir / 'type data'
-        self.per_unit_templates = per_unit_templates
 
-        if extra_data is None:
-            extra_data = {}
+        self.per_unit_templates: List[Dict] = []
+        if 'per_unit_templates' in target_json:
+            for template in target_json['per_unit_templates']:
+                unit_template: Dict = {
+                    'infile': generators.utils.File(self.template_dir / template['filename']),
+                    'out_dir': self.output_dir / template['output_location'],
+                    'file_format': template['output_pattern'],
+                }
+                self.per_unit_templates += [unit_template]
 
-        extra_data['output_dir'] = output_dir
-        self.extra_data = extra_data
+        if 'extra_data' in target_json:
+            self.extra_data = target_json['extra_data']
+        else:
+            self.extra_data = {}
+        self.extra_data['output_dir'] = output_dir
+
         self.units: List[generators.unit.Unit] = []
         self.unit_type = unit_type
         self.hasCombinations = True
@@ -65,11 +76,16 @@ class Target:
         )
 
         for unit in self.units:
-            unit.generate()
+            unit.generate(self.print_files)
 
         self.generate_fill_dict()
 
     def generate_system(self):
+        generators.utils.Template(
+            self.generic_dir,
+            self.output_dir,
+        ).fill_with(self.fill_dict)
+
         generators.utils.Template(
             self.target_dir,
             self.output_dir,

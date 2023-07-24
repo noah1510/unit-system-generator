@@ -130,3 +130,33 @@ This may change in the future.
 To add a new units you have to first add the unit and its literals to the units.json file.
 After that you need to specify the combinations that the unit can be used in.
 Lastly if you need to add a constant you can add it to the constants.json file.
+
+### Getting a new unit ID
+
+The identifier should be unique for each child class
+It is used so that only values with the same unit can be
+compared, copied and converted.
+* 0 for unit_t
+* 1 for time_si
+* 2 for length
+* 3 for mass
+* 4 for temp
+* 5 for amount
+* 6 for el current
+* 7 for lum. intensity
+* 8 for energy (not part of base but part of common)
+* 9 is reserved
+
+combined units can just combine these numbers with the 0 as divide symbol
+
+examples:
+* 16 for charge (A s)
+* 201 for speed (m / s)
+* 2011 for acceleration (m / (s * s) )
+
+combinations of many types might use the reserved digit (9) to shorten
+if common is not used, you may also use the digit 8 to shorten the identifier 
+
+examples:
+* 8 for energy (J) instead of 322011
+* 801 for Power (W) instead of 3220111

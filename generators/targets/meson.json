@@ -1,0 +1,19 @@
+{
+  "name": "meson",
+  "group": "Cpp17",
+  "help": "generate the code for the meson build system",
+  "generate_folders": [],
+  "extra_data": {},
+  "per_unit_templates": [
+    {
+      "filename": "unit.cpp.template",
+      "output_location": "src",
+      "output_pattern": "{unit[name]}.cpp"
+    },
+    {
+      "filename": "unit.hpp.template",
+      "output_location": "include/unit_system",
+      "output_pattern": "{unit[name]}.hpp"
+    }
+  ]
+}
