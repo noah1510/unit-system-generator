@@ -38,8 +38,6 @@ unit-system.kdev4
 .idea
 .vscode
 
-doc
-
 subprojects/*
 !subprojects/*.wrap
 .meson-subproject-wrap-hash.txt

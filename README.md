@@ -72,33 +72,22 @@ int main(){
 
 All you need for the code generator is python3.
 The code generator is written in python3 and uses the jinja2 template engine to generate the code.
-To install the dependencies run `pip3 install -r requirements.txt` in the root directory of this repository.
+To install the dependencies run `pipenv install` in the root directory of this repository.
 
-After the dependencies are installed you can run the code generator with `python3 ./genSources.py`.
+After the dependencies are installed you can run the code generator with `pipenv run python ./genSources.py`.
 The script takes the following arguments:
 
-* `-o` or `--outDir` -> the output directory for the generated code. Default is `./output`
-* `--arduino` -> generate code for arduino instead of meson
+* `-o` or `--outDir` -> the output directory for the generated code. Default is `./output_{target}`
 * `--printOutFiles` -> print which files are generated to stdout
+* `--help` -> print the help message if you put it after the target name it gives yout the options for that target
+* `target` -> specifies the target language. This is required and can be one of the following:
+  * `meson` -> generates the code ofr the meson build system
+  * `arduino` -> generates for the arduino library manager
 
-## Adding new units
+## Adding new units or targets
 
-To add new units all you need to do is change the json files in the `type data` directory and rerun the code generator.
-There are three json files:
-
-* `units.json` -> contains all the units, their names and literals
-* `constants.json` -> contains all the constants and their values
-* `combinations.json` -> contains all the combinations of units
-
-Add the new units to the `units.json` file and also specify how they are combined in the `combinations.json` file.
-The combination file is used to generate the operators for the units.
-Each object in that array specifies two units and the resulting unit.
-The way this is interpreted is `factor1 * factor2 = product`.
-The code automatically generates the inverse of the product as well as different orders.
-
-Each unit needs a unique id.
-That id is needed to prevent converting one unit into another by accident.
-If you want to see the naming convention for the ids look into the `unit_t.hpp` header file.
+Check the doc/type_formats.md file for the documentation on how to add new units.
+Check the doc/targets.md file for the documentation on how to add new targets.
 
 ## Planned features
 
@@ -106,6 +95,6 @@ At the moment the only generated language is C++.
 But there are plans to add support for other languages in the future (e.g. python).
 For this to be useful or even work at all, the language must support operator overloading (e.g. not java).
 
-Once build system support is the C++ code will get a C++20 module interface.
+Once build system support exists, the C++ code will get a C++20 module interface.
 This will make it easier to use the unit system in your project.
 At the moment however no build system supports C++20 modules properly.

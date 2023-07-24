@@ -61,7 +61,7 @@ if __name__ == "__main__":
     main_script_dir = Path(os.path.dirname(__file__)).absolute().expanduser()
 
     if args['outDir'] == '':
-        base_dir = main_script_dir / ('output-' + args['target'])
+        base_dir = main_script_dir / ('output_' + args['target'])
     else:
         base_dir = main_script_dir / args['outDir']
 
