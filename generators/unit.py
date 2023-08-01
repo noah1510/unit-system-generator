@@ -211,7 +211,7 @@ def generate_prefixed_literals(
             prefixes_to_generate = prefixes[literal.name]
             for prefix in prefixes_to_generate:
                 try:
-                    multiplier, code_literal = generators.python.generic.prefixes.Prefix.from_string(prefix)
+                    prefix_data = generators.python.generic.prefixes.Prefix.from_string(prefix)
                 except ValueError as Error:
                     print(Error)
                     raise ValueError(
@@ -220,9 +220,9 @@ def generate_prefixed_literals(
 
                 prefix_json = {
                     "name": prefix + literal.name,
-                    "multiplier": multiplier * literal.multiplier,
-                    "code_literal": code_literal + literal.code_literal,
-                    "code_alternative": code_literal + literal.alternative,
+                    "multiplier": prefix_data.value() * literal.multiplier,
+                    "code_literal": prefix_data.short() + literal.code_literal,
+                    "code_alternative": prefix_data.short() + literal.alternative,
                     "offset": literal.offset,
                 }
                 all_literals.append(UnitLiteral(prefix_json))

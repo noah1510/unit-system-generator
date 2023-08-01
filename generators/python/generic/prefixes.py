@@ -1,9 +1,29 @@
 class Prefix:
-    def __init__(self):
-        self.prefix = ''
+    def __init__(self, short: str, long: str, amount: float):
+        self.__short = short
+        self.__long = long
+        self.__amount = amount
+
+    def __str__(self) -> str:
+        return self.__long
+
+    def __float__(self):
+        return self.__amount
+
+    def __repr__(self) -> str:
+        return f'Prefix({self.__short}, {self.__long}, {self.__amount})'
+
+    def value(self) -> float:
+        return self.__amount
+
+    def short(self) -> str:
+        return self.__short
+
+    def long(self) -> str:
+        return self.__long
 
     @staticmethod
-    def from_string(data: str) -> (float, str):
+    def from_string(data: str) -> 'Prefix':
         if '^' in data:
             name, exponent = data.split('^')
         else:
@@ -12,14 +32,14 @@ class Prefix:
 
         try:
             exponent = int(exponent)
-            amount, prefix = Prefix.direct_prefix_string(name)
+            prefix = Prefix.direct_prefix_string(name)
         except ValueError:
             raise ValueError('Invalid prefix string: ' + data)
 
-        return amount ** exponent, prefix
+        return Prefix(prefix.short(), prefix.long()+f'^{exponent}', prefix.value() ** exponent)
 
     @staticmethod
-    def direct_prefix_string(raw_str: str) -> (float, str):
+    def direct_prefix_string(raw_str: str) -> 'Prefix':
         if raw_str == 'quetta':
             return Prefix.quetta()
         elif raw_str == 'ronna':
@@ -72,96 +92,97 @@ class Prefix:
             raise ValueError('Invalid prefix string: ' + raw_str)
 
     @staticmethod
-    def quetta() -> (float, str):
-        return 1e30, 'Q'
+    def quetta() -> 'Prefix':
+        return Prefix('Q', 'quetta', 1e30)
 
     @staticmethod
-    def ronna() -> (float, str):
-        return 1e27, 'R'
+    def ronna() -> 'Prefix':
+        return Prefix('R', 'ronna', 1e27)
 
     @staticmethod
-    def yotta() -> (float, str):
-        return 1e24, 'Y'
+    def yotta() -> 'Prefix':
+        return Prefix('Y', 'yotta', 1e24)
 
     @staticmethod
-    def zetta() -> (float, str):
-        return 1e21, 'Z'
+    def zetta() -> 'Prefix':
+        return Prefix('Z', 'zetta', 1e21)
 
     @staticmethod
-    def exa() -> (float, str):
-        return 1e18, 'E'
+    def exa() -> 'Prefix':
+        return Prefix('E', 'exa', 1e18)
 
     @staticmethod
-    def peta() -> (float, str):
-        return 1e15, 'P'
+    def peta() -> 'Prefix':
+        return Prefix('P', 'peta', 1e15)
 
     @staticmethod
-    def tera() -> (float, str):
-        return 1e12, 'T'
+    def tera() -> 'Prefix':
+        return Prefix('T', 'tera', 1e12)
 
     @staticmethod
-    def giga() -> (float, str):
-        return 1e9, 'G'
+    def giga() -> 'Prefix':
+        return Prefix('G', 'giga', 1e9)
 
     @staticmethod
-    def mega() -> (float, str):
-        return 1e6, 'M'
+    def mega() -> 'Prefix':
+        return Prefix('M', 'mega', 1e6)
 
     @staticmethod
-    def kilo() -> (float, str):
-        return 1e3, 'k'
+    def kilo() -> 'Prefix':
+        return Prefix('k', 'kilo', 1e3)
 
     @staticmethod
-    def hecto() -> (float, str):
-        return 1e2, 'h'
+    def hecto() -> 'Prefix':
+        return Prefix('h', 'hecto', 1e2)
 
     @staticmethod
-    def deca() -> (float, str):
-        return 1e1, 'da'
-    @staticmethod
-    def deci() -> (float, str):
-        return 1e-1, 'd'
+    def deca() -> 'Prefix':
+        return Prefix('da', 'deca', 1e1)
 
     @staticmethod
-    def centi() -> (float, str):
-        return 1e-2, 'c'
+    def deci() -> 'Prefix':
+        return Prefix('d', 'deci', 1e-1)
 
     @staticmethod
-    def milli() -> (float, str):
-        return 1e-3, 'm'
+    def centi() -> 'Prefix':
+        return Prefix('c', 'centi', 1e-2)
 
     @staticmethod
-    def micro() -> (float, str):
-        return 1e-6, 'u'
+    def milli() -> 'Prefix':
+        return Prefix('m', 'milli', 1e-3)
 
     @staticmethod
-    def nano() -> (float, str):
-        return 1e-9, 'n'
+    def micro() -> 'Prefix':
+        return Prefix('u', 'micro', 1e-6)
 
     @staticmethod
-    def pico() -> (float, str):
-        return 1e-12, 'p'
+    def nano() -> 'Prefix':
+        return Prefix('n', 'nano', 1e-9)
 
     @staticmethod
-    def femto() -> (float, str):
-        return 1e-15, 'f'
+    def pico() -> 'Prefix':
+        return Prefix('p', 'pico', 1e-12)
 
     @staticmethod
-    def atto() -> (float, str):
-        return 1e-18, 'a'
+    def femto() -> 'Prefix':
+        return Prefix('f', 'femto', 1e-15)
 
     @staticmethod
-    def zepto() -> (float, str):
-        return 1e-21, 'z'
+    def atto() -> 'Prefix':
+        return Prefix('a', 'atto', 1e-18)
 
     @staticmethod
-    def yocto() -> (float, str):
-        return 1e-24, 'y'
+    def zepto() -> 'Prefix':
+        return Prefix('z', 'zepto', 1e-21)
 
     @staticmethod
-    def ronto() -> (float, str):
-        return 1e-27, 'r'
+    def yocto() -> 'Prefix':
+        return Prefix('y', 'yocto', 1e-24)
 
     @staticmethod
-    def quecto() -> (float, str):
-        return 1e-30, 'q'
+    def ronto() -> 'Prefix':
+        return Prefix('r', 'ronto', 1e-27)
+
+    @staticmethod
+    def quecto() -> 'Prefix':
+        return Prefix('q', 'quecto', 1e-30)

@@ -8,12 +8,12 @@ class {{ unit.name }}:
         multiplier=1.0,
         offset=0.0
     ):
-        self.value = value
-        self.multiplier = multiplier
-        self.offset = offset
+        self.value = float(value)
+        self.multiplier = float(multiplier)
+        self.offset = float(offset)
 
     def __str__(self):
-        return f'{self.value} {{ unit.base_name }}'
+        return f'{self.cast_to_values().value} {{ unit.base_name }}'
 
     def __repr__(self):
         return f'{{ unit.name }}({self.value}, {self.multiplier}, {self.offset})'
