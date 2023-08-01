@@ -122,8 +122,7 @@ sakurajin::unit_system::{{ unit.name }}::{{ unit.name }}(long double v, std::rat
 {% endfor %}
 
 namespace std{
-    {% for unit in units %}
-    UNIT_SYSTEM_EXPORT_MACRO sakurajin::unit_system::{{ unit.name }} abs(const sakurajin::unit_system::{{ unit.name }}& unit);
+    {% for unit in units %}UNIT_SYSTEM_EXPORT_MACRO sakurajin::unit_system::{{ unit.name }} abs(const sakurajin::unit_system::{{ unit.name }}& unit);
     {% endfor %}
 }
 

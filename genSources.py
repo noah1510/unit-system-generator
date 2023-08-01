@@ -50,6 +50,15 @@ if __name__ == "__main__":
         action='store_true',
     )
 
+    parser.add_argument(
+        "--no_format",
+        help="set this flag to disable running the formatter on the generated files",
+        required=False,
+        default=True,
+        dest='format_sources',
+        action='store_false',
+    )
+
     # add a subparser to select the target for the code generator
     subparser_manager = parser.add_subparsers(help="generator target", dest="target")
     generators.targets.init_subparser(subparser_manager)
@@ -76,6 +85,9 @@ if __name__ == "__main__":
     )
 
     generator_target.generate()
+
+    if args['format_sources']:
+        generator_target.format()
 
     if args['archive']:
         generator_target.archive()

@@ -10,5 +10,11 @@
       "output_location": "src",
       "output_pattern": "{unit[name]}.cpp"
     }
-  ]
+  ],
+  "clang-format": {
+    "file_patters": [
+      "include/unit_system.hpp",
+      "src/*.cpp"
+    ]
+  }
 }

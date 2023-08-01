@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 jinja2 = "*"
+clang-format = "*"
 
 [dev-packages]
 

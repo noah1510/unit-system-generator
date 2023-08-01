@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 from typing import List, Dict
 import tarfile
@@ -55,6 +56,7 @@ class Target:
         self.unit_type = unit_type
         self.hasCombinations = True
         self.fill_dict = {}
+        self.clang_format_options = target_json.get('clang-format', {})
 
     def generate_fill_dict(self):
         self.fill_dict = generators.unit.fill_from_files(
@@ -99,3 +101,11 @@ class Target:
         archive_name = self.main_script_dir / ('unit_system_' + self.target_name + '.tar.gz')
         with tarfile.open(archive_name, 'w:gz') as tar:
             tar.add(self.output_dir, arcname=self.target_name)
+
+    def format(self):
+        if 'file_patters' not in self.clang_format_options:
+            return
+
+        for pattern in self.clang_format_options['file_patters']:
+            for file in self.output_dir.glob(pattern):
+                subprocess.run(['clang-format', '-i', file], cwd=self.output_dir)
