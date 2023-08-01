@@ -1,10 +1,126 @@
 #pragma once
 
-//all of the units that are generated
-#include "unit_system/units.hpp"
+#define UNIT_SYSTEM_ABS(x) ((x) < -(x) ? -(x) : (x))
 
-//all of the constatns that are generated
-#include "unit_system/constants.hpp"
+const long double UNIT_SYSTEM_FEMTO = 1e-15;
+const long double UNIT_SYSTEM_PICO = 1e-12;
+const long double UNIT_SYSTEM_NANO = 1e-9;
+const long double UNIT_SYSTEM_MICRO = 1e-6;
+const long double UNIT_SYSTEM_MILLI = 1e-3;
+const long double UNIT_SYSTEM_CENTI = 1e-2;
+const long double UNIT_SYSTEM_DECI = 1e-1;
+const long double UNIT_SYSTEM_DECA = 1e1;
+const long double UNIT_SYSTEM_HECTO = 1e2;
+const long double UNIT_SYSTEM_KILO = 1e3;
+const long double UNIT_SYSTEM_MEGA = 1e6;
+const long double UNIT_SYSTEM_GIGA = 1e9;
+const long double UNIT_SYSTEM_TERA = 1e12;
+const long double UNIT_SYSTEM_PETA = 1e15;
+const long double UNIT_SYSTEM_EXA = 1e18;
+const long double UNIT_SYSTEM_ZETTA = 1e21;
 
-//all of the conbinations that are generated
-#include "unit_system/combinations.hpp"
+namespace sakurajin{
+    namespace unit_system{
+        //forward declare all units
+        {% for unit in units %}
+        class {{ unit.name }};{% endfor %}
+
+        {% for unit in units %}
+        class {{ unit.name }} {
+        public:
+            const long double multiplier;
+            long double value = 0;
+            const long double offset;
+            long double rel_error = 0.000001;
+
+            {{ unit.name }}();
+            {{ unit.name }}(const {{ unit.name }}& other) = default;
+
+            explicit {{ unit.name }}(long double v);
+            {{ unit.name }}(long double v, long double mult);
+            {{ unit.name }}(long double v, long double mult, long double off);
+
+            {{ unit.name }} operator*(long double scalar) const;
+            void operator*=(long double scalar);
+
+            long double operator/(const {{ unit.name }}& other) const;
+            {{ unit.name }} operator/(long double scalar) const;
+            void operator/=(long double scalar);
+
+            {{ unit.name }} operator+(const {{ unit.name }}& other) const;
+            void operator+=(const {{ unit.name }}& other);
+
+            {{ unit.name }} operator-(const {{ unit.name }}& other) const;
+            void operator-=(const {{ unit.name }}& other);
+
+            {{ unit.name }} operator-() const;
+
+            void operator=(const {{ unit.name }}& other);
+
+            explicit operator long double() const;
+
+            {{ unit.name }} convert_multiplier(long double new_multiplier = 1) const;
+            {{ unit.name }} convert_offset(long double new_offset = 0) const;
+            {{ unit.name }} convert_copy(long double new_multiplier = 1, long double new_offset = 0) const;
+
+            bool operator<(const {{ unit.name }}& other) const;
+            bool operator>(const {{ unit.name }}& other) const;
+            bool operator<=(const {{ unit.name }}& other) const;
+            bool operator>=(const {{ unit.name }}& other) const;
+            bool operator==(const {{ unit.name }}& other) const;
+            bool operator!=(const {{ unit.name }}& other) const;
+
+        {% if unit.combinations|length > 0 %}{% for comb in unit.combinations %}
+        {% if comb.factor1 == comb.factor2 %}
+            {% if comb.factor1 == unit.name %}
+            {{ comb.product }} square() const;
+            {% elif comb.product == unit.name %}
+            {{ comb.factor1 }} sqrt() const;
+            {% endif %}
+        {% else %}
+            {% if comb.factor2 == unit.name %}
+            {{ comb.product }} operator*(const {{ comb.factor1 }}& other) const;
+            {% elif comb.product == unit.name %}
+            {{ comb.factor2 }} operator/(const {{ comb.factor1 }}& other) const;
+            {% endif %}
+        {% endif %}
+        {% if comb.factor1 == unit.name %}
+            {{ comb.product }} operator*(const {{ comb.factor2 }}& other) const;
+        {% elif comb.product == unit.name %}
+            {{ comb.factor1 }} operator/(const {{ comb.factor2 }}& other) const;
+        {% endif %}
+
+        {% endfor %}{% endif %}
+        };
+
+        {{ unit.name }} unit_cast(const {{ unit.name }}& unit, long double new_multiplier = 1, long double new_offset = 0);
+        {{ unit.name }} clamp(const {{ unit.name }}& unit, const {{ unit.name }}& lower, const {{ unit.name }}& upper);
+
+        {% if unit.literals|length > 0 %}
+        inline namespace literals{
+            {% for literal in unit.literals %}
+            {% if use_alternate_names %}
+            {{ unit.name }} operator "" _{{ literal.alternative }}(long double val);
+            {{ unit.name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
+            {% else %}
+            {{ unit.name }} operator "" _{{ literal.udl }}(long double val);
+            {{ unit.name }} operator "" _{{ literal.udl }}(unsigned long long int val);
+            {% endif %}
+            {% endfor %}
+        }
+        {% endif %}
+
+        {% endfor %}
+    }
+}
+
+//add all constants
+namespace sakurajin{
+    namespace unit_system{
+        namespace constants{
+            {% for constant in constants %}
+            const long double {{ constant.name }} = {{ constant.value }};
+            {% endfor %}
+        }
+    }
+}

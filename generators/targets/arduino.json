@@ -4,18 +4,20 @@
   "help": "generate the code for the arduino library manager",
   "generate_folders": [],
   "extra_data": {
-    "use_alternate_names": true
+    "use_alternate_names": true,
+    "math_provider": "Arduino.h"
   },
   "per_unit_templates": [
     {
       "filename": "unit.cpp.template",
-      "output_location": "src",
+      "output_location": "src/units",
       "output_pattern": "{unit[name]}.cpp"
-    },
-    {
-      "filename": "unit.hpp.template",
-      "output_location": "src/unit_system",
-      "output_pattern": "{unit[name]}.hpp"
     }
-  ]
+  ],
+  "clang-format": {
+    "file_patters": [
+      "src/unit_system.hpp",
+      "src/units/*.cpp"
+    ]
+  }
 }
