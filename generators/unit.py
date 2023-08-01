@@ -94,6 +94,7 @@ class Unit(Dict):
             'unit_id': data['unit_id'],
             'literals': data.get('literals', []),
             'combinations': data.get('combinations', []),
+            'dependencies': data.get('dependencies', []),
             'extra_data': data.get('extra_data', {}),
         })
 
@@ -126,9 +127,12 @@ def units_from_file(
     file_location = main_script_dir / 'type data' / 'units.json'
     units_file = generators.utils.File(file_location.expanduser().absolute())
 
+    combinations = generators.combination.load_all_combinations(main_script_dir / 'type data' / 'combinations.json')
+
     # create a list of Unit objects from the JSON object string
     units = [generators.unit.unit_from_json(
         unit,
+        combinations=combinations,
         extra_data=extra_data,
         unit_type=unit_type
     ) for unit in units_file.read_json()]
@@ -153,6 +157,7 @@ def units_from_file(
 def unit_from_json(
         json_object_str: Dict,
         extra_data: Dict = None,
+        combinations: List[generators.combination.Combination] = None,
         unit_type: type(Unit) = Unit,
 ):
 
@@ -168,6 +173,10 @@ def unit_from_json(
         pass
 
     json_object_str['literals'] = literals
+
+    if combinations is not None:
+        json_object_str['combinations'] = generators.combination.get_defined_for(json_object_str['name'], combinations)
+        json_object_str['dependencies'] = generators.combination.get_all_deps_for(json_object_str['name'], combinations)
 
     if extra_data is None:
         extra_data = {}

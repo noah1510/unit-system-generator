@@ -25,7 +25,6 @@ sources = [
     {% for unit in units %}
     'src/{{ unit.name }}.cpp',
     {% endfor %}
-    'src/combinations.cpp',
 ]
 
 unit_system = library(
@@ -50,7 +49,6 @@ pkg.generate(unit_system, subdirs: 'unit_system')
     install_headers('include/unit_system/{{ unit.name }}.hpp', subdir : 'unit-system')
 {% endfor %}
 
-install_headers('include/unit_system/combinations.hpp', subdir : 'unit-system')
 install_headers('include/unit_system/constants.hpp', subdir : 'unit-system')
 install_headers('include/unit_system/units.hpp', subdir : 'unit-system')
 install_headers('include/unit_system.hpp')

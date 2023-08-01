@@ -26,18 +26,17 @@ class Combination(Dict):
         return unit in [self['factor1'], self['factor2'], self['product']]
 
     def get_deps_for(self, unit: str) -> List[str]:
-        match unit:
-            case self.get('factor1'):
-                return [self['factor2'], self['product']]
+        if unit == self.get('factor1', ''):
+            return [self['factor2'], self['product']]
 
-            case self.get('factor2'):
-                return [self['factor1'], self['product']]
+        elif unit == self.get('factor2', ''):
+            return [self['factor1'], self['product']]
 
-            case self.get('product'):
-                return [self['factor1'], self['factor2']]
+        elif unit == self.get('product', ''):
+            return [self['factor1'], self['factor2']]
 
-            case _:
-                return []
+        else:
+            return []
 
 
 def load_all_combinations(file: Path) -> List[Combination]:
@@ -51,3 +50,17 @@ def load_all_combinations(file: Path) -> List[Combination]:
 
 def get_defined_for(unit: str, combinations: List[Combination]) -> List[Combination]:
     return [comb for comb in combinations if comb.uses(unit)]
+
+
+def get_all_deps_for(unit: str, combinations: List[Combination]) -> List[str]:
+    deps = []
+    for comb in combinations:
+        if comb.uses(unit):
+            new_deps = comb.get_deps_for(unit)
+            for dep in new_deps:
+                if dep == unit:
+                    continue
+                if dep not in deps:
+                    deps.append(dep)
+
+    return deps

@@ -1,4 +1,9 @@
 #include "unit_system/{{ name }}.hpp"
+{% if dependencies|length > 0 %}
+{% for dependency in dependencies %}
+#include "unit_system/{{ dependency }}.hpp"
+{% endfor %}
+{% endif %}
 
 sakurajin::unit_system::{{ name }}::{{ name }}(): {{ name }}{0.0}{}
 sakurajin::unit_system::{{ name }}::{{ name }}(long double v): {{ name }}{v,1,0}{}
@@ -44,6 +49,20 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::operator-
 sakurajin::unit_system::{{ name }}::operator long double() const{
     auto retval = sakurajin::unit_system::unit_cast(*this, 1, 0);
     return retval.value;
+}
+
+sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::convert_multiplier(long double new_multiplier) const{
+    return convert_copy(new_multiplier, offset);
+}
+
+sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::convert_offset(long double new_offset) const{
+    return convert_copy(multiplier, new_offset);
+}
+
+sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::convert_copy(long double new_multiplier, long double new_offset) const{
+    auto valBase0 = (value + offset) * multiplier;
+    sakurajin::unit_system::{{ name }} retval{valBase0/new_multiplier-new_offset, new_multiplier, new_offset};
+    return retval;
 }
 
 //comparison operators
@@ -115,6 +134,47 @@ void sakurajin::unit_system::{{ name }}::operator=(const sakurajin::unit_system:
     value = otherVal.value;
 }
 
+{% if combinations|length > 0 %}{% for comb in combinations %}
+    {% if comb.factor1 == comb.factor2 %}
+        {% if comb.factor1 == name %}
+        sakurajin::unit_system::{{ comb.product }} sakurajin::unit_system::{{ name }}::square() const{
+            return sakurajin::unit_system::{{ comb.product }}{value*value, multiplier*multiplier, offset};
+        }
+        {% elif comb.product == name %}
+        sakurajin::unit_system::{{ comb.factor1 }} sakurajin::unit_system::{{ name }}::sqrt() const{
+            return sakurajin::unit_system::{{ comb.factor1 }}{std::sqrt(value), std::sqrt(multiplier), offset};
+        }
+        {% endif %}
+    {% else %}
+        {% if comb.factor2 == name %}
+        sakurajin::unit_system::{{ comb.product }} sakurajin::unit_system::{{ name }}::operator*(const {{ comb.factor1 }}& other) const{
+            sakurajin::unit_system::{{ comb.factor1 }} _v1 = other.convert_offset(0);
+            sakurajin::unit_system::{{ comb.factor2 }} _v2 = convert_offset(0);
+            return sakurajin::unit_system::{{ comb.product }}{_v1.value*_v2.value,_v1.multiplier*_v2.multiplier};
+        }
+        {% elif comb.product == name %}
+        sakurajin::unit_system::{{ comb.factor2 }} sakurajin::unit_system::{{ name }}::operator/(const {{ comb.factor1 }}& other) const{
+            sakurajin::unit_system::{{ comb.product }} _v1 = convert_offset(0);
+            sakurajin::unit_system::{{ comb.factor1 }} _v2 = other.convert_offset(0);
+            return sakurajin::unit_system::{{ comb.factor2 }}{_v1.value/_v2.value,_v1.multiplier/_v2.multiplier};
+        }
+        {% endif %}
+    {% endif %}
+    {% if comb.factor1 == name %}
+        sakurajin::unit_system::{{ comb.product }} sakurajin::unit_system::{{ name }}::operator*(const {{ comb.factor2 }}& other) const{
+            sakurajin::unit_system::{{ comb.factor1 }} _v1 = convert_offset(0);
+            sakurajin::unit_system::{{ comb.factor2 }} _v2 = other.convert_offset(0);
+            return sakurajin::unit_system::{{ comb.product }}{_v1.value*_v2.value,_v1.multiplier*_v2.multiplier};
+        }
+    {% elif comb.product == name %}
+        sakurajin::unit_system::{{ comb.factor1 }} sakurajin::unit_system::{{ name }}::operator/(const {{ comb.factor2 }}& other) const{
+            sakurajin::unit_system::{{ comb.product }} _v1 = convert_offset(0);
+            sakurajin::unit_system::{{ comb.factor2 }} _v2 = other.convert_offset(0);
+            return sakurajin::unit_system::{{ comb.factor1 }}{_v1.value/_v2.value,_v1.multiplier/_v2.multiplier};
+        }
+    {% endif %}
+{% endfor %}{% endif %}
+
 // external functions
 std::ostream& sakurajin::unit_system::operator<<(std::ostream& os, const sakurajin::unit_system::{{ name }}& t){
     auto t1 = sakurajin::unit_system::unit_cast(t,1);
@@ -122,9 +182,7 @@ std::ostream& sakurajin::unit_system::operator<<(std::ostream& os, const sakuraj
 }
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::unit_cast(const sakurajin::unit_system::{{ name }}& unit, long double new_multiplier, long double new_offset){
-    auto valBase0 = (unit.value + unit.offset) * unit.multiplier;
-    sakurajin::unit_system::{{ name }} retval{valBase0/new_multiplier-new_offset, new_multiplier, new_offset};
-    return retval;
+    return unit.convert_copy(new_multiplier, new_offset);
 }
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::clamp(const sakurajin::unit_system::{{ name }}& unit, const sakurajin::unit_system::{{ name }}& lower, const sakurajin::unit_system::{{ name }}& upper){
