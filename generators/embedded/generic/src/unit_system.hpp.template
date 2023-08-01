@@ -99,7 +99,7 @@ namespace sakurajin{
         {% if unit.literals|length > 0 %}
         inline namespace literals{
             {% for literal in unit.literals %}
-            {% if use_alternate_names %}
+            {% if extra_data.use_alternate_names %}
             {{ unit.name }} operator "" _{{ literal.alternative }}(long double val);
             {{ unit.name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
             {% else %}

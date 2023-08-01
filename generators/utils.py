@@ -3,8 +3,8 @@ import distutils.dir_util
 import distutils.file_util
 import json
 import os
-from pathlib import Path, PosixPath, WindowsPath
-from typing import Dict, List
+from pathlib import Path
+from typing import Dict
 
 import jinja2
 
