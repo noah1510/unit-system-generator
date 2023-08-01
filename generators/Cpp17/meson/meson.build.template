@@ -45,12 +45,6 @@ unit_system_dep = declare_dependency(
 pkg = import('pkgconfig')
 pkg.generate(unit_system, subdirs: 'unit_system')
 
-{% for unit in units %}
-    install_headers('include/unit_system/{{ unit.name }}.hpp', subdir : 'unit-system')
-{% endfor %}
-
-install_headers('include/unit_system/constants.hpp', subdir : 'unit-system')
-install_headers('include/unit_system/units.hpp', subdir : 'unit-system')
 install_headers('include/unit_system.hpp')
 
 meson.override_dependency('unit-system', unit_system_dep)

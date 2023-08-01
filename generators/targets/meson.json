@@ -9,11 +9,6 @@
       "filename": "unit.cpp.template",
       "output_location": "src",
       "output_pattern": "{unit[name]}.cpp"
-    },
-    {
-      "filename": "unit.hpp.template",
-      "output_location": "include/unit_system",
-      "output_pattern": "{unit[name]}.hpp"
     }
   ]
 }

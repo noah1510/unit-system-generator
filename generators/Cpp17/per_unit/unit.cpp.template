@@ -1,9 +1,4 @@
-#include "unit_system/{{ name }}.hpp"
-{% if dependencies|length > 0 %}
-{% for dependency in dependencies %}
-#include "unit_system/{{ dependency }}.hpp"
-{% endfor %}
-{% endif %}
+#include "unit_system.hpp"
 
 sakurajin::unit_system::{{ name }}::{{ name }}(): {{ name }}{0.0}{}
 sakurajin::unit_system::{{ name }}::{{ name }}(long double v): {{ name }}{v,1,0}{}
