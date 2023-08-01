@@ -76,18 +76,13 @@ namespace sakurajin{
             {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
             {{ mult.product }} operator*(const {{ mult.factor }}& other) const; {% endfor %}{% endif %}
 
-            {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
-            {% if div.result == div.divisor %}{{ div.result }} sqrt() const;{% endif %}{% endfor %}{% endif %}
-
-            {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
-            {% if mult.factor == unit.name %}{{ mult.product }} square() const;{% endif %}{% endfor %}{% endif %}
+            {% if unit.sqrt_result != '' %}{{ unit.sqrt_result }} sqrt() const;{% endif %}
+            {% if unit.square_result != '' %}{{ unit.square_result }} square() const;{% endif %}
 
         };
 
-        {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
-        {% if div.result == div.divisor %}{{ div.result }} sqrt(const {{ unit.name}}& unit);{% endif %}{% endfor %}{% endif %}
-        {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
-        {% if mult.factor == unit.name %}{{ mult.product }} square(const {{ unit.name}}& unit);{% endif %}{% endfor %}{% endif %}
+        {% if unit.sqrt_result != '' %}{{ unit.sqrt_result }} sqrt(const {{ unit.name}}& unit);{% endif %}
+        {% if unit.square_result != '' %}{{ unit.square_result }} square(const {{ unit.name}}& unit);{% endif %}
         {{ unit.name }} unit_cast(const {{ unit.name }}& unit, long double new_multiplier = 1, long double new_offset = 0);
         {{ unit.name }} clamp(const {{ unit.name }}& unit, const {{ unit.name }}& lower, const {{ unit.name }}& upper);
 

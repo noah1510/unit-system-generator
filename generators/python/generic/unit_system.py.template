@@ -58,10 +58,22 @@ class {{ unit.name }}:
         elif isinstance(value, {{ mult.factor }}):
             v1 = self.cast_to_values(self.multiplier)
             v2 = value.cast_to_values(value.multiplier)
-            return {{ mult.result }}(v1.value * v2.value, v1.multiplier * v2.multiplier)
+            return {{ mult.product }}(v1.value * v2.value, v1.multiplier * v2.multiplier)
         {% endfor %}{% endif %}
         else:
             raise TypeError(f'Cannot multiply {{ unit.name }} by {type(value)}')
+
+    {% if unit.sqrt_result != '' %}
+    def sqrt(self):
+        v1 = self.cast_to_values(self.multiplier)
+        return {{ unit.sqrt_result }}(v1.value ** 0.5, v1.multiplier ** 0.5)
+    {% endif %}
+
+    {% if unit.square_result != '' %}
+    def square(self):
+        v1 = self.cast_to_values(self.multiplier)
+        return {{ unit.square_result }}(v1.value ** 2, v1.multiplier ** 2)
+    {% endif %}
 
     def cast_to_other(self, other: '{{ unit.name }}'):
         return self.cast_to_values(other.multiplier, other.offset)

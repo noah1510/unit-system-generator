@@ -145,29 +145,27 @@ sakurajin::unit_system::{{ mult.product }} sakurajin::unit_system::{{ name }}::o
 }
 {% endfor %}{% endif %}
 
-{% if divisions|length > 0 %}{% for div in divisions %}
-{% if div.result == div.divisor %}
-sakurajin::unit_system::{{ div.result }} sakurajin::unit_system::{{ name }}::sqrt() const{
-    return sakurajin::unit_system::{{ div.result }}{std::sqrt(value), std::sqrt(multiplier), offset};
+{% if sqrt_result != '' %}
+sakurajin::unit_system::{{ sqrt_result }} sakurajin::unit_system::{{ name }}::sqrt() const{
+    return sakurajin::unit_system::{{ sqrt_result }}{std::sqrt(value), std::sqrt(multiplier), offset};
 }
-{% endif %}{% endfor %}{% endif %}
+{% endif %}
 
-{% if multiplications|length > 0 %}{% for mult in multiplications %}
-{% if mult.factor == name %}
-sakurajin::unit_system::{{ mult.product }} sakurajin::unit_system::{{ name }}::square() const{
-    return sakurajin::unit_system::{{ mult.product }}{value*value, multiplier*multiplier, offset};
+{% if square_result != '' %}
+sakurajin::unit_system::{{ square_result }} sakurajin::unit_system::{{ name }}::square() const{
+    return sakurajin::unit_system::{{ square_result }}{value*value, multiplier*multiplier, offset};
 }
-{% endif %}{% endfor %}{% endif %}
+{% endif %}
 
 // external functions
 
-{% if divisions|length > 0 %}{% for div in divisions %}{% if div.result == div.divisor %}
-sakurajin::unit_system::{{ div.result }} sakurajin::unit_system::sqrt(const {{ name}}& unit){return unit.sqrt();}
-{% endif %}{% endfor %}{% endif %}
+{% if sqrt_result != '' %}
+sakurajin::unit_system::{{ sqrt_result }} sakurajin::unit_system::sqrt(const {{ name}}& unit){return unit.sqrt();}
+{% endif %}
 
-{% if multiplications|length > 0 %}{% for mult in multiplications %}{% if mult.factor == name %}
-sakurajin::unit_system::{{ mult.product }} sakurajin::unit_system::square(const {{ name}}& unit){return unit.square();}
-{% endif %}{% endfor %}{% endif %}
+{% if square_result != '' %}
+sakurajin::unit_system::{{ square_result }} sakurajin::unit_system::square(const {{ name}}& unit){return unit.square();}
+{% endif %}
 
 std::ostream& sakurajin::unit_system::operator<<(std::ostream& os, const sakurajin::unit_system::{{ name }}& t){
     auto t1 = sakurajin::unit_system::unit_cast(t,1);

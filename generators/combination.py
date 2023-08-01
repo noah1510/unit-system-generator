@@ -98,3 +98,17 @@ def get_division_for(unit: str, combinations: List[Combination]) -> List[Dict]:
                     'result': comb['factor1'],
                 })
     return divisions
+
+
+def get_sqrt_for(unit: str, combinations: List[Combination]) -> str:
+    for comb in combinations:
+        if comb['product'] == unit and comb['factor1'] == comb['factor2']:
+            return comb['factor1']
+    return ''
+
+
+def get_square_for(unit: str, combinations: List[Combination]) -> str:
+    for comb in combinations:
+        if comb['factor1'] == unit and comb['factor2'] == unit:
+            return comb['product']
+    return ''

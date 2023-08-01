@@ -102,6 +102,8 @@ class Unit(Dict):
             'dependencies': generators.combination.get_all_deps_for(data['name'], data.get('combinations', [])),
             'multiplications': generators.combination.get_multiplication_for(data['name'], data.get('combinations', [])),
             'divisions': generators.combination.get_division_for(data['name'], data.get('combinations', [])),
+            'sqrt_result': generators.combination.get_sqrt_for(data['name'], data.get('combinations', [])),
+            'square_result': generators.combination.get_square_for(data['name'], data.get('combinations', [])),
             'extra_data': data.get('extra_data', {}),
         })
 
