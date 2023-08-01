@@ -116,48 +116,44 @@ void sakurajin::unit_system::{{ name }}::operator=(const sakurajin::unit_system:
     value = otherVal.value;
 }
 
-{% if combinations|length > 0 %}{% for comb in combinations %}
-    {% if comb.factor1 == comb.factor2 %}
-        {% if comb.factor1 == name %}
-        sakurajin::unit_system::{{ comb.product }} sakurajin::unit_system::{{ name }}::square() const{
-            return sakurajin::unit_system::{{ comb.product }}{value*value, multiplier*multiplier, offset};
-        }
-        {% elif comb.product == name %}
-        sakurajin::unit_system::{{ comb.factor1 }} sakurajin::unit_system::{{ name }}::sqrt() const{
-            return sakurajin::unit_system::{{ comb.factor1 }}{::sqrt(value), ::sqrt(multiplier), offset};
-        }
-        {% endif %}
-    {% else %}
-        {% if comb.factor2 == name %}
-        sakurajin::unit_system::{{ comb.product }} sakurajin::unit_system::{{ name }}::operator*(const {{ comb.factor1 }}& other) const{
-            sakurajin::unit_system::{{ comb.factor1 }} _v1 = other.convert_offset(0);
-            sakurajin::unit_system::{{ comb.factor2 }} _v2 = convert_offset(0);
-            return sakurajin::unit_system::{{ comb.product }}{_v1.value*_v2.value,_v1.multiplier*_v2.multiplier};
-        }
-        {% elif comb.product == name %}
-        sakurajin::unit_system::{{ comb.factor2 }} sakurajin::unit_system::{{ name }}::operator/(const {{ comb.factor1 }}& other) const{
-            sakurajin::unit_system::{{ comb.product }} _v1 = convert_offset(0);
-            sakurajin::unit_system::{{ comb.factor1 }} _v2 = other.convert_offset(0);
-            return sakurajin::unit_system::{{ comb.factor2 }}{_v1.value/_v2.value,_v1.multiplier/_v2.multiplier};
-        }
-        {% endif %}
-    {% endif %}
-    {% if comb.factor1 == name %}
-        sakurajin::unit_system::{{ comb.product }} sakurajin::unit_system::{{ name }}::operator*(const {{ comb.factor2 }}& other) const{
-            sakurajin::unit_system::{{ comb.factor1 }} _v1 = convert_offset(0);
-            sakurajin::unit_system::{{ comb.factor2 }} _v2 = other.convert_offset(0);
-            return sakurajin::unit_system::{{ comb.product }}{_v1.value*_v2.value,_v1.multiplier*_v2.multiplier};
-        }
-    {% elif comb.product == name %}
-        sakurajin::unit_system::{{ comb.factor1 }} sakurajin::unit_system::{{ name }}::operator/(const {{ comb.factor2 }}& other) const{
-            sakurajin::unit_system::{{ comb.product }} _v1 = convert_offset(0);
-            sakurajin::unit_system::{{ comb.factor2 }} _v2 = other.convert_offset(0);
-            return sakurajin::unit_system::{{ comb.factor1 }}{_v1.value/_v2.value,_v1.multiplier/_v2.multiplier};
-        }
-    {% endif %}
+{% if divisions|length > 0 %}{% for div in divisions %}
+sakurajin::unit_system::{{ div.result }} sakurajin::unit_system::{{ name }}::operator/(const sakurajin::unit_system::{{ div.divisor }}& other) const{
+    sakurajin::unit_system::{{ name }} _v1 = convert_offset(0);
+    sakurajin::unit_system::{{ div.divisor }} _v2 = other.convert_offset(0);
+    return sakurajin::unit_system::{{ div.result }}{_v1.value/_v2.value,_v1.multiplier/_v2.multiplier};
+}
 {% endfor %}{% endif %}
 
+{% if multiplications|length > 0 %}{% for mult in multiplications %}
+sakurajin::unit_system::{{ mult.product }} sakurajin::unit_system::{{ name }}::operator*(const sakurajin::unit_system::{{ mult.factor }}& other) const{
+    sakurajin::unit_system::{{ name }} _v1 = convert_offset(0);
+    sakurajin::unit_system::{{ mult.factor }} _v2 = other.convert_offset(0);
+    return sakurajin::unit_system::{{ mult.product }}{_v1.value*_v2.value,_v1.multiplier*_v2.multiplier};
+}
+{% endfor %}{% endif %}
+
+{% if divisions|length > 0 %}{% for div in divisions %}
+{% if div.result == div.divisor %}
+sakurajin::unit_system::{{ div.result }} sakurajin::unit_system::{{ name }}::sqrt() const{
+    return sakurajin::unit_system::{{ div.result }}{::sqrt(value), ::sqrt(multiplier), offset};
+}
+{% endif %}{% endfor %}{% endif %}
+
+{% if multiplications|length > 0 %}{% for mult in multiplications %}
+{% if mult.factor == name %}
+sakurajin::unit_system::{{ mult.product }} sakurajin::unit_system::{{ name }}::square() const{
+    return sakurajin::unit_system::{{ mult.product }}{value*value, multiplier*multiplier, offset};
+}
+{% endif %}{% endfor %}{% endif %}
+
 // external functions
+{% if divisions|length > 0 %}{% for div in divisions %}{% if div.result == div.divisor %}
+sakurajin::unit_system::{{ div.result }} sakurajin::unit_system::sqrt(const {{ name}}& unit){return unit.sqrt();}
+{% endif %}{% endfor %}{% endif %}
+
+{% if multiplications|length > 0 %}{% for mult in multiplications %}{% if mult.factor == name %}
+sakurajin::unit_system::{{ mult.product }} sakurajin::unit_system::square(const {{ name}}& unit){return unit.square();}
+{% endif %}{% endfor %}{% endif %}
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::unit_cast(const sakurajin::unit_system::{{ name }}& unit, long double new_multiplier, long double new_offset){
     return unit.convert_copy(new_multiplier, new_offset);
@@ -174,7 +170,7 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::clamp(const sakurajin
 // literals
 {% if literals|length > 0 %}
 {% for literal in literals %}
-{% if use_alternate_names %}
+{% if extra_data.use_alternate_names %}
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::literals::operator "" _{{ literal.alternative }}(long double len){
     return sakurajin::unit_system::{{ name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
 }

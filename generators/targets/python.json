@@ -1,0 +1,10 @@
+{
+  "name": "python",
+  "group": "python",
+  "help": "generate the code for pip-py",
+  "generate_folders": [],
+  "extra_data": {
+  },
+  "per_unit_templates": [
+  ]
+}

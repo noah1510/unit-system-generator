@@ -1,0 +1,56 @@
+
+
+{% for unit in units %}
+class {{ unit.name }}:
+    def __init__(
+        self,
+        value=0.0,
+        multiplier=1.0,
+        offset=0.0
+    ):
+        self.value = value
+        self.multiplier = multiplier
+        self.offset = offset
+
+    def __str__(self):
+        return f'{self.value} {{ unit.base_name }}'
+
+    def __repr__(self):
+        return f'{{ unit.name }}({self.value}, {self.multiplier}, {self.offset})'
+
+    def __add__(self, other: '{{ unit.name }}') -> '{{ unit.name }}':
+        other = other.cast_to_values(self.multiplier, self.offset)
+        return {{ unit.name }}(self.value + other.value)
+
+    def __sub__(self, other: '{{ unit.name }}') -> '{{ unit.name }}':
+        other = other.cast_to_values(self.multiplier, self.offset)
+        return {{ unit.name }}(self.value - other.value)
+
+    def __truediv__(self, value: typing.Union[float, '{{ unit.name }}']):
+        if isinstance(value, float):
+            return {{ unit.name }}(self.value / value)
+        elif isinstance(value, {{ unit.name }}):
+            v1 = self.cast_to_values()
+            v2 = value.cast_to_values()
+            return v1.value / v2.value
+        else:
+            raise TypeError(f'Cannot divide {{ unit.name }} by {type(value)}')
+
+    def __mul__(self, value: typing.Union[
+        float
+    ]):
+        if isinstance(value, float):
+            return {{ unit.name }}(self.value * value)
+        else:
+            raise TypeError(f'Cannot multiply {{ unit.name }} by {type(value)}')
+
+    def cast_to_other(self, other: '{{ unit.name }}'):
+        return self.cast_to_values(other.multiplier, other.offset)
+
+    def cast_to_values(self, multiplier: float = 1.0, offset: float = 0.0):
+        return {{ unit.name }}(self.value * multiplier + offset)
+{% endfor %}
+
+
+
+    

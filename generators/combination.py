@@ -64,3 +64,37 @@ def get_all_deps_for(unit: str, combinations: List[Combination]) -> List[str]:
                     deps.append(dep)
 
     return deps
+
+
+def get_multiplication_for(unit: str, combinations: List[Combination]) -> List[Dict]:
+    multiplications = []
+    for comb in combinations:
+        if comb['factor1'] == unit:
+            multiplications.append({
+                'factor': comb['factor2'],
+                'product': comb['product'],
+            })
+            continue
+        if comb['factor2'] == unit:
+            multiplications.append({
+                'factor': comb['factor1'],
+                'product': comb['product'],
+            })
+    return multiplications
+
+
+def get_division_for(unit: str, combinations: List[Combination]) -> List[Dict]:
+    divisions = []
+    for comb in combinations:
+        if comb['product'] == unit:
+            divisions.append({
+                'divisor': comb['factor1'],
+                'result': comb['factor2'],
+            })
+
+            if comb['factor1'] != comb['factor2']:
+                divisions.append({
+                    'divisor': comb['factor2'],
+                    'result': comb['factor1'],
+                })
+    return divisions

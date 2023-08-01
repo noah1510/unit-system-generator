@@ -70,29 +70,24 @@ namespace sakurajin{
             bool operator==(const {{ unit.name }}& other) const;
             bool operator!=(const {{ unit.name }}& other) const;
 
-        {% if unit.combinations|length > 0 %}{% for comb in unit.combinations %}
-        {% if comb.factor1 == comb.factor2 %}
-            {% if comb.factor1 == unit.name %}
-            {{ comb.product }} square() const;
-            {% elif comb.product == unit.name %}
-            {{ comb.factor1 }} sqrt() const;
-            {% endif %}
-        {% else %}
-            {% if comb.factor2 == unit.name %}
-            {{ comb.product }} operator*(const {{ comb.factor1 }}& other) const;
-            {% elif comb.product == unit.name %}
-            {{ comb.factor2 }} operator/(const {{ comb.factor1 }}& other) const;
-            {% endif %}
-        {% endif %}
-        {% if comb.factor1 == unit.name %}
-            {{ comb.product }} operator*(const {{ comb.factor2 }}& other) const;
-        {% elif comb.product == unit.name %}
-            {{ comb.factor1 }} operator/(const {{ comb.factor2 }}& other) const;
-        {% endif %}
+            {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
+            {{ div.result }} operator/(const {{ div.divisor }}& other) const; {% endfor %}{% endif %}
 
-        {% endfor %}{% endif %}
+            {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
+            {{ mult.product }} operator*(const {{ mult.factor }}& other) const; {% endfor %}{% endif %}
+
+            {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
+            {% if div.result == div.divisor %}{{ div.result }} sqrt() const;{% endif %}{% endfor %}{% endif %}
+
+            {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
+            {% if mult.factor == unit.name %}{{ mult.product }} square() const;{% endif %}{% endfor %}{% endif %}
+
         };
 
+        {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
+        {% if div.result == div.divisor %}{{ div.result }} sqrt(const {{ unit.name}}& unit);{% endif %}{% endfor %}{% endif %}
+        {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
+        {% if mult.factor == unit.name %}{{ mult.product }} square(const {{ unit.name}}& unit);{% endif %}{% endfor %}{% endif %}
         {{ unit.name }} unit_cast(const {{ unit.name }}& unit, long double new_multiplier = 1, long double new_offset = 0);
         {{ unit.name }} clamp(const {{ unit.name }}& unit, const {{ unit.name }}& lower, const {{ unit.name }}& upper);
 

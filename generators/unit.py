@@ -83,6 +83,11 @@ class Unit(Dict):
         if 'unit_id' not in data:
             raise ValueError('Unit must have a unit ID')
 
+        if 'base_literal' not in data or data['base_literal'] is None or data['base_literal'] == '':
+            data['base_name'] = data['name']
+        else:
+            data['base_name'] = data['base_literal']
+
         # If the base name is an empty string or None, set the base_name attribute to the name of the unit system,
         # otherwise set it to the given base name
         if 'base_name' not in data or data['base_name'] == '' or data['base_name'] is None:
@@ -94,7 +99,9 @@ class Unit(Dict):
             'unit_id': data['unit_id'],
             'literals': data.get('literals', []),
             'combinations': data.get('combinations', []),
-            'dependencies': data.get('dependencies', []),
+            'dependencies': generators.combination.get_all_deps_for(data['name'], data.get('combinations', [])),
+            'multiplications': generators.combination.get_multiplication_for(data['name'], data.get('combinations', [])),
+            'divisions': generators.combination.get_division_for(data['name'], data.get('combinations', [])),
             'extra_data': data.get('extra_data', {}),
         })
 
