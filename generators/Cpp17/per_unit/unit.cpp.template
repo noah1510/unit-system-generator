@@ -55,7 +55,7 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::convert_o
 }
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::convert_copy(long double new_multiplier, long double new_offset) const{
-    auto valBase0 = (value + offset) * multiplier;
+    auto valBase0 = value * multiplier + offset;
     sakurajin::unit_system::{{ name }} retval{valBase0/new_multiplier-new_offset, new_multiplier, new_offset};
     return retval;
 }

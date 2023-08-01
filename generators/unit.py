@@ -183,7 +183,6 @@ def unit_from_json(
 
     if combinations is not None:
         json_object_str['combinations'] = generators.combination.get_defined_for(json_object_str['name'], combinations)
-        json_object_str['dependencies'] = generators.combination.get_all_deps_for(json_object_str['name'], combinations)
 
     if extra_data is None:
         extra_data = {}

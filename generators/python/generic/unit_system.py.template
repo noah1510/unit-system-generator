@@ -1,4 +1,4 @@
-
+import typing
 
 {% for unit in units %}
 class {{ unit.name }}:
@@ -26,21 +26,40 @@ class {{ unit.name }}:
         other = other.cast_to_values(self.multiplier, self.offset)
         return {{ unit.name }}(self.value - other.value)
 
-    def __truediv__(self, value: typing.Union[float, '{{ unit.name }}']):
+    def __truediv__(self, value: typing.Union[
+        float,
+        '{{ unit.name }}',
+        {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
+        '{{ div.divisor }}',{% endfor %}{% endif %}
+    ]):
         if isinstance(value, float):
             return {{ unit.name }}(self.value / value)
         elif isinstance(value, {{ unit.name }}):
             v1 = self.cast_to_values()
             v2 = value.cast_to_values()
             return v1.value / v2.value
+        {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
+        elif isinstance(value,{{ div.divisor }}):
+            v1 = self.cast_to_values(self.multiplier)
+            v2 = value.cast_to_values(value.multiplier)
+            return {{ div.result }}(v1.value / v2.value, v1.multiplier / v2.multiplier)
+        {% endfor %}{% endif %}
         else:
             raise TypeError(f'Cannot divide {{ unit.name }} by {type(value)}')
 
     def __mul__(self, value: typing.Union[
-        float
+        float,
+        {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
+        '{{ mult.factor }}',{% endfor %}{% endif %}
     ]):
         if isinstance(value, float):
             return {{ unit.name }}(self.value * value)
+        {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
+        elif isinstance(value, {{ mult.factor }}):
+            v1 = self.cast_to_values(self.multiplier)
+            v2 = value.cast_to_values(value.multiplier)
+            return {{ mult.result }}(v1.value * v2.value, v1.multiplier * v2.multiplier)
+        {% endfor %}{% endif %}
         else:
             raise TypeError(f'Cannot multiply {{ unit.name }} by {type(value)}')
 
@@ -48,7 +67,8 @@ class {{ unit.name }}:
         return self.cast_to_values(other.multiplier, other.offset)
 
     def cast_to_values(self, multiplier: float = 1.0, offset: float = 0.0):
-        return {{ unit.name }}(self.value * multiplier + offset)
+        base_value = self.value * self.multiplier + self.offset
+        return {{ unit.name }}(base_value / multiplier - offset, multiplier, offset)
 {% endfor %}
 
 
