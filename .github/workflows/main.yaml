@@ -20,8 +20,12 @@ jobs:
     uses: ./.github/workflows/pio.yaml
     secrets: inherit
 
+  python_matrix:
+    uses: ./.github/workflows/python.yaml
+    secrets: inherit
+
   releases:
-    needs: [ meson_cpp17_matrix, arduino_matix, pio_matrix ]
+    needs: [ meson_cpp17_matrix, arduino_matix, pio_matrix, python_matrix ]
     uses: ./.github/workflows/release.yaml
     secrets: inherit
 

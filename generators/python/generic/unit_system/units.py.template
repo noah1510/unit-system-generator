@@ -15,14 +15,21 @@ class {{ unit.name }}:
     def __str__(self):
         return f'{self.cast_to_values().value} {{ unit.base_name }}'
 
+    def __float__(self):
+        return self.cast_to_values().value
+
     def __repr__(self):
         return f'{{ unit.name }}({self.value}, {self.multiplier}, {self.offset})'
 
     def __add__(self, other: '{{ unit.name }}') -> '{{ unit.name }}':
+        if not isinstance(other, {{ unit.name }}):
+            raise TypeError(f'Cannot add {{ unit.name }} to {type(other)}')
         other = other.cast_to_values(self.multiplier, self.offset)
         return {{ unit.name }}(self.value + other.value)
 
     def __sub__(self, other: '{{ unit.name }}') -> '{{ unit.name }}':
+        if not isinstance(other, {{ unit.name }}):
+            raise TypeError(f'Cannot add {{ unit.name }} to {type(other)}')
         other = other.cast_to_values(self.multiplier, self.offset)
         return {{ unit.name }}(self.value - other.value)
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Dict
 
 import generators.utils
-import generators.python.generic.prefixes
+import generators.python.generic.unit_system.prefixes
 import generators.combination
 
 
@@ -211,7 +211,7 @@ def generate_prefixed_literals(
             prefixes_to_generate = prefixes[literal.name]
             for prefix in prefixes_to_generate:
                 try:
-                    prefix_data = generators.python.generic.prefixes.Prefix.from_string(prefix)
+                    prefix_data = generators.python.generic.unit_system.prefixes.Prefix.from_string(prefix)
                 except ValueError as Error:
                     print(Error)
                     raise ValueError(

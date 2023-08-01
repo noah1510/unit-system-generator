@@ -1,0 +1,45 @@
+on:
+  workflow_call:
+
+
+jobs:
+  python_matrix:
+    env:
+      PYTHONIOENCODING: 'utf-8'
+      PYTHONLEGACYWINDOWSSTDIO: 'utf-8'
+      PYTHONUTF8: '1'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-20.04", "ubuntu-22.04", "macos-latest", "windows-latest"]
+
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+          cache: 'pipenv'
+
+      - name: install pipenv
+        run: pip install pipenv
+      - name: install deps in venv
+        run: pipenv install
+      - name: update pipenv
+        run: pipenv update
+      - name: list pipenv packages
+        run: pipenv graph
+
+      - name: generate the sources
+        run: pipenv run python ./genSources.py -o output python
+
+      - name: test the project
+        working-directory: output
+        run: python -m unittest tests/tests.py
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}
+          path: build
