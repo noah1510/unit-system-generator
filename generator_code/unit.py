@@ -2,9 +2,9 @@ import os
 from pathlib import Path
 from typing import List, Dict
 
-import generators.utils
-import generators.python.generic.unit_system.prefixes
-import generators.combination
+import generator_code.utils
+import generator_code.prefixes
+import generator_code.combination
 
 
 # A class representing a unit literal.
@@ -73,7 +73,7 @@ class Unit(Dict):
     def __init__(
             self,
             data: Dict,
-            templates: List[generators.utils.Template] = None,
+            templates: List[generator_code.utils.Template] = None,
     ):
 
         # first check if all required keys are present and raise an error if they are not
@@ -99,17 +99,17 @@ class Unit(Dict):
             'unit_id': data['unit_id'],
             'literals': data.get('literals', []),
             'combinations': data.get('combinations', []),
-            'dependencies': generators.combination.get_all_deps_for(data['name'], data.get('combinations', [])),
-            'multiplications': generators.combination.get_multiplication_for(data['name'], data.get('combinations', [])),
-            'divisions': generators.combination.get_division_for(data['name'], data.get('combinations', [])),
-            'sqrt_result': generators.combination.get_sqrt_for(data['name'], data.get('combinations', [])),
-            'square_result': generators.combination.get_square_for(data['name'], data.get('combinations', [])),
+            'dependencies': generator_code.combination.get_all_deps_for(data['name'], data.get('combinations', [])),
+            'multiplications': generator_code.combination.get_multiplication_for(data['name'], data.get('combinations', [])),
+            'divisions': generator_code.combination.get_division_for(data['name'], data.get('combinations', [])),
+            'sqrt_result': generator_code.combination.get_sqrt_for(data['name'], data.get('combinations', [])),
+            'square_result': generator_code.combination.get_square_for(data['name'], data.get('combinations', [])),
             'extra_data': data.get('extra_data', {}),
         })
 
         self.templates = templates
 
-    def add_template(self, template: generators.utils.Template):
+    def add_template(self, template: generator_code.utils.Template):
         if self.templates is None:
             self.templates = []
 
@@ -134,12 +134,12 @@ def units_from_file(
 ) -> List[type(Unit)]:
 
     file_location = main_script_dir / 'type data' / 'units.json'
-    units_file = generators.utils.File(file_location.expanduser().absolute())
+    units_file = generator_code.utils.File(file_location.expanduser().absolute())
 
-    combinations = generators.combination.load_all_combinations(main_script_dir / 'type data' / 'combinations.json')
+    combinations = generator_code.combination.load_all_combinations(main_script_dir / 'type data' / 'combinations.json')
 
     # create a list of Unit objects from the JSON object string
-    units = [generators.unit.unit_from_json(
+    units = [generator_code.unit.unit_from_json(
         unit,
         combinations=combinations,
         extra_data=extra_data,
@@ -157,7 +157,7 @@ def units_from_file(
                 out_filename = fileinfo['file_format'].format(unit=unit)
                 out_path = out_dir / out_filename
 
-                unit.add_template(generators.utils.Template(infile, out_path))
+                unit.add_template(generator_code.utils.Template(infile, out_path))
 
     return units
 
@@ -166,7 +166,7 @@ def units_from_file(
 def unit_from_json(
         json_object_str: Dict,
         extra_data: Dict = None,
-        combinations: List[generators.combination.Combination] = None,
+        combinations: List[generator_code.combination.Combination] = None,
         unit_type: type(Unit) = Unit,
 ):
 
@@ -184,7 +184,8 @@ def unit_from_json(
     json_object_str['literals'] = literals
 
     if combinations is not None:
-        json_object_str['combinations'] = generators.combination.get_defined_for(json_object_str['name'], combinations)
+        json_object_str['combinations'] = (
+            generator_code.combination.get_defined_for(json_object_str['name'], combinations))
 
     if extra_data is None:
         extra_data = {}
@@ -211,7 +212,7 @@ def generate_prefixed_literals(
             prefixes_to_generate = prefixes[literal.name]
             for prefix in prefixes_to_generate:
                 try:
-                    prefix_data = generators.python.generic.unit_system.prefixes.Prefix.from_string(prefix)
+                    prefix_data = generator_code.prefixes.Prefix.from_string(prefix)
                 except ValueError as Error:
                     print(Error)
                     raise ValueError(
@@ -237,10 +238,10 @@ def fill_from_files(
 ) -> Dict:
 
     # load the 'combinations.json' file and parse its contents as a JSON string
-    combinations = generators.combination.load_all_combinations(type_location / 'combinations.json')
+    combinations = generator_code.combination.load_all_combinations(type_location / 'combinations.json')
 
     # load the 'constants.json' file and parse its contents as a JSON string
-    constants_file = generators.utils.File(type_location / 'constants.json')
+    constants_file = generator_code.utils.File(type_location / 'constants.json')
     constants = [constant for constant in constants_file.read_json()]
 
     # create a dictionary containing the values that will be used to generate the header files
