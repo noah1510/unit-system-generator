@@ -2,9 +2,20 @@
   "name": "python",
   "group": "python",
   "help": "generate the code for pip-py",
-  "generate_folders": [],
-  "extra_data": {
-  },
-  "per_unit_templates": [
+  "extra_install_files": [
+    {
+      "file": "generator_code/prefixes.py",
+      "destination": "unit_system"
+    }
+  ],
+  "test_commands": [
+    {
+      "command":["python", "-m", "unittest", "tests/tests.py"],
+      "environment": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONLEGACYWINDOWSSTDIO": "utf-8",
+        "PYTHONUTF8": "1"
+      }
+    }
   ]
 }

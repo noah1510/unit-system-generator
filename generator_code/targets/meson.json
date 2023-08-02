@@ -2,7 +2,6 @@
   "name": "meson",
   "group": "Cpp17",
   "help": "generate the code for the meson build system",
-  "generate_folders": [],
   "extra_data": {},
   "per_unit_templates": [
     {
@@ -16,5 +15,11 @@
       "include/unit_system.hpp",
       "src/*.cpp"
     ]
-  }
+  },
+  "test_commands": [
+    {"command": ["meson", "setup", "build", "--wipe"],
+     "environment": {"colorize_console": "1"}},
+    {"command": ["meson", "compile", "-C", "build"]},
+    {"command": ["meson", "test", "-C", "build"]}
+  ]
 }

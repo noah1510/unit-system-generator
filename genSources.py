@@ -18,16 +18,6 @@ if __name__ == "__main__":
         description=msg
     )
 
-    # create an archive flag, which is a flag to directly produce a release archive
-    parser.add_argument(
-        "--archive",
-        help="give this flag to generate a tar.zstd archive of the output directory",
-        required=False,
-        default=False,
-        dest='archive',
-        action='store_true',
-    )
-
     # define the 'outDir' argument, which is optional, should be a string, and has a default value of ''
     parser.add_argument(
         "--outDir",
@@ -39,11 +29,18 @@ if __name__ == "__main__":
         type=str,
     )
 
-    # define the 'printOutFiles' argument, which is a flag that indicates whether
-    # the generated files should be printed
+    parser.add_argument(
+        "-v", "--verbose",
+        help="increase output verbosity",
+        required=False,
+        default=False,
+        dest='verbose',
+        action='store_true',
+    )
+
     parser.add_argument(
         "--printOutFiles",
-        help="set to true if the generated file should be print",
+        help="set to true if the generated file should be print (enabled when --verbose is set)",
         required=False,
         default=False,
         dest='printOutFiles',
@@ -59,12 +56,32 @@ if __name__ == "__main__":
         action='store_false',
     )
 
+    # create an archive flag, which is a flag to directly produce a release archive
+    parser.add_argument(
+        "--archive",
+        help="give this flag to generate a tar.zstd archive of the output directory",
+        required=False,
+        default=False,
+        dest='archive',
+        action='store_true',
+    )
+
     parser.add_argument(
         "--clean",
         help="set this flag to clean the output directory before generating the files",
         required=False,
         default=False,
         dest='clean',
+        action='store_true',
+    )
+
+    parser.add_argument(
+        "--test",
+        help="set this flag to run the test commands after generating the files. Warning: this might require external "
+             "programs to be installed in your system.",
+        required=False,
+        default=False,
+        dest='test',
         action='store_true',
     )
 
@@ -87,17 +104,29 @@ if __name__ == "__main__":
         version='0.7.1',
         main_script_dir=main_script_dir,
         output_dir=args['outDir'],
-        print_files=args['printOutFiles'],
+        print_files=args['printOutFiles'] or args['verbose'],
         target_name=args['target'],
         clean_output_dir=args['clean'],
+        verbose=args['verbose'],
     )
 
     for generator_target in generator_targets:
-        print(f'Generating {generator_target.target_name}...')
+        print(f'Current target: {generator_target.target_name}')
+        print('Generating...')
         generator_target.generate()
+        print('Generation done without errors.')
 
         if args['format_sources']:
+            print('Formatting...')
             generator_target.format()
+            print('Formatting done without errors.')
+
+        if args['test']:
+            print('Testing...')
+            generator_target.test()
+            print('Testing done without errors.')
 
         if args['archive']:
+            print('Archiving...')
             generator_target.archive()
+            print('Archiving done without errors.')

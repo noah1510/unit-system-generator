@@ -2,7 +2,6 @@
   "name": "arduino",
   "group": "embedded",
   "help": "generate the code for the arduino library manager",
-  "generate_folders": [],
   "extra_data": {
     "use_alternate_names": true,
     "math_provider": "Arduino.h"
@@ -19,5 +18,8 @@
       "src/unit_system.hpp",
       "src/units/*.cpp"
     ]
-  }
+  },
+  "test_commands": [
+    {"command":["arduino-cli", "compile", "-b", "arduino:megaavr:nona4809", "examples/advanced_time/advanced_time.ino", "--library", "."]}
+  ]
 }

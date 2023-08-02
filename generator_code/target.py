@@ -19,6 +19,7 @@ class Target:
             output_dir: str,
             print_files: bool = False,
             clean_output_dir: bool = False,
+            verbose: bool = False,
             target_file: generator_code.utils.File = None,
             unit_type: type(generator_code.unit.Unit) = generator_code.unit.Unit
     ):
@@ -29,10 +30,8 @@ class Target:
         self.target_group = target_json['group']
         self.print_files = print_files
         self.clean_output_dir = clean_output_dir
-        if 'extra_data' in target_json:
-            self.extra_data = target_json['extra_data']
-        else:
-            self.extra_data = {}
+        self.verbose = verbose
+        self.extra_data = target_json.get('extra_data', {})
         self.units: List[generator_code.unit.Unit] = []
         self.unit_type = unit_type
         self.hasCombinations = True
@@ -64,6 +63,12 @@ class Target:
                     'file_format': template['output_pattern'],
                 }
                 self.per_unit_templates += [unit_template]
+
+        # get the extra install files
+        self.extra_install_files: List[Dict] = target_json.get('extra_install_files', [])
+
+        # get the test commands
+        self.test_commands: List[Dict] = target_json.get('test_commands', [])
 
     def generate_fill_dict(self):
         self.fill_dict = generator_code.unit.fill_from_files(
@@ -105,6 +110,12 @@ class Target:
             self.output_dir,
         ).fill_with(self.fill_dict)
 
+        for file in self.extra_install_files:
+            generator_code.utils.Template(
+                file['file'],
+                self.output_dir / file['destination'],
+            ).fill_with(self.fill_dict)
+
     def generate(self):
         self.clean()
         self.generate_sources()
@@ -118,6 +129,36 @@ class Target:
         archive_name = self.main_script_dir / ('unit_system_' + self.target_name + '.tar.gz')
         with tarfile.open(archive_name, 'w:gz') as tar:
             tar.add(self.output_dir, arcname=self.target_name)
+
+    def test(self):
+        # iterate over all test commands and run them
+        for i in range(len(self.test_commands)):
+            command = self.test_commands[i]
+            # update the env with the given vars
+            env = os.environ.copy()
+            env.update(command.get('environment', {}))
+            cmd = command.get("command", "")
+            print('test', i+1, 'of', len(self.test_commands))
+            if self.verbose:
+                print('running: ', cmd)
+                print('in dir: ' + str(self.output_dir))
+                print('with env extras: ' + str(command.get('environment', {})))
+
+            output = subprocess.run(
+                cmd,
+                cwd=self.output_dir,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                encoding='utf-8',
+
+            )
+
+            if self.verbose or output.returncode != 0:
+                print('stdout: ')
+                for line in str(output.stdout).split('\\n'):
+                    print(line)
+            output.check_returncode()
 
     def format(self):
         if 'file_patters' not in self.clang_format_options:
@@ -148,6 +189,7 @@ class Target:
             target_name: str,
             print_files=False,
             clean_output_dir=False,
+            verbose=False,
     ) -> List['Target']:
         targets_json = Target.get_target_files()
         target_list = []
@@ -161,6 +203,7 @@ class Target:
                     print_files=print_files,
                     clean_output_dir=clean_output_dir,
                     target_file=target,
+                    verbose=verbose,
                 ))
 
         if len(target_list) == 0:
