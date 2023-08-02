@@ -32,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--outDir",
         "-o",
-        help="Put all files in the same given directory. This overwrites the baseDir.",
+        help="Put all files in the same given directory. This does not work with the 'all' target.",
         required=False,
         default='',
         dest='outDir',
@@ -59,6 +59,15 @@ if __name__ == "__main__":
         action='store_false',
     )
 
+    parser.add_argument(
+        "--clean",
+        help="set this flag to clean the output directory before generating the files",
+        required=False,
+        default=False,
+        dest='clean',
+        action='store_true',
+    )
+
     # add a subparser to select the target for the code generator
     subparser_manager = parser.add_subparsers(help="generator target", dest="target")
     Target.init_subparser(subparser_manager)
@@ -69,25 +78,26 @@ if __name__ == "__main__":
     # get the directory containing the script
     main_script_dir = Path(os.path.dirname(__file__)).absolute().expanduser()
 
-    if args['outDir'] == '':
-        base_dir = main_script_dir / ('output_' + args['target'])
-    else:
-        base_dir = main_script_dir / args['outDir']
+    if args['outDir'] != '':
+        if args['target'] == 'all':
+            raise ValueError('Cannot specify an output directory when generating all targets')
 
-    # if the 'genArduino' flag is set to True, use the arduino generator
-    # otherwise, use the meson generator
-    generator_target = Target.get_target(
+    # get the generator target(s) from the command line arguments
+    generator_targets = Target.get_targets(
         version='0.7.1',
         main_script_dir=main_script_dir,
-        output_dir=base_dir,
+        output_dir=args['outDir'],
         print_files=args['printOutFiles'],
         target_name=args['target'],
+        clean_output_dir=args['clean'],
     )
 
-    generator_target.generate()
+    for generator_target in generator_targets:
+        print(f'Generating {generator_target.target_name}...')
+        generator_target.generate()
 
-    if args['format_sources']:
-        generator_target.format()
+        if args['format_sources']:
+            generator_target.format()
 
-    if args['archive']:
-        generator_target.archive()
+        if args['archive']:
+            generator_target.archive()

@@ -78,6 +78,13 @@ class File:
     def read_json(self) -> Dict:
         return json.loads(self.read_string())
 
+    def clean(self):
+        if self.get().exists():
+            if self.get().is_file():
+                self.get().unlink()
+            else:
+                distutils.dir_util.remove_tree(str(self.get()))
+
 
 class Template:
     def __init__(

@@ -20,8 +20,7 @@ jobs:
           pipx install ninja
           pip install pipenv
           pipenv install
-          pipenv run python3 ./genSources.py --archive meson
-          pipenv run python3 ./genSources.py --archive arduino
+          pipenv run python3 ./genSources.py --archive all
       - name: "Release latest"
         uses: "marvinpinto/action-automatic-releases@latest"
         if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
