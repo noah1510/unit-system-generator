@@ -1,6 +1,6 @@
 {
   "name": "arduino",
-  "group": "Cpp17",
+  "group": "Cpp",
   "help": "generate the code for the arduino library manager",
   "extra_data": {
     "math_provider": "Arduino.h",

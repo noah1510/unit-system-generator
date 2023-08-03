@@ -189,8 +189,11 @@ class Target:
     def init_subparser(subparser):
         targets_json = [t.read_json() for t in Target.get_target_files()]
         subparser.add_parser('all', help='Generate all targets')
+        groups = set([target['group'] for target in targets_json])
         for target in targets_json:
             subparser.add_parser(target['name'], help=target['help'])
+        for group in groups:
+            subparser.add_parser(group, help=f'Generate all targets in group {group}')
 
     @staticmethod
     def get_targets(
@@ -206,7 +209,11 @@ class Target:
         target_list = []
 
         for target in targets_json:
-            if target.read_json()['name'] == target_name or target_name == 'all':
+            if (
+                    target.read_json()['name'] == target_name or
+                    target_name == 'all' or
+                    target.read_json()['group'] == target_name
+            ):
                 target_list.append(Target(
                     version=version,
                     main_script_dir=main_script_dir,

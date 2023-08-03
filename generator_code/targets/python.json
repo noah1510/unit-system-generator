@@ -1,6 +1,6 @@
 {
   "name": "python",
-  "group": "python",
+  "group": "python3",
   "help": "generate the code for pip-py",
   "data_override": {
     "literals" : {

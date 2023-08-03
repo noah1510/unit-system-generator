@@ -1,6 +1,6 @@
 {
   "name": "meson",
-  "group": "Cpp17",
+  "group": "Cpp",
   "help": "generate the code for the meson build system",
   "extra_data": {
     "math_provider": "cmath",
