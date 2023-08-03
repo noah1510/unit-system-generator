@@ -2,7 +2,12 @@
   "name": "meson",
   "group": "Cpp17",
   "help": "generate the code for the meson build system",
-  "extra_data": {},
+  "extra_data": {
+    "math_provider": "cmath",
+    "has_std": true,
+    "sqrt_function": "std::sqrt",
+    "export_macro": "UNIT_SYSTEM_EXPORT_MACRO"
+  },
   "per_unit_templates": [
     {
       "filename": "unit.cpp.template",

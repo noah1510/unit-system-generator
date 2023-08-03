@@ -1,10 +1,11 @@
 {
   "name": "arduino",
-  "group": "embedded",
+  "group": "Cpp17",
   "help": "generate the code for the arduino library manager",
   "extra_data": {
-    "use_alternate_names": true,
-    "math_provider": "Arduino.h"
+    "math_provider": "Arduino.h",
+    "has_std": false,
+    "sqrt_function": "::sqrt"
   },
   "per_unit_templates": [
     {

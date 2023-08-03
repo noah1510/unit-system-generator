@@ -1,4 +1,5 @@
 #include "unit_system.hpp"
+#include "{{ extra_data.math_provider }}"
 
 sakurajin::unit_system::{{ name }}::{{ name }}(): {{ name }}{0.0}{}
 sakurajin::unit_system::{{ name }}::{{ name }}(long double v): {{ name }}{v,1,0}{}
@@ -61,49 +62,49 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::convert_c
 }
 
 //comparison operators
-#if __cplusplus >= 202002L
-    int sakurajin::unit_system::{{ name }}::operator<=>(const sakurajin::unit_system::{{ name }}& other) const{
-        const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-        if(*this < retval){
-            return -1;
-        }
-
-        if(*this > retval){
-            return 1;
-        }
-
-        return 0;
-    }
-#else
-    bool sakurajin::unit_system::{{ name }}::operator<(const sakurajin::unit_system::{{ name }}& other) const{
-        const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-        return value < retval.value;
+{% if extra_data.has_std %}#if __cplusplus >= 202002L
+int sakurajin::unit_system::{{ name }}::operator<=>(const sakurajin::unit_system::{{ name }}& other) const{
+    const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
+    if(*this < retval){
+        return -1;
     }
 
-    bool sakurajin::unit_system::{{ name }}::operator>(const sakurajin::unit_system::{{ name }}& other) const{
-        const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-        return value > retval.value;
+    if(*this > retval){
+        return 1;
     }
 
-    bool sakurajin::unit_system::{{ name }}::operator<=(const sakurajin::unit_system::{{ name }}& other) const{
-        const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-        return value <= retval.value;
-    }
+    return 0;
+}
+#else {% endif %}
+bool sakurajin::unit_system::{{ name }}::operator<(const sakurajin::unit_system::{{ name }}& other) const{
+    const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
+    return value < retval.value;
+}
 
-    bool sakurajin::unit_system::{{ name }}::operator>=(const sakurajin::unit_system::{{ name }}& other) const{
-        const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-        return value >= retval.value;
-    }
+bool sakurajin::unit_system::{{ name }}::operator>(const sakurajin::unit_system::{{ name }}& other) const{
+    const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
+    return value > retval.value;
+}
 
-    bool sakurajin::unit_system::{{ name }}::operator==(const sakurajin::unit_system::{{ name }}& other) const{
-        const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-        return value == retval.value;
-    }
+bool sakurajin::unit_system::{{ name }}::operator<=(const sakurajin::unit_system::{{ name }}& other) const{
+    const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
+    return value <= retval.value;
+}
 
-    bool sakurajin::unit_system::{{ name }}::operator!=(const sakurajin::unit_system::{{ name }}& other) const{
-        return ! (*this == other);
-    }
-#endif
+bool sakurajin::unit_system::{{ name }}::operator>=(const sakurajin::unit_system::{{ name }}& other) const{
+    const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
+    return value >= retval.value;
+}
+
+bool sakurajin::unit_system::{{ name }}::operator==(const sakurajin::unit_system::{{ name }}& other) const{
+    const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
+    return value == retval.value;
+}
+
+bool sakurajin::unit_system::{{ name }}::operator!=(const sakurajin::unit_system::{{ name }}& other) const{
+    return ! (*this == other);
+}
+{% if extra_data.has_std %}#endif{% endif %}
 
 //non const member functions
 void sakurajin::unit_system::{{ name }}::operator*=(long double scalar){
@@ -147,7 +148,7 @@ sakurajin::unit_system::{{ mult.product }} sakurajin::unit_system::{{ name }}::o
 
 {% if sqrt_result != '' %}
 sakurajin::unit_system::{{ sqrt_result }} sakurajin::unit_system::{{ name }}::sqrt() const{
-    return sakurajin::unit_system::{{ sqrt_result }}{std::sqrt(value), std::sqrt(multiplier), offset};
+    return sakurajin::unit_system::{{ sqrt_result }}{ {{ extra_data.sqrt_function }}(value), {{ extra_data.sqrt_function }}(multiplier), offset};
 }
 {% endif %}
 
@@ -167,11 +168,6 @@ sakurajin::unit_system::{{ sqrt_result }} sakurajin::unit_system::sqrt(const {{ 
 sakurajin::unit_system::{{ square_result }} sakurajin::unit_system::square(const {{ name}}& unit){return unit.square();}
 {% endif %}
 
-std::ostream& sakurajin::unit_system::operator<<(std::ostream& os, const sakurajin::unit_system::{{ name }}& t){
-    auto t1 = sakurajin::unit_system::unit_cast(t,1);
-    return os << t1.value << " {{ base_name }}";
-}
-
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::unit_cast(const sakurajin::unit_system::{{ name }}& unit, long double new_multiplier, long double new_offset){
     return unit.convert_copy(new_multiplier, new_offset);
 }
@@ -184,10 +180,17 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::clamp(const sakurajin
     return sakurajin::unit_system::{{ name }}{val, unit.multiplier, unit.offset};
 }
 
+{% if extra_data.has_std %}
 sakurajin::unit_system::{{ name }} std::abs(const sakurajin::unit_system::{{ name }}& unit){
     auto inv = -unit;
     return unit > inv ? unit : inv;
 }
+
+std::ostream& sakurajin::unit_system::operator<<(std::ostream& os, const sakurajin::unit_system::{{ name }}& t){
+    auto t1 = sakurajin::unit_system::unit_cast(t,1);
+    return os << t1.value << " {{ base_name }}";
+}
+{% endif %}
 
 // literals
 {% if literals|length > 0 %}
