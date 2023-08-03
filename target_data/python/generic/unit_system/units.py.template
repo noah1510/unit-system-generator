@@ -21,26 +21,86 @@ class {{ unit.name }}:
     def __repr__(self):
         return f'{{ unit.name }}({self.value}, {self.multiplier}, {self.offset})'
 
+    def __lt__(self, other: '{{ unit.name }}') -> bool:
+        if not isinstance(other, {{ unit.name }}):
+            raise TypeError(f'Cannot compare {{ unit.name }} to {type(other)}')
+        other = other.cast_to_values(self.multiplier, self.offset)
+        return self.value < other.value
+
+    def __le__(self, other: '{{ unit.name }}') -> bool:
+        if not isinstance(other, {{ unit.name }}):
+            raise TypeError(f'Cannot compare {{ unit.name }} to {type(other)}')
+        other = other.cast_to_values(self.multiplier, self.offset)
+        return self.value <= other.value
+
+    def __gt__(self, other: '{{ unit.name }}') -> bool:
+        if not isinstance(other, {{ unit.name }}):
+            raise TypeError(f'Cannot compare {{ unit.name }} to {type(other)}')
+        other = other.cast_to_values(self.multiplier, self.offset)
+        return self.value > other.value
+
+    def __ge__(self, other: '{{ unit.name }}') -> bool:
+        if not isinstance(other, {{ unit.name }}):
+            raise TypeError(f'Cannot compare {{ unit.name }} to {type(other)}')
+        other = other.cast_to_values(self.multiplier, self.offset)
+        return self.value >= other.value
+
     def __add__(self, other: '{{ unit.name }}') -> '{{ unit.name }}':
         if not isinstance(other, {{ unit.name }}):
             raise TypeError(f'Cannot add {{ unit.name }} to {type(other)}')
         other = other.cast_to_values(self.multiplier, self.offset)
-        return {{ unit.name }}(self.value + other.value)
+        return {{ unit.name }}(self.value + other.value, self.multiplier, self.offset)
+
+    def __iadd__(self, other: '{{ unit.name }}') -> '{{ unit.name }}':
+        if not isinstance(other, {{ unit.name }}):
+            raise TypeError(f'Cannot add {{ unit.name }} to {type(other)}')
+        other = other.cast_to_values(self.multiplier, self.offset)
+        self.value += other.value
+        return self
 
     def __sub__(self, other: '{{ unit.name }}') -> '{{ unit.name }}':
         if not isinstance(other, {{ unit.name }}):
             raise TypeError(f'Cannot add {{ unit.name }} to {type(other)}')
         other = other.cast_to_values(self.multiplier, self.offset)
-        return {{ unit.name }}(self.value - other.value)
+        return {{ unit.name }}(self.value - other.value, self.multiplier, self.offset)
+
+    def __isub__(self, other: '{{ unit.name }}') -> '{{ unit.name }}':
+        if not isinstance(other, {{ unit.name }}):
+            raise TypeError(f'Cannot add {{ unit.name }} to {type(other)}')
+        other = other.cast_to_values(self.multiplier, self.offset)
+        self.value -= other.value
+        return self
+
+    def __imul__(self, other: float, int) -> '{{ unit.name }}':
+        if not isinstance(other, float) and not isinstance(other, int):
+            raise TypeError(f'Cannot multiply {{ unit.name }} by {type(other)}')
+        self.value *= other
+        return self
+
+    def __idiv__(self, other: float, int) -> '{{ unit.name }}':
+        if not isinstance(other, float) and not isinstance(other, int):
+            raise TypeError(f'Cannot divide {{ unit.name }} by {type(other)}')
+        self.value /= other
+        return self
+
+    def __neg__(self) -> '{{ unit.name }}':
+        return {{ unit.name }}(-self.value, self.multiplier, self.offset)
+
+    def __pos__(self) -> '{{ unit.name }}':
+        return {{ unit.name }}(+self.value, self.multiplier, self.offset)
+
+    def __abs__(self) -> '{{ unit.name }}':
+        return {{ unit.name }}(abs(self.value), self.multiplier, self.offset)
 
     def __truediv__(self, value: typing.Union[
         float,
+        int,
         '{{ unit.name }}',
         {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
         '{{ div.divisor }}',{% endfor %}{% endif %}
     ]):
-        if isinstance(value, float):
-            return {{ unit.name }}(self.value / value)
+        if isinstance(value, float) or isinstance(value, int):
+            return {{ unit.name }}(self.value / value, self.multiplier, self.offset)
         elif isinstance(value, {{ unit.name }}):
             v1 = self.cast_to_values()
             v2 = value.cast_to_values()
@@ -56,11 +116,12 @@ class {{ unit.name }}:
 
     def __mul__(self, value: typing.Union[
         float,
+        int,
         {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
         '{{ mult.factor }}',{% endfor %}{% endif %}
     ]):
-        if isinstance(value, float):
-            return {{ unit.name }}(self.value * value)
+        if isinstance(value, float) or isinstance(value, int):
+            return {{ unit.name }}(self.value * value, self.multiplier, self.offset)
         {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
         elif isinstance(value, {{ mult.factor }}):
             v1 = self.cast_to_values(self.multiplier)

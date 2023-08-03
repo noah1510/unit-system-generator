@@ -1,12 +1,12 @@
 [
   {
     "factor1": "speed",
-    "factor2": "time_si",
+    "factor2": "time",
     "product": "length"
   },
   {
     "factor1": "acceleration",
-    "factor2": "time_si",
+    "factor2": "time",
     "product": "speed"
   },
   {
@@ -21,7 +21,7 @@
   },
   {
     "factor1": "power",
-    "factor2": "time_si",
+    "factor2": "time",
     "product": "energy"
   },
   {
@@ -31,7 +31,7 @@
   },
   {
     "factor1": "force",
-    "factor2": "time_si",
+    "factor2": "time",
     "product": "momentum"
   },
   {
