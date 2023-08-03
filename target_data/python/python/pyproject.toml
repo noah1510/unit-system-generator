@@ -22,3 +22,8 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/noah1510/unit-system-generator"
 "Bug Tracker" = "https://github.com/noah1510/unit-system-generator/issues"
+
+[tool.yapf]
+based_on_style = "pep8"
+column_limit = 120
+dedent_closing_brackets = true

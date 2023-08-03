@@ -118,8 +118,8 @@ if __name__ == "__main__":
 
         if args['format_sources']:
             print('Formatting...')
-            generator_target.format()
-            print('Formatting done without errors.')
+            fmt = generator_target.format()
+            print('Formatting done by', fmt, 'without errors.')
 
         if args['test']:
             print('Testing...')

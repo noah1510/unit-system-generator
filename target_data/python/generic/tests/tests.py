@@ -1,5 +1,5 @@
 import unittest
-from unit_system.units import length, area, literals
+from unit_system import literals
 
 
 class TestLength(unittest.TestCase):
@@ -15,11 +15,13 @@ class TestLength(unittest.TestCase):
     def test_length_square(self):
         l1 = literals.mm(5)
         a1 = l1.square()
+        a2 = literals.mm2(25)
 
         # test if squaring and square root works
         self.assertAlmostEqual(a1.cast_to_values().value, 0.000025)
         self.assertUnitEqual(a1, l1 * l1)
         self.assertUnitEqual(a1.sqrt(), l1)
+        self.assertUnitEqual(a1, a2)
 
     def test_math_operator_type(self):
         l1 = literals.mm(5)
@@ -50,7 +52,7 @@ class TestLength(unittest.TestCase):
 
         self.assertUnitEqual(l1, l2)
         self.assertUnitEqual(l1 + l2, l3)
-        self.assertUnitEqual(l1 - l2, length(0))
+        self.assertUnitEqual(l1 - l2, literals.m(0))
         self.assertUnitEqual(l1 * 2, l3)
         self.assertUnitEqual(l3 / 2, l2)
         self.assertUnitEqual(l1 * l2, l1.square())
@@ -58,11 +60,11 @@ class TestLength(unittest.TestCase):
         self.assertUnitEqual(l1/l1, 1.0)
 
     def test_comparison_operators(self):
-        v1 = length(1000, 1)
-        v2 = length(1, 1)
+        v1 = literals.m(1000)
+        v2 = literals.m(1)
         v3 = literals.km(1)
-        v4 = area(1, 1)
-        v5 = length(-1, 1)
+        v4 = literals.m2(1)
+        v5 = literals.m(-1)
 
         # test if positive and negative values are compared correctly
         self.assertTrue(v2 < v3)
@@ -88,8 +90,8 @@ class TestLength(unittest.TestCase):
         self.assertRaises(TypeError, lambda: v1 >= 1)
 
     def test_function_overloads(self):
-        v1 = length(1, 1)
-        v2 = length(-1, 1)
+        v1 = literals.m(1)
+        v2 = literals.m(-1)
 
         # test if abs works
         self.assertUnitEqual(abs(v1), v1)

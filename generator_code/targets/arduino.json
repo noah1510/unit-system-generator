@@ -35,7 +35,9 @@
       }
     }
   },
-  "clang-format": {
+  "formatter": {
+    "name": "clang-format",
+    "args": ["-i"],
     "file_patters": [
       "src/unit_system.hpp",
       "src/units/*.cpp"

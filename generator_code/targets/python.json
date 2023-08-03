@@ -11,6 +11,14 @@
       }
     }
   },
+  "formatter": {
+    "name": "yapf",
+    "args": ["-i"],
+    "file_patters": [
+      "tests/tests.py",
+      "unit_system.py"
+    ]
+  },
   "test_commands": [
     {
       "command":["python", "-m", "unittest", "tests/tests.py"],

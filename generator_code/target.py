@@ -33,7 +33,7 @@ class Target:
         self.verbose = verbose
         self.extra_data = target_json.get('extra_data', {})
         self.unit_type = unit_type
-        self.clang_format_options = target_json.get('clang-format', {})
+        self.formatter_config = target_json.get('formatter', {})
         self.data_override = target_json.get('data_override', {})
 
         # setup all needed paths
@@ -151,13 +151,30 @@ class Target:
                     print(line)
             output.check_returncode()
 
-    def format(self):
-        if 'file_patters' not in self.clang_format_options:
-            return
+    def format(self) -> str:
+        if self.formatter_config is None or self.formatter_config == {}:
+            return 'None'
 
-        for pattern in self.clang_format_options['file_patters']:
-            for file in self.output_dir.glob(pattern):
-                subprocess.run(['clang-format', '-i', file], cwd=self.output_dir)
+        if 'name' not in self.formatter_config:
+            print('no formatter name given')
+            return 'None'
+
+        if 'file_patters' not in self.formatter_config and 'no_patters' not in self.formatter_config:
+            print('no files given to format')
+            return 'None'
+
+        formatter_command = [self.formatter_config['name']]
+        formatter_command += self.formatter_config.get('args', [])
+
+        if 'no_patters' in self.formatter_config:
+            subprocess.run(formatter_command, cwd=self.output_dir)
+        else:
+            for pattern in self.formatter_config['file_patters']:
+                for file in self.output_dir.glob(pattern):
+                    formatter_command += [file]
+                    subprocess.run(formatter_command, cwd=self.output_dir)
+
+        return self.formatter_config['name']
 
     @staticmethod
     def get_target_files() -> List[generator_code.utils.File]:
