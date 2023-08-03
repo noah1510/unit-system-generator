@@ -32,11 +32,9 @@ class Target:
         self.clean_output_dir = clean_output_dir
         self.verbose = verbose
         self.extra_data = target_json.get('extra_data', {})
-        self.units: List[generator_code.unit.Unit] = []
         self.unit_type = unit_type
-        self.hasCombinations = True
-        self.fill_dict = {}
         self.clang_format_options = target_json.get('clang-format', {})
+        self.data_override = target_json.get('data_override', {})
 
         # setup all needed paths
         self.main_script_dir = main_script_dir
@@ -70,29 +68,22 @@ class Target:
         # get the test commands
         self.test_commands: List[Dict] = target_json.get('test_commands', [])
 
-    def generate_fill_dict(self):
-        self.fill_dict = generator_code.unit.fill_from_files(
-            self.type_location,
-            self.units,
+        # generate the data used to fill the templates
+        self.fill_dict = generator_code.unit.generate_data(
+            main_script_dir=self.main_script_dir,
             extra_data=self.extra_data,
+            data_overrides=self.data_override,
+            per_unit_templates=self.per_unit_templates,
+            print_files=self.print_files,
         )
 
         self.fill_dict['target'] = self.target_name
         self.fill_dict['version'] = self.version
 
     def generate_sources(self):
-        self.units = generator_code.unit.units_from_file(
-            self.main_script_dir,
-            self.print_files,
-            per_unit_templates=self.per_unit_templates,
-            extra_data=self.extra_data,
-            unit_type=self.unit_type,
-        )
-
-        for unit in self.units:
-            unit.generate(self.print_files)
-
-        self.generate_fill_dict()
+        # generate the sources for all units
+        for unit in self.fill_dict.get('units', []):
+            unit.generate()
 
     def generate_system(self):
         generator_code.utils.Template(

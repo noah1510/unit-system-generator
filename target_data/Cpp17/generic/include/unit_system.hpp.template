@@ -89,13 +89,8 @@ namespace sakurajin{
         {% if unit.literals|length > 0 %}
         inline namespace literals{
             {% for literal in unit.literals %}
-            {% if use_alternate_names %}
-            UNIT_SYSTEM_EXPORT_MACRO {{ unit.name }} operator "" _{{ literal.alternative }}(long double val);
-            UNIT_SYSTEM_EXPORT_MACRO {{ unit.name }} operator "" _{{ literal.alternative }}(unsigned long long int val);
-            {% else %}
-            UNIT_SYSTEM_EXPORT_MACRO {{ unit.name }} operator "" _{{ literal.udl }}(long double val);
-            UNIT_SYSTEM_EXPORT_MACRO {{ unit.name }} operator "" _{{ literal.udl }}(unsigned long long int val);
-            {% endif %}
+            UNIT_SYSTEM_EXPORT_MACRO {{ unit.name }} operator "" _{{ literal.code_literal }}(long double val);
+            UNIT_SYSTEM_EXPORT_MACRO {{ unit.name }} operator "" _{{ literal.code_literal }}(unsigned long long int val);
             {% endfor %}
         }
         {% endif %}

@@ -192,22 +192,12 @@ sakurajin::unit_system::{{ name }} std::abs(const sakurajin::unit_system::{{ nam
 // literals
 {% if literals|length > 0 %}
 {% for literal in literals %}
-{% if use_alternate_names %}
-sakurajin::unit_system::{{ name }} sakurajin::unit_system::literals::operator "" _{{ literal.alternative }}(long double len){
+sakurajin::unit_system::{{ name }} sakurajin::unit_system::literals::operator "" _{{ literal.code_literal }}(long double len){
     return sakurajin::unit_system::{{ name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
 }
 
-sakurajin::unit_system::{{ name }} sakurajin::unit_system::literals::operator "" _{{ literal.alternative }}(unsigned long long int len){
+sakurajin::unit_system::{{ name }} sakurajin::unit_system::literals::operator "" _{{ literal.code_literal }}(unsigned long long int len){
     return sakurajin::unit_system::{{ name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
 }
-{% else %}
-sakurajin::unit_system::{{ name }} sakurajin::unit_system::literals::operator "" _{{ literal.udl }}(long double len){
-    return sakurajin::unit_system::{{ name }}{len,{{ literal.multiplier }}, {{ literal.offset }}};
-}
-
-sakurajin::unit_system::{{ name }} sakurajin::unit_system::literals::operator "" _{{ literal.udl }}(unsigned long long int len){
-    return sakurajin::unit_system::{{ name }}{static_cast<long double>(len),{{ literal.multiplier }}, {{ literal.offset }}};
-}
-{% endif %}
 {% endfor %}
 {% endif %}

@@ -13,6 +13,28 @@
       "output_pattern": "{unit[name]}.cpp"
     }
   ],
+  "data_override": {
+    "rename_unit": {
+      "time": "time_si"
+    },
+    "literals" : {
+      "time_si": {
+        "minute": {
+          "code_literal": "minute"
+        }
+      },
+      "force" : {
+        "Newton": {
+          "code_literal": "Newton"
+        }
+      },
+      "temperature" : {
+        "Celsius": {
+          "code_literal": "Celsius"
+        }
+      }
+    }
+  },
   "clang-format": {
     "file_patters": [
       "src/unit_system.hpp",

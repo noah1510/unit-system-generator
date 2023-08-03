@@ -10,6 +10,19 @@
       "output_pattern": "{unit[name]}.cpp"
     }
   ],
+  "data_override": {
+    "rename_unit": {
+      "time": "time_si"
+    },
+    "literals" : {
+      "time_si": {
+        "minute": {
+          "code_literal": "minute"
+        }
+      }
+
+    }
+  },
   "clang-format": {
     "file_patters": [
       "include/unit_system.hpp",

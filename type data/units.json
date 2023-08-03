@@ -1,6 +1,6 @@
 [
   {
-    "name": "time_si",
+    "name": "time",
     "base_literal": "second",
     "unit_id": 1,
     "literals": [
@@ -21,8 +21,7 @@
       },
       {
         "name": "minute",
-        "code_literal": "m",
-        "udl_override": "minute",
+        "code_literal": "min",
         "multiplier": 60
       },
       {
@@ -112,7 +111,6 @@
       {
         "name": "Celsius",
         "code_literal": "C",
-        "code_alternative": "Celsius",
         "multiplier": 1e0,
         "offset": 273.15
       }
@@ -300,8 +298,7 @@
       },
       {
         "name": "standard  gravity",
-        "code_literal": "g",
-        "udl_override": "G",
+        "code_literal": "G",
         "multiplier": 9.80665
       }
     ]
@@ -344,7 +341,6 @@
       {
         "name": "Newton",
         "code_literal": "N",
-        "code_alternative": "Newton",
         "multiplier": 1e0
       }
     ],

@@ -23,18 +23,6 @@ class UnitLiteral(Dict):
         self.name = _data['name']
         self.code_literal = _data['code_literal']
 
-        # Set the UDL that should be used for the literal instead of the normal literal
-        if 'udl_override' in _data:
-            self.udl = _data['udl_override']
-        else:
-            self.udl = self.code_literal
-
-        # Set the alternative name that should be used on problematic platforms
-        if 'code_alternative' in _data:
-            self.alternative = _data['code_alternative']
-        else:
-            self.alternative = self.udl
-
         # If the input dictionary contains a 'multiplier' key, set the multiplier attribute
         # to the corresponding value, otherwise set it to 1.0
         if 'multiplier' in _data:
@@ -125,29 +113,42 @@ class Unit(Dict):
                 print(template.output_file)
 
 
-def units_from_file(
+def generate_data(
         main_script_dir: Path,
-        print_files: bool = False,
         extra_data: Dict = None,
+        data_overrides: Dict = None,
+        print_files: bool = False,
         per_unit_templates: List[Dict] = None,
         unit_type: type(Unit) = Unit,
-) -> List[type(Unit)]:
+) -> Dict:
 
-    file_location = main_script_dir / 'type data' / 'units.json'
-    units_file = generator_code.utils.File(file_location.expanduser().absolute())
+    type_location = (main_script_dir / 'type data').expanduser().absolute()
 
-    combinations = generator_code.combination.load_all_combinations(main_script_dir / 'type data' / 'combinations.json')
+    # load all files into json objects
+    units_json = generator_code.utils.File(type_location / 'units.json').read_json()
+    combinations = generator_code.combination.load_all_combinations(type_location / 'combinations.json')
+    constants_json = generator_code.utils.File(type_location / 'constants.json').read_json()
 
-    # create a list of Unit objects from the JSON object string
+    # apply the rename part of the overrides
+    if data_overrides is not None and 'rename_unit' in data_overrides:
+        rename_unit = data_overrides['rename_unit']
+        for comb in combinations:
+            comb.apply_rename(rename_unit)
+
+        for unit in units_json:
+            if unit['name'] in rename_unit:
+                unit['name'] = rename_unit[unit['name']]
+
+    # create the unit objects
     units = [generator_code.unit.unit_from_json(
         unit,
         combinations=combinations,
         extra_data=extra_data,
-        unit_type=unit_type
-    ) for unit in units_file.read_json()]
+        unit_type=unit_type,
+        literal_override=data_overrides.get('literals', {}).get(unit['name'], None),
+    ) for unit in units_json]
 
-    # iterate over the units, generating the source files for each unit and
-    # appending the unit name to the 'unit_strings' list
+    # add the template files for the per-unit templates to each unit
     for unit in units:
         if per_unit_templates is not None:
             for fileinfo in per_unit_templates:
@@ -159,7 +160,15 @@ def units_from_file(
 
                 unit.add_template(generator_code.utils.Template(infile, out_path))
 
-    return units
+    # create a fict will all the generated data
+    fill_dict = {
+        'units': units,
+        'combinations': combinations,
+        'constants': [constant for constant in constants_json],
+        'extra_data': extra_data,
+    }
+
+    return fill_dict
 
 
 # This function takes a JSON object string as its argument and returns a Unit object
@@ -167,6 +176,7 @@ def unit_from_json(
         json_object_str: Dict,
         extra_data: Dict = None,
         combinations: List[generator_code.combination.Combination] = None,
+        literal_override: Dict = None,
         unit_type: type(Unit) = Unit,
 ):
 
@@ -177,7 +187,11 @@ def unit_from_json(
     # Use a list comprehension to create the 'literals' list
     literals = [UnitLiteral(literal) for literal in literals]
     try:
-        literals = generate_prefixed_literals(literals, json_object_str)
+        literals = generate_prefixed_literals(
+            literals,
+            json_object_str.get('generated_multipliers', None),
+            literal_override
+        )
     except KeyError:
         pass
 
@@ -198,58 +212,43 @@ def unit_from_json(
 
 def generate_prefixed_literals(
         literals: List[UnitLiteral],
-        json_object_str: Dict,
+        generated_multipliers: Dict = None,
+        literal_override: Dict = None,
 ) -> List[UnitLiteral]:
-
-    if 'generated_multipliers' not in json_object_str:
-        return literals
 
     # get the prefixes that should be generated
     all_literals = literals
-    prefixes = json_object_str['generated_multipliers']
-    for literal in literals:
-        if literal.name in prefixes:
-            prefixes_to_generate = prefixes[literal.name]
-            for prefix in prefixes_to_generate:
-                try:
-                    prefix_data = generator_code.prefixes.Prefix.from_string(prefix)
-                except ValueError as Error:
-                    print(Error)
-                    raise ValueError(
-                        f'Invalid prefix {prefix} for unit {literal.name} in unit system {json_object_str["name"]}'
-                    )
 
-                prefix_json = {
-                    "name": prefix + literal.name,
-                    "multiplier": prefix_data.value() * literal.multiplier,
-                    "code_literal": prefix_data.short() + literal.code_literal,
-                    "code_alternative": prefix_data.short() + literal.alternative,
-                    "offset": literal.offset,
-                }
-                all_literals.append(UnitLiteral(prefix_json))
+    # generate the multipliers if needed
+    if generated_multipliers is not None:
+        for literal in literals:
+            if literal.name in generated_multipliers:
+                prefixes_to_generate = generated_multipliers[literal.name]
+                for prefix in prefixes_to_generate:
+                    try:
+                        prefix_data = generator_code.prefixes.Prefix.from_string(prefix)
+                    except ValueError as Error:
+                        print(Error)
+                        raise ValueError(
+                            f'Invalid prefix {prefix} for literal {literal.name}'
+                        )
+
+                    prefix_json = {
+                        "name": prefix + literal.name,
+                        "multiplier": prefix_data.value() * literal.multiplier,
+                        "code_literal": prefix_data.short() + literal.code_literal,
+                        "offset": literal.offset,
+                    }
+                    all_literals.append(UnitLiteral(prefix_json))
+
+    # apply the overrides to the full list of literals
+    if literal_override is not None:
+        for literal in all_literals:
+            if literal.name in literal_override:
+                override_data = literal_override[literal.name]
+                literal.name = override_data.get('name', literal.name)
+                literal.code_literal = override_data.get('code_literal', literal.code_literal)
+                literal.multiplier = override_data.get('multiplier', literal.multiplier)
+                literal.offset = override_data.get('offset', literal.offset)
 
     return all_literals
-
-
-def fill_from_files(
-        type_location: Path,
-        units: List[Unit],
-        extra_data: Dict = None,
-) -> Dict:
-
-    # load the 'combinations.json' file and parse its contents as a JSON string
-    combinations = generator_code.combination.load_all_combinations(type_location / 'combinations.json')
-
-    # load the 'constants.json' file and parse its contents as a JSON string
-    constants_file = generator_code.utils.File(type_location / 'constants.json')
-    constants = [constant for constant in constants_file.read_json()]
-
-    # create a dictionary containing the values that will be used to generate the header files
-    fill_dict = {
-        'units': units,
-        'combinations': combinations,
-        'constants': constants,
-        'extra_data': extra_data,
-    }
-
-    return fill_dict

@@ -25,6 +25,14 @@ class Combination(Dict):
     def uses(self, unit: str) -> bool:
         return unit in [self['factor1'], self['factor2'], self['product']]
 
+    def apply_rename(self, rename: Dict[str, str]) -> None:
+        if self['factor1'] in rename:
+            self['factor1'] = rename[self['factor1']]
+        if self['factor2'] in rename:
+            self['factor2'] = rename[self['factor2']]
+        if self['product'] in rename:
+            self['product'] = rename[self['product']]
+
     def get_deps_for(self, unit: str) -> List[str]:
         if unit == self.get('factor1', ''):
             return [self['factor2'], self['product']]
