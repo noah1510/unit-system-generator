@@ -151,6 +151,15 @@ class {{ unit.name }}:
         return {{ unit.name }}(base_value / multiplier - offset, multiplier, offset)
 {% endfor %}
 
-
+class literals:
+{% for unit in units %}{% if unit.literals|length > 0 %}
+{% for literal in unit.literals %}
+    @staticmethod
+    def {{ literal.code_literal }}(val: (float,int)) -> '{{ unit.name }}':
+        if not isinstance(val, (int, float)):
+            raise TypeError("val must be a number")
+        return {{ unit.name }}(val, {{ literal.multiplier }}, {{ literal.offset }})
+{% endfor %}
+{% endif %}{% endfor %}
 
     

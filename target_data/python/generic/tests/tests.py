@@ -1,6 +1,5 @@
 import unittest
-from unit_system.units import length, area
-from unit_system.prefixes import Prefix
+from unit_system.units import length, area, literals
 
 
 class TestLength(unittest.TestCase):
@@ -8,14 +7,13 @@ class TestLength(unittest.TestCase):
         self.assertEqual(type(u1), type(u2))
         self.assertAlmostEqual(float(u1), float(u2))
 
-    def test_length_prefix(self):
+    def test_length_literals(self):
         # test if the prefix is correctly applied
-        self.assertAlmostEqual(float(length(5, Prefix.milli())), 0.005)
-        self.assertAlmostEqual(float(length(5, Prefix.from_string('milli'))), 0.005)
-        self.assertAlmostEqual(float(length(5, Prefix.from_string('centi^2'))), 0.0005)
+        self.assertAlmostEqual(float(literals.mm(5)), 0.005)
+        self.assertUnitEqual(literals.mm(5), literals.cm(0.5))
 
     def test_length_square(self):
-        l1 = length(5, Prefix.milli())
+        l1 = literals.mm(5)
         a1 = l1.square()
 
         # test if squaring and square root works
@@ -24,8 +22,8 @@ class TestLength(unittest.TestCase):
         self.assertUnitEqual(a1.sqrt(), l1)
 
     def test_math_operator_type(self):
-        l1 = length(5, Prefix.milli())
-        a1 = area(5, Prefix.milli())
+        l1 = literals.mm(5)
+        a1 = literals.mm2(5000)
 
         # check that the type is checked in all math operations
         self.assertRaises(TypeError, lambda: l1 + a1)
@@ -46,9 +44,9 @@ class TestLength(unittest.TestCase):
             l1 /= a1
 
     def test_math_operator_value(self):
-        l1 = length(5, Prefix.milli())
-        l2 = length(5000, Prefix.micro())
-        l3 = length(10, Prefix.milli())
+        l1 = literals.mm(5)
+        l2 = literals.um(5000)
+        l3 = literals.mm(10)
 
         self.assertUnitEqual(l1, l2)
         self.assertUnitEqual(l1 + l2, l3)
@@ -62,7 +60,7 @@ class TestLength(unittest.TestCase):
     def test_comparison_operators(self):
         v1 = length(1000, 1)
         v2 = length(1, 1)
-        v3 = length(1, Prefix.kilo())
+        v3 = literals.km(1)
         v4 = area(1, 1)
         v5 = length(-1, 1)
 

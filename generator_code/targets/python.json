@@ -2,12 +2,15 @@
   "name": "python",
   "group": "python",
   "help": "generate the code for pip-py",
-  "extra_install_files": [
-    {
-      "file": "generator_code/prefixes.py",
-      "destination": "unit_system"
+  "data_override": {
+    "literals" : {
+      "time": {
+        "attosecond": {
+          "code_literal": "as_"
+        }
+      }
     }
-  ],
+  },
   "test_commands": [
     {
       "command":["python", "-m", "unittest", "tests/tests.py"],
