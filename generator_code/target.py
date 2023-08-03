@@ -89,16 +89,19 @@ class Target:
         generator_code.utils.Template(
             self.common_dir,
             self.output_dir,
+            group_path=self.group_dir,
         ).fill_with(self.fill_dict)
 
         generator_code.utils.Template(
             self.generic_dir,
             self.output_dir,
+            group_path=self.group_dir,
         ).fill_with(self.fill_dict)
 
         generator_code.utils.Template(
             self.target_dir,
             self.output_dir,
+            group_path=self.group_dir,
         ).fill_with(self.fill_dict)
 
         for file in self.extra_install_files:

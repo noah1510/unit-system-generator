@@ -92,6 +92,7 @@ class Template:
             template_file: Path,
             output_file: Path,
             extra_infos: Dict = None,
+            group_path: Path = None,
          ):
 
         if extra_infos is None:
@@ -100,6 +101,7 @@ class Template:
         self.template_file = File(template_file)
         self.output_file = File(output_file)
         self.extra_infos = extra_infos
+        self.group_path = group_path
 
     # Fill the template file with the given values and write the output to the output file
     # If the input is a directory, it will be copied recursively to the output folder and each file with a .template
@@ -107,7 +109,8 @@ class Template:
     def fill_with(self, values: Dict):
         if self.template_file.get().is_file():
             if self.template_file.get().suffix != '.template':
-                self.template_file.copy(self.output_file.get(), copy_as_subfile=False)
+                if self.template_file.get().suffix != '.template_local':
+                    self.template_file.copy(self.output_file.get(), copy_as_subfile=False)
                 return
 
             try:
@@ -115,7 +118,14 @@ class Template:
                 template_str = self.template_file.read_string()
 
                 # load the template string into a jinja2 template
-                template = jinja2.Template(template_str)
+                if self.group_path is None:
+                    template = jinja2.Environment(
+                        loader=jinja2.FileSystemLoader(self.template_file.get().parent)
+                    ).from_string(template_str)
+                else:
+                    template = jinja2.Environment(
+                        loader=jinja2.FileSystemLoader(self.group_path)
+                    ).from_string(template_str)
 
                 # fill the template with the given values
                 filled_template = template.render(values)
@@ -145,5 +155,6 @@ class Template:
                 Template(
                     infile,
                     outfile,
-                    extra_infos=self.extra_infos
+                    extra_infos=self.extra_infos,
+                    group_path=self.group_path,
                 ).fill_with(values)

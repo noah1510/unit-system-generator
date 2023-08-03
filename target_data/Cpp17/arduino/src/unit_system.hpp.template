@@ -1,5 +1,7 @@
-#pragma once
+{% extends "generic/unit_system.template_local" %}
 
+{% block include_area %}
+{{ super() }}
 #define UNIT_SYSTEM_ABS(x) ((x) < -(x) ? -(x) : (x))
 
 const long double UNIT_SYSTEM_FEMTO = 1e-15;
@@ -18,94 +20,4 @@ const long double UNIT_SYSTEM_TERA = 1e12;
 const long double UNIT_SYSTEM_PETA = 1e15;
 const long double UNIT_SYSTEM_EXA = 1e18;
 const long double UNIT_SYSTEM_ZETTA = 1e21;
-
-namespace sakurajin{
-    namespace unit_system{
-        //forward declare all units
-        {% for unit in units %}
-        class {{ unit.name }};{% endfor %}
-
-        {% for unit in units %}
-        class {{ unit.name }} {
-        public:
-            const long double multiplier;
-            long double value = 0;
-            const long double offset;
-            long double rel_error = 0.000001;
-
-            {{ unit.name }}();
-            {{ unit.name }}(const {{ unit.name }}& other) = default;
-
-            explicit {{ unit.name }}(long double v);
-            {{ unit.name }}(long double v, long double mult);
-            {{ unit.name }}(long double v, long double mult, long double off);
-
-            {{ unit.name }} operator*(long double scalar) const;
-            void operator*=(long double scalar);
-
-            long double operator/(const {{ unit.name }}& other) const;
-            {{ unit.name }} operator/(long double scalar) const;
-            void operator/=(long double scalar);
-
-            {{ unit.name }} operator+(const {{ unit.name }}& other) const;
-            void operator+=(const {{ unit.name }}& other);
-
-            {{ unit.name }} operator-(const {{ unit.name }}& other) const;
-            void operator-=(const {{ unit.name }}& other);
-
-            {{ unit.name }} operator-() const;
-
-            void operator=(const {{ unit.name }}& other);
-
-            explicit operator long double() const;
-
-            {{ unit.name }} convert_multiplier(long double new_multiplier = 1) const;
-            {{ unit.name }} convert_offset(long double new_offset = 0) const;
-            {{ unit.name }} convert_copy(long double new_multiplier = 1, long double new_offset = 0) const;
-
-            bool operator<(const {{ unit.name }}& other) const;
-            bool operator>(const {{ unit.name }}& other) const;
-            bool operator<=(const {{ unit.name }}& other) const;
-            bool operator>=(const {{ unit.name }}& other) const;
-            bool operator==(const {{ unit.name }}& other) const;
-            bool operator!=(const {{ unit.name }}& other) const;
-
-            {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
-            {{ div.result }} operator/(const {{ div.divisor }}& other) const; {% endfor %}{% endif %}
-
-            {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
-            {{ mult.product }} operator*(const {{ mult.factor }}& other) const; {% endfor %}{% endif %}
-
-            {% if unit.sqrt_result != '' %}{{ unit.sqrt_result }} sqrt() const;{% endif %}
-            {% if unit.square_result != '' %}{{ unit.square_result }} square() const;{% endif %}
-
-        };
-
-        {% if unit.sqrt_result != '' %}{{ unit.sqrt_result }} sqrt(const {{ unit.name}}& unit);{% endif %}
-        {% if unit.square_result != '' %}{{ unit.square_result }} square(const {{ unit.name}}& unit);{% endif %}
-        {{ unit.name }} unit_cast(const {{ unit.name }}& unit, long double new_multiplier = 1, long double new_offset = 0);
-        {{ unit.name }} clamp(const {{ unit.name }}& unit, const {{ unit.name }}& lower, const {{ unit.name }}& upper);
-
-        {% if unit.literals|length > 0 %}
-        inline namespace literals{
-            {% for literal in unit.literals %}
-            {{ unit.name }} operator "" _{{ literal.code_literal }}(long double val);
-            {{ unit.name }} operator "" _{{ literal.code_literal }}(unsigned long long int val);
-            {% endfor %}
-        }
-        {% endif %}
-
-        {% endfor %}
-    }
-}
-
-//add all constants
-namespace sakurajin{
-    namespace unit_system{
-        namespace constants{
-            {% for constant in constants %}
-            const long double {{ constant.name }} = {{ constant.value }};
-            {% endfor %}
-        }
-    }
-}
+{% endblock %}
