@@ -17,10 +17,13 @@ jobs:
         generateArgs:
           - name: "meson"
             args: ""
-            repo: "git@github.com:noah1510/unit-system.git"
+            repo: "git@github.com:unit-system-exports/unit-system-meson.git"
           - name: "arduino"
             args: ""
-            repo: "git@github.com:noah1510/unit-system-adruino.git"
+            repo: "git@github.com:unit-system-exports/unit-system-arduino.git"
+          - name: "python"
+            args: ""
+            repo: "git@github.com:unit-system-exports/unit-system-python.git"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
@@ -46,6 +49,13 @@ jobs:
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "ssh_key<<$EOF" >> "$GITHUB_ENV"
           echo "${{ secrets.ARDUINO_DEPLOY_KEY }}" >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
+      - name: put the arduino ssh key to env
+        if: ${{ matrix.generateArgs.name == 'python' }}
+        run: |
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "ssh_key<<$EOF" >> "$GITHUB_ENV"
+          echo "${{ secrets.PYTHON_DEPLOY_KEY }}" >> "$GITHUB_ENV"
           echo "$EOF" >> "$GITHUB_ENV"
       - name: commit and push changes to ${{ matrix.generateArgs.name }}
         if: ${{ github.ref_type == 'branch'}}
