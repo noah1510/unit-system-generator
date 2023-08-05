@@ -90,7 +90,7 @@ if __name__ == "__main__":
         "--set_version",
         help="use this to pass a version to the generator. It has to be parsable by semver.",
         required=False,
-        default='0.8.0',
+        default='0.8.0-git',
         dest='version',
         type=str,
     )
@@ -117,6 +117,9 @@ if __name__ == "__main__":
     if args['outDir'] != '':
         if args['target'] == 'all':
             raise ValueError('Cannot specify an output directory when generating all targets')
+
+    if args['version'].startswith('v'):
+        args['version'] = args['version'][1:]
 
     # get the generator target(s) from the command line arguments
     generator_targets = Target.get_targets(
