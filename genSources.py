@@ -1,6 +1,7 @@
 import os.path
 import argparse
 from pathlib import Path
+import semver
 
 from generator_code.target import Target
 
@@ -101,7 +102,7 @@ if __name__ == "__main__":
 
     # get the generator target(s) from the command line arguments
     generator_targets = Target.get_targets(
-        version='0.7.1',
+        version=semver.VersionInfo.parse('0.8.0-rc.1'),
         main_script_dir=main_script_dir,
         output_dir=args['outDir'],
         print_files=args['printOutFiles'] or args['verbose'],

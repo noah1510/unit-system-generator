@@ -1,6 +1,9 @@
-on:
-  workflow_call:
+name: create release
 
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   python_matrix:
@@ -44,3 +47,19 @@ jobs:
         with:
           name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}
           path: build
+
+  release:
+    name: "Release candidate"
+    runs-on: "ubuntu-20.04"
+    needs: [ python_matrix ]
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: "release"
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

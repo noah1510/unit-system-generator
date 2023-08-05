@@ -5,7 +5,7 @@ project(
         'cpp_std=c++17',
         'warning_level=3'
     ],
-    version : '{{ version }}',
+    version : '{{ version_simple }}',
     meson_version: '>= 1.1.0',
 )
 

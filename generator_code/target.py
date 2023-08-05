@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 from typing import List, Dict
 import tarfile
+import semver
 
 import generator_code.utils
 import generator_code.unit
@@ -14,7 +15,7 @@ import generator_code.unit
 class Target:
     def __init__(
             self,
-            version: str,
+            version: semver.VersionInfo,
             main_script_dir: Path,
             output_dir: str,
             print_files: bool = False,
@@ -78,7 +79,8 @@ class Target:
         )
 
         self.fill_dict['target'] = self.target_name
-        self.fill_dict['version'] = self.version
+        self.fill_dict['version'] = str(self.version)
+        self.fill_dict['version_simple'] = self.version.finalize_version()
 
     def generate_sources(self):
         # generate the sources for all units
@@ -197,7 +199,7 @@ class Target:
 
     @staticmethod
     def get_targets(
-            version,
+            version: semver.VersionInfo,
             main_script_dir,
             output_dir: str,
             target_name: str,

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "043cdaf15c9315713734f5be698ed1fee06ef036e3ef29af880a2ef93f812310"
+            "sha256": "21516ddc60023770aa2b1382d533cf387829cc60d0f992204a528c28f0cc71ac"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -115,6 +115,14 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==3.10.0"
+        },
+        "semver": {
+            "hashes": [
+                "sha256:2a23844ba1647362c7490fe3995a86e097bb590d16f0f32dfc383008f19e4cdf",
+                "sha256:9ec78c5447883c67b97f98c3b6212796708191d22e4ad30f4570f840171cbce1"
+            ],
+            "index": "pypi",
+            "version": "==3.0.1"
         },
         "tomli": {
             "hashes": [
