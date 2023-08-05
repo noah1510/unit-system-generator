@@ -12,9 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-20.04", "ubuntu-22.04", "macos-latest", "windows-latest"]
-        pythonVersion: ["3.11", "3.10", "3.9"]
+        pythonVersion: ["3.11", "3.10", "3.9", "3.8"]
 
-    name: ${{ matrix.os }}
+    name: ${{ matrix.os }} - python ${{ matrix.pythonVersion }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
