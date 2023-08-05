@@ -15,31 +15,17 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-20.04", "ubuntu-22.04", "macos-latest", "windows-latest"]
-        pythonVersion: ["3.11", "3.10", "3.9"]
+        pythonVersion: ["3.11", "3.10", "3.9", "3.8"]
 
-    name: ${{ matrix.os }}
+    name: ${{ matrix.os }} - python ${{ matrix.pythonVersion }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.pythonVersion }}
-          cache: 'pipenv'
-
-      - name: install pipenv
-        run: pip install pipenv
-      - name: install deps in venv
-        run: pipenv install
-      - name: update pipenv
-        run: pipenv update
-      - name: list pipenv packages
-        run: pipenv graph
-
-      - name: generate the sources
-        run: pipenv run python ./genSources.py -o output python
 
       - name: test the project
-        working-directory: output
         run: python -m unittest tests/tests.py
 
       - uses: actions/upload-artifact@v3
