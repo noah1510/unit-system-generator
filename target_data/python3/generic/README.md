@@ -12,7 +12,7 @@ If you feel something is missing open an issue or a pull request on the [generat
 ## Usage examples
 
 ```python
-from unit_system import literals
+from unit_system_py import literals
 
 # create some units
 l1 = literals.km(10)
@@ -36,7 +36,7 @@ While it is generally better to create units using the literals, it is also poss
 Just note that you have to manually set the multiplier, since the unit is not created using the literals.
 
 ```python
-from unit_system import time, length
+from unit_system_py import time, length
 
 # create some units
 l1 = length(10, 1000)
@@ -56,7 +56,7 @@ Another use of this, is to specify type hints for the units.
 This is highly encouraged, when defining functions that take units as arguments.
 
 ```python
-from unit_system import length, speed, literals
+from unit_system_py import length, speed, literals
 from math import sin, radians
 
 # create an example function which calculates a throw distance from a speed and angle

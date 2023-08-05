@@ -32,6 +32,7 @@ jobs:
           files: |
             unit_system_meson.tar.gz
             unit_system_arduino.tar.gz
+            unit_system_python.tar.gz
 
       - name: "release"
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -40,5 +41,6 @@ jobs:
           repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
           prerelease: ${{ contains(github.ref_name, '-rc') }}
           files: |
-            unit_system_meson.tar.zstd
-            unit_system_arduino.tar.zstd
+            unit_system_meson.tar.gz
+            unit_system_arduino.tar.gz
+            unit_system_python.tar.gz

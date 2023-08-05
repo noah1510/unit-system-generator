@@ -1,5 +1,5 @@
 import unittest
-from unit_system import literals
+from unit_system_py import literals
 
 
 class TestLength(unittest.TestCase):
