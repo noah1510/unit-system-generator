@@ -19,6 +19,16 @@
       "unit_system.py"
     ]
   },
+  "post_gen_commands": [
+    {
+      "command": ["python", "-m", "build"],
+      "environment": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONLEGACYWINDOWSSTDIO": "utf-8",
+        "PYTHONUTF8": "1"
+      }
+    }
+  ],
   "test_commands": [
     {
       "command":["python", "-m", "unittest", "tests/tests.py"],

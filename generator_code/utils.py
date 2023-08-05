@@ -3,6 +3,7 @@ import distutils.dir_util
 import distutils.file_util
 import json
 import os
+import subprocess
 from pathlib import Path
 from typing import Dict
 
@@ -86,6 +87,8 @@ class File:
                 distutils.dir_util.remove_tree(str(self.get()))
 
 
+# A class to represent a template file or directory
+# It handles filling the template with the given values and writing the output to the output file
 class Template:
     def __init__(
             self,
@@ -158,3 +161,44 @@ class Template:
                     extra_infos=self.extra_infos,
                     group_path=self.group_path,
                 ).fill_with(values)
+
+
+# A class to represent a subprocess command for easier use
+class Command:
+    def __init__(self, command_dict: Dict):
+        self.env = command_dict.get('environment', {})
+        self.cmd = command_dict.get("command", "")
+        self.wasExecuted = False
+        self.output: subprocess.CompletedProcess = None
+
+    def run(self, cwd: Path = None):
+        if cwd is None:
+            cwd = Path.cwd()
+
+        env = os.environ.copy()
+        env.update(self.env)
+        self.output = subprocess.run(
+            self.cmd,
+            cwd=cwd,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8',
+        )
+        self.wasExecuted = True
+
+    def print_output(self):
+        if self.wasExecuted:
+            print(self.output.stdout)
+        else:
+            raise RuntimeError('Command was not executed')
+
+    def print_info(self):
+        print('command: ', self.cmd)
+        print('env extras: ' + str(self.env))
+
+    def check_returncode(self):
+        if self.wasExecuted:
+            self.output.check_returncode()
+        else:
+            raise RuntimeError('Command was not executed')

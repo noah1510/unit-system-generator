@@ -69,6 +69,9 @@ class Target:
         # get the test commands
         self.test_commands: List[Dict] = target_json.get('test_commands', [])
 
+        # get the post generation commands
+        self.post_generation_commands: List[Dict] = target_json.get('post_gen_commands', [])
+
         # generate the data used to fill the templates
         self.fill_dict = generator_code.unit.generate_data(
             main_script_dir=self.main_script_dir,
@@ -112,6 +115,26 @@ class Target:
                 self.output_dir / file['destination'],
             ).fill_with(self.fill_dict)
 
+    def post_generate(self):
+        # iterate over all test commands and run them
+        for i in range(len(self.post_generation_commands)):
+            # create a new command object
+            command = generator_code.utils.Command(self.post_generation_commands[i])
+
+            print('post gen command', i + 1, 'of', len(self.post_generation_commands))
+            if self.verbose:
+                command.print_info()
+
+            command.run(cwd=self.output_dir)
+
+            try:
+                command.check_returncode()
+                if self.verbose:
+                    command.print_output()
+            except subprocess.CalledProcessError as e:
+                command.print_output()
+                raise e
+
     def generate(self):
         self.clean()
         self.generate_sources()
@@ -129,32 +152,22 @@ class Target:
     def test(self):
         # iterate over all test commands and run them
         for i in range(len(self.test_commands)):
-            command = self.test_commands[i]
-            # update the env with the given vars
-            env = os.environ.copy()
-            env.update(command.get('environment', {}))
-            cmd = command.get("command", "")
+            # create a new command object
+            command = generator_code.utils.Command(self.test_commands[i])
+
             print('test', i+1, 'of', len(self.test_commands))
             if self.verbose:
-                print('running: ', cmd)
-                print('in dir: ' + str(self.output_dir))
-                print('with env extras: ' + str(command.get('environment', {})))
+                command.print_info()
 
-            output = subprocess.run(
-                cmd,
-                cwd=self.output_dir,
-                env=env,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                encoding='utf-8',
+            command.run(cwd=self.output_dir)
 
-            )
-
-            if self.verbose or output.returncode != 0:
-                print('stdout: ')
-                for line in str(output.stdout).split('\\n'):
-                    print(line)
-            output.check_returncode()
+            try:
+                command.check_returncode()
+                if self.verbose:
+                    command.print_output()
+            except subprocess.CalledProcessError as e:
+                command.print_output()
+                raise e
 
     def format(self) -> str:
         if self.formatter_config is None or self.formatter_config == {}:

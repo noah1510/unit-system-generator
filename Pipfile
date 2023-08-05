@@ -8,5 +8,6 @@ jinja2 = "*"
 clang-format = "*"
 yapf = "*"
 semver = "*"
+build = "*"
 
 [dev-packages]

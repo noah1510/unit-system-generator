@@ -122,6 +122,10 @@ if __name__ == "__main__":
             fmt = generator_target.format()
             print('Formatting done by', fmt, 'without errors.')
 
+        print('running post generation commands...')
+        generator_target.post_generate()
+        print('post generation commands done without errors.')
+
         if args['test']:
             print('Testing...')
             generator_target.test()
