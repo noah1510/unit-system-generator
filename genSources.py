@@ -86,6 +86,24 @@ if __name__ == "__main__":
         action='store_true',
     )
 
+    parser.add_argument(
+        "--set_version",
+        help="use this to pass a version to the generator. It has to be parsable by semver.",
+        required=False,
+        default='0.8.0',
+        dest='version',
+        type=str,
+    )
+
+    parser.add_argument(
+        "--no-post-gen",
+        help="set this flag to disable running the post generation commands",
+        required=False,
+        default=True,
+        dest='post_gen',
+        action='store_false',
+    )
+
     # add a subparser to select the target for the code generator
     subparser_manager = parser.add_subparsers(help="generator target", dest="target")
     Target.init_subparser(subparser_manager)
@@ -102,7 +120,7 @@ if __name__ == "__main__":
 
     # get the generator target(s) from the command line arguments
     generator_targets = Target.get_targets(
-        version=semver.VersionInfo.parse('0.8.0-rc.1'),
+        version=semver.VersionInfo.parse(args['version']),
         main_script_dir=main_script_dir,
         output_dir=args['outDir'],
         print_files=args['printOutFiles'] or args['verbose'],
@@ -122,9 +140,10 @@ if __name__ == "__main__":
             fmt = generator_target.format()
             print('Formatting done by', fmt, 'without errors.')
 
-        print('running post generation commands...')
-        generator_target.post_generate()
-        print('post generation commands done without errors.')
+        if args['post_gen']:
+            print('running post generation commands...')
+            generator_target.post_generate()
+            print('post generation commands done without errors.')
 
         if args['test']:
             print('Testing...')

@@ -14,13 +14,18 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pipenv"
-      - name: setup environment and generate sources
+      - name: setup environment
         run: |
           pipx install meson
           pipx install ninja
           pip install pipenv
           pipenv install
-          pipenv run python3 ./genSources.py --archive all
+      - name: generate the sources (release)
+        if: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') }}
+        run: pipenv run python3 ./genSources.py --set_version ${{ github.ref_name }} --archive all
+      - name: generate the sources (latest)
+        if: ${{ !(github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) }}
+        run: pipenv run python3 ./genSources.py --archive all
       - name: "Release latest"
         uses: "marvinpinto/action-automatic-releases@latest"
         if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
