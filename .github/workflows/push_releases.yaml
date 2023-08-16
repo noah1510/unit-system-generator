@@ -17,12 +17,15 @@ jobs:
         generateArgs:
           - name: "meson"
             args: ""
+            args_latest: ""
             repo: "git@github.com:unit-system-exports/unit-system-meson.git"
           - name: "arduino"
             args: ""
+            args_latest: ""
             repo: "git@github.com:unit-system-exports/unit-system-arduino.git"
           - name: "python"
             args: ""
+            args_latest: "--no-post-gen"
             repo: "git@github.com:unit-system-exports/unit-system-python.git"
     steps:
       - uses: actions/checkout@v3
@@ -39,7 +42,7 @@ jobs:
         run: pipenv run python3 ./genSources.py --set_version ${{ github.ref_name }} ${{ matrix.generateArgs.args }} -o output ${{ matrix.generateArgs.name }}
       - name: generate the sources (latest)
         if: ${{ !(github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) }}
-        run: pipenv run python3 ./genSources.py ${{ matrix.generateArgs.args }} -o output ${{ matrix.generateArgs.name }}
+        run: pipenv run python3 ./genSources.py ${{ matrix.generateArgs.args }} ${{ matrix.generateArgs.args_latest }} -o output ${{ matrix.generateArgs.name }}
       - name: put the meson ssh key to env
         if: ${{ matrix.generateArgs.name == 'meson' }}
         run: |
