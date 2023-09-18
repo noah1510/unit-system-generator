@@ -88,6 +88,8 @@ namespace sakurajin{
         }
         {% endif %}
 
+        {{ unit.name }} operator*(long double scalar, const {{ unit.name }}& value);
+
         {% endfor %}
     }
 }

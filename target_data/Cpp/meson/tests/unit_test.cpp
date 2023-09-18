@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "unit_system.hpp"
+#include "test_functions.hpp"
 
 using namespace sakurajin::unit_system;
 
@@ -75,6 +75,8 @@ TEST( unit_t_tests, operator_tests ) {
     EXPECT_TRUE(v5 == v8);
 
     EXPECT_DOUBLE_EQ(v1/v2, 1.0);
+
+    EXPECT_UNIT_EQ( v1*2.0, 2.0*v1 );
     
 }
 

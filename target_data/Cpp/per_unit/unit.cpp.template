@@ -160,6 +160,10 @@ sakurajin::unit_system::{{ square_result }} sakurajin::unit_system::{{ name }}::
 
 // external functions
 
+sakurajin::unit_system::{{ name }} sakurajin::unit_system::operator*(long double scalar, const sakurajin::unit_system::{{ name }}& value){
+    return value*scalar;
+}
+
 {% if sqrt_result != '' %}
 sakurajin::unit_system::{{ sqrt_result }} sakurajin::unit_system::sqrt(const {{ name}}& unit){return unit.sqrt();}
 {% endif %}
