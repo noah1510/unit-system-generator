@@ -90,7 +90,7 @@ if __name__ == "__main__":
         "--set_version",
         help="use this to pass a version to the generator. It has to be parsable by semver.",
         required=False,
-        default='0.8.0-git',
+        default='0.8.0',
         dest='version',
         type=str,
     )

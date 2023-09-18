@@ -51,6 +51,9 @@ namespace sakurajin{
             {{ unit.name }} convert_offset(long double new_offset = 0) const;
             {{ unit.name }} convert_copy(long double new_multiplier = 1, long double new_offset = 0) const;
 
+            //returns a copy of the unit with the same multiplier and offset as the other unit
+            {{ unit.name }} convert_like(const {{ unit.name }}& other) const;
+
             {% if extra_data.has_std %} #if __cplusplus >= 202002L
                 int operator<=>(const {{ unit.name }}& other) const;
             #else {% endif %}
@@ -88,7 +91,7 @@ namespace sakurajin{
         }
         {% endif %}
 
-        {{ unit.name }} operator*(long double scalar, const {{ unit.name }}& value);
+        {{ extra_data.export_macro }} {{ unit.name }} operator*(long double scalar, const {{ unit.name }}& value);
 
         {% endfor %}
     }
