@@ -8,8 +8,12 @@ on:
       - latest
 
 jobs:
-  meson_cpp17_matrix:
-    uses: ./.github/workflows/cpp17.yaml
+  desktop_cpp_matrix:
+    uses: ./.github/workflows/cppDesktop.yaml
+    secrets: inherit
+
+  meson_cpp_matrix:
+    uses: ./.github/workflows/meson.yaml
     secrets: inherit
 
   arduino_matix:
@@ -25,7 +29,7 @@ jobs:
     secrets: inherit
 
   releases:
-    needs: [ desktop_cpp_meson_matrix, meson_cpp_matrix, arduino_matix, pio_matrix, python_matrix ]
+    needs: [ desktop_cpp_matrix, meson_cpp_matrix, arduino_matix, pio_matrix, python_matrix ]
     uses: ./.github/workflows/release.yaml
     secrets: inherit
 
