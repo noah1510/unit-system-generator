@@ -22,6 +22,11 @@ jobs:
             os: "ubuntu-22.04"
           - useMsys: true
             os: "macos-latest"
+          - cppStd: "c++23"
+            os: "ubuntu-20.04"
+          - cppStd: "c++23"
+            useMsys: false
+            os: "windows-latest"
         include:
           - setupExtras: "-Db_lto=false -Dgtest:b_lto=false"
             os: "windows-latest"
