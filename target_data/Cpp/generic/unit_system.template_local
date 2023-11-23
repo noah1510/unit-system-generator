@@ -56,12 +56,11 @@ namespace sakurajin{
 
             {% if extra_data.has_std %} #if __cplusplus >= 202002L
                 int operator<=>(const {{ unit.name }}& other) const;
-            #else {% endif %}
+            #endif {% endif %}
                 bool operator<(const {{ unit.name }}& other) const;
                 bool operator>(const {{ unit.name }}& other) const;
                 bool operator<=(const {{ unit.name }}& other) const;
                 bool operator>=(const {{ unit.name }}& other) const;
-            {% if extra_data.has_std %} #endif {% endif %}
                 bool operator==(const {{ unit.name }}& other) const;
                 bool operator!=(const {{ unit.name }}& other) const;
 

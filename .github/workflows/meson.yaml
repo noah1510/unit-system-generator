@@ -15,7 +15,7 @@ jobs:
           - setupExtras: "-Db_lto=false -Dgtest:b_lto=false"
             os: "windows-latest"
 
-    name: ${{ matrix.os }} ${{ matrix.buildType }} msys ${{ matrix.useMsys }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -49,7 +49,7 @@ jobs:
 
       - name: setup the project - default
         working-directory: output
-        run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} build
+        run: meson setup ${{ matrix.setupExtras }} build
 
       - name: compile the project - default
         working-directory: output
