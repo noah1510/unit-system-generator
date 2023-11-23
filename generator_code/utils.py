@@ -1,6 +1,5 @@
 # loads the contents of a file at the given filepath as a string
-import distutils.dir_util
-import distutils.file_util
+import shutil
 import json
 import os
 import subprocess
@@ -59,9 +58,9 @@ class File:
     # If this file is a directory, it will be copied recursively to the output folder.
     # If the output folder does not exist, it will be created.
     def copy(
-        self,
-        output_folder: Path,
-        copy_as_subfile: bool = True,
+            self,
+            output_folder: Path,
+            copy_as_subfile: bool = True,
     ) -> 'File':
         if copy_as_subfile:
             output_folder = output_folder / self.get().name
@@ -70,9 +69,9 @@ class File:
             os.makedirs(output_folder.parent, exist_ok=True)
 
         if self.get().is_file():
-            distutils.file_util.copy_file(str(self), str(output_folder))
+            shutil.copy(str(self), str(output_folder))
         else:
-            distutils.dir_util.copy_tree(str(self), str(output_folder))
+            shutil.copytree(str(self), str(output_folder))
 
         return File(output_folder)
 
@@ -84,7 +83,7 @@ class File:
             if self.get().is_file():
                 self.get().unlink()
             else:
-                distutils.dir_util.remove_tree(str(self.get()))
+                shutil.rmtree(str(self.get()))
 
 
 # A class to represent a template file or directory
@@ -96,7 +95,7 @@ class Template:
             output_file: Path,
             extra_infos: Dict = None,
             group_path: Path = None,
-         ):
+    ):
 
         if extra_infos is None:
             extra_infos = {}
