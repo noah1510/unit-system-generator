@@ -95,7 +95,7 @@ bool sakurajin::unit_system::{{ name }}::operator>=(const sakurajin::unit_system
     const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
     return value >= retval.value;
 }
-
+{% if extra_data.has_std %}#endif{% endif %}
 bool sakurajin::unit_system::{{ name }}::operator==(const sakurajin::unit_system::{{ name }}& other) const{
     const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
     return value == retval.value;
@@ -104,7 +104,6 @@ bool sakurajin::unit_system::{{ name }}::operator==(const sakurajin::unit_system
 bool sakurajin::unit_system::{{ name }}::operator!=(const sakurajin::unit_system::{{ name }}& other) const{
     return ! (*this == other);
 }
-{% if extra_data.has_std %}#endif{% endif %}
 
 //non const member functions
 void sakurajin::unit_system::{{ name }}::operator*=(long double scalar){
