@@ -48,9 +48,11 @@ class Target:
         self.common_dir = self.script_dir / 'common'
         self.group_dir = self.script_dir / self.target_group
         self.target_dir = self.group_dir / self.target_name
-        self.generic_dir = self.group_dir / 'generic'
         self.template_dir = self.group_dir / 'per_unit'
         self.type_location = main_script_dir / 'type data'
+
+        self.mergeDirs = [self.group_dir / mergeTarget for mergeTarget in target_json.get('merge', [])]
+        self.mergeDirs.append(self.group_dir / 'generic')
 
         # get the per-unit templates
         self.per_unit_templates: List[Dict] = []
@@ -97,11 +99,12 @@ class Target:
             group_path=self.group_dir,
         ).fill_with(self.fill_dict)
 
-        generator_code.utils.Template(
-            self.generic_dir,
-            self.output_dir,
-            group_path=self.group_dir,
-        ).fill_with(self.fill_dict)
+        for mergeDir in self.mergeDirs:
+            generator_code.utils.Template(
+                mergeDir,
+                self.output_dir,
+                group_path=self.group_dir,
+            ).fill_with(self.fill_dict)
 
         generator_code.utils.Template(
             self.target_dir,

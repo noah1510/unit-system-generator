@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*'
 
+{% raw -%}
 jobs:
   meson_cpp17_matrix:
     strategy:
@@ -85,7 +86,10 @@ jobs:
         with:
           name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}
           path: build
+{% endraw %}
 
+{% if target == 'cppDesktop' %}
+{% raw -%}
   release:
     name: "Release candidate"
     runs-on: "ubuntu-20.04"
@@ -106,3 +110,5 @@ jobs:
           provides: "unit-system = unit_system_dep"
           push-repository: "https://github.com/noah1510/wrapdb"
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+{% endraw %}
+{% endif %}

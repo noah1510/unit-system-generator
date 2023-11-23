@@ -1,10 +1,10 @@
 {
-  "name": "meson",
+  "name": "cppDesktop",
   "group": "Cpp",
   "merge": [
-    "cppDesktop"
+    "meson"
   ],
-  "help": "generate the code for the meson build system",
+  "help": "generate the C++ desktop code for all build systems",
   "extra_data": {
     "math_provider": "cmath",
     "has_std": true,
