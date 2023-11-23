@@ -25,7 +25,7 @@ jobs:
     secrets: inherit
 
   releases:
-    needs: [ meson_cpp17_matrix, arduino_matix, pio_matrix, python_matrix ]
+    needs: [ desktop_cpp_meson_matrix, meson_cpp_matrix, arduino_matix, pio_matrix, python_matrix ]
     uses: ./.github/workflows/release.yaml
     secrets: inherit
 

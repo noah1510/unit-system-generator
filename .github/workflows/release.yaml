@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pipenv"
       - name: setup environment
         run: |
@@ -35,7 +35,7 @@ jobs:
           prerelease: true
           title: "Development Build"
           files: |
-            unit_system_meson.tar.gz
+            unit_system_cppDesktop.tar.gz
             unit_system_arduino.tar.gz
             unit_system_python.tar.gz
 
@@ -46,6 +46,6 @@ jobs:
           repo_token: "${{ secrets.CI_GITHUB_TOKEN }}"
           prerelease: ${{ contains(github.ref_name, '-rc') }}
           files: |
-            unit_system_meson.tar.gz
+            unit_system_cppDesktop.tar.gz
             unit_system_arduino.tar.gz
             unit_system_python.tar.gz

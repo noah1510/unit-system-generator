@@ -3,7 +3,7 @@ on:
 
 
 jobs:
-  meson_cpp17_matrix:
+  desktop_cpp_meson_matrix:
     env:
       PYTHONIOENCODING: 'utf-8'
       PYTHONLEGACYWINDOWSSTDIO: 'utf-8'
@@ -12,6 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-20.04", "ubuntu-22.04", "macos-latest", "windows-latest"]
+        cppStd: ["c++14", "c++17", "c++20", "c++23"]
         buildType: ["static", "shared"]
         useMsys: [true, false]
         exclude:
@@ -25,13 +26,13 @@ jobs:
           - setupExtras: "-Db_lto=false -Dgtest:b_lto=false"
             os: "windows-latest"
 
-    name: ${{ matrix.os }} ${{ matrix.buildType }} msys ${{ matrix.useMsys }}
+    name: ${{ matrix.os }} ${{ matrix.buildType }} msys ${{ matrix.useMsys }} ${{ matrix.cppStd }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pipenv'
 
       - name: install pipenv
@@ -49,7 +50,7 @@ jobs:
           pipx install ninja
 
       - name: generate the sources - default
-        run: pipenv run python ./genSources.py -o output meson
+        run: pipenv run python ./genSources.py -o output cppDesktop
 
       - name: windows - Prepare MSVC
         if: ${{ !matrix.useMsys && matrix.os == 'windows-latest' }}
@@ -73,12 +74,12 @@ jobs:
       - name: setup the project - default
         if: ${{ !matrix.useMsys }}
         working-directory: output
-        run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} build
+        run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} -Dcpp_std=${{ matrix.cppStd }} build
       - name: setup the project - msys2
         if: ${{ matrix.useMsys }}
         shell: 'msys2 {0}'
         working-directory: output
-        run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} build
+        run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} -Dcpp_std=${{ matrix.cppStd }} build
 
       - name: compile the project - default
         if: ${{ !matrix.useMsys }}

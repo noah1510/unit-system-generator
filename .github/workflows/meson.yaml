@@ -1,0 +1,66 @@
+on:
+  workflow_call:
+
+jobs:
+  meson_cpp_matrix:
+    env:
+      PYTHONIOENCODING: 'utf-8'
+      PYTHONLEGACYWINDOWSSTDIO: 'utf-8'
+      PYTHONUTF8: '1'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-22.04", "macos-latest", "windows-latest"]
+        include:
+          - setupExtras: "-Db_lto=false -Dgtest:b_lto=false"
+            os: "windows-latest"
+
+    name: ${{ matrix.os }} ${{ matrix.buildType }} msys ${{ matrix.useMsys }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+          cache: 'pipenv'
+
+      - name: install pipenv
+        run: pip install pipenv
+      - name: install deps in venv
+        run: pipenv install
+      - name: update pipenv
+        run: pipenv update
+      - name: list pipenv packages
+        run: pipenv graph
+      - name: default - install meson and ninja
+        if: ${{ !matrix.useMsys }}
+        run: |
+          pipx install meson
+          pipx install ninja
+
+      - name: generate the sources - default
+        run: pipenv run python ./genSources.py -o output meson
+
+      - name: windows - Prepare MSVC
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: bus1/cabuild/action/msdevshell@v1
+        with:
+          architecture: x64
+
+      - name: setup the project - default
+        working-directory: output
+        run: meson setup ${{ matrix.setupExtras }} -Ddefault_library=${{ matrix.buildType }} build
+
+      - name: compile the project - default
+        working-directory: output
+        run: meson compile -C build
+
+      - name: test the project - default
+        working-directory: output
+        run: meson test --verbose -C build
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}
+          path: build
