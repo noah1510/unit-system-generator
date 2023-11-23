@@ -9,5 +9,6 @@ clang-format = "*"
 yapf = "*"
 semver = "*"
 build = "*"
+disutils = "*"
 
 [dev-packages]
