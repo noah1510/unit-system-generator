@@ -2,6 +2,7 @@
 
 {% block include_area %}{% endblock %}
 
+{% block base_class_area %}
 namespace sakurajin{
     namespace unit_system{
         //forward declare all units
@@ -10,12 +11,13 @@ namespace sakurajin{
 
         {% for unit in units %}
         class {{ extra_data.export_macro }} {{ unit.name }} {
-        public:
-            const long double multiplier;
+        private:
             long double value = 0;
-            const long double offset;
+            long double multiplier;
+            long double offset;
             long double rel_error = 0.000001;
-
+        
+        public:
             {{ unit.name }}();
             {{ unit.name }}(const {{ unit.name }}& other) = default;
 
@@ -27,6 +29,16 @@ namespace sakurajin{
             template<std::intmax_t numerator, std::intmax_t denumerator = 1>
             {{ unit.name }}(long double v, std::ratio<numerator, denumerator> mult, long double off = 0);
             {% endif %}
+            
+            long double val() const;
+            long double mult() const;
+            long double off() const;
+            long double rel_err() const;
+            
+            long double& val();
+            long double& mult();
+            long double& off();
+            long double& rel_err();
 
             {{ unit.name }} operator*(long double scalar) const;
             void operator*=(long double scalar);
@@ -95,6 +107,7 @@ namespace sakurajin{
         {% endfor %}
     }
 }
+{% endblock %}
 
 {% block std_compat %}{% endblock %}
 

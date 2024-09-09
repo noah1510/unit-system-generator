@@ -22,7 +22,8 @@ class Target:
             clean_output_dir: bool = False,
             verbose: bool = False,
             target_file: generator_code.utils.File = None,
-            unit_type: type(generator_code.unit.Unit) = generator_code.unit.Unit
+            unit_type: type(
+                generator_code.unit.Unit) = generator_code.unit.Unit
     ):
         # read the target config file and the passed arguments
         target_json = target_file.read_json()
@@ -51,7 +52,8 @@ class Target:
         self.template_dir = self.group_dir / 'per_unit'
         self.type_location = main_script_dir / 'type data'
 
-        self.mergeDirs = [self.group_dir / mergeTarget for mergeTarget in target_json.get('merge', [])]
+        self.mergeDirs = [
+            self.group_dir / mergeTarget for mergeTarget in target_json.get('merge', [])]
         self.mergeDirs.append(self.group_dir / 'generic')
 
         # get the per-unit templates
@@ -66,13 +68,15 @@ class Target:
                 self.per_unit_templates += [unit_template]
 
         # get the extra install files
-        self.extra_install_files: List[Dict] = target_json.get('extra_install_files', [])
+        self.extra_install_files: List[Dict] = target_json.get(
+            'extra_install_files', [])
 
         # get the test commands
         self.test_commands: List[Dict] = target_json.get('test_commands', [])
 
         # get the post generation commands
-        self.post_generation_commands: List[Dict] = target_json.get('post_gen_commands', [])
+        self.post_generation_commands: List[Dict] = target_json.get(
+            'post_gen_commands', [])
 
         # generate the data used to fill the templates
         self.fill_dict = generator_code.unit.generate_data(
@@ -122,9 +126,11 @@ class Target:
         # iterate over all test commands and run them
         for i in range(len(self.post_generation_commands)):
             # create a new command object
-            command = generator_code.utils.Command(self.post_generation_commands[i])
+            command = generator_code.utils.Command(
+                self.post_generation_commands[i])
 
-            print('post gen command', i + 1, 'of', len(self.post_generation_commands))
+            print('post gen command', i + 1, 'of',
+                  len(self.post_generation_commands))
             if self.verbose:
                 command.print_info()
 
@@ -148,7 +154,8 @@ class Target:
             generator_code.utils.File(self.output_dir).clean()
 
     def archive(self):
-        archive_name = self.main_script_dir / ('unit_system_' + self.target_name + '.tar.gz')
+        archive_name = self.main_script_dir / \
+            ('unit_system_' + self.target_name + '.tar.gz')
         with tarfile.open(archive_name, 'w:gz') as tar:
             tar.add(self.output_dir, arcname=self.target_name)
 
@@ -192,15 +199,17 @@ class Target:
         else:
             for pattern in self.formatter_config['file_patters']:
                 for file in self.output_dir.glob(pattern):
-                    formatter_command += [file]
-                    subprocess.run(formatter_command, cwd=self.output_dir)
+                    fmt_cmd = formatter_command + [file]
+                    subprocess.run(fmt_cmd, cwd=self.output_dir)
 
         return self.formatter_config['name']
 
     @staticmethod
     def get_target_files() -> List[generator_code.utils.File]:
-        targets_dir = Path(os.path.dirname(__file__)).absolute().expanduser() / 'targets'
-        targets = [generator_code.utils.File(targets_dir / f) for f in targets_dir.iterdir() if f.is_file()]
+        targets_dir = Path(os.path.dirname(__file__)
+                           ).absolute().expanduser() / 'targets'
+        targets = [generator_code.utils.File(
+            targets_dir / f) for f in targets_dir.iterdir() if f.is_file()]
         return targets
 
     @staticmethod
@@ -211,7 +220,8 @@ class Target:
         for target in targets_json:
             subparser.add_parser(target['name'], help=target['help'])
         for group in groups:
-            subparser.add_parser(group, help=f'Generate all targets in group {group}')
+            subparser.add_parser(
+                group, help=f'Generate all targets in group {group}')
 
     @staticmethod
     def get_targets(

@@ -1,7 +1,10 @@
 #make both dependencies into one array
-deps = [
-    dependency('unit-system', required: true),
-    dependency('gtest', required: true, fallback:['gtest','gtest_dep'])
+gtest_dep = dependency('gtest', required: true, fallback:['gtest','gtest_dep'])
+
+tests_17 = [
+    'unit_test_17',
+    'base_units_test_17',
+    'common_test_17',
 ]
 
 tests = [
@@ -13,7 +16,11 @@ tests = [
 test_incdir = include_directories('.')
 
 #create all the tests
-foreach test_obj : tests
+foreach test_obj : tests_17
+    deps = [
+        dependency('unit-system', required: true),
+        gtest_dep,
+    ]
     exe = executable(
         test_obj, 
         test_obj + '.cpp',

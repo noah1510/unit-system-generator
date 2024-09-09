@@ -4,7 +4,18 @@
 sakurajin::unit_system::{{ name }}::{{ name }}(): {{ name }}{0.0}{}
 sakurajin::unit_system::{{ name }}::{{ name }}(long double v): {{ name }}{v,1,0}{}
 sakurajin::unit_system::{{ name }}::{{ name }}(long double v, long double mult): {{ name }}{v,mult,0}{}
-sakurajin::unit_system::{{ name }}::{{ name }}(long double v, long double mult, long double off): multiplier{mult}, value{v}, offset{off}{}
+sakurajin::unit_system::{{ name }}::{{ name }}(long double v, long double mult, long double off): value{v}, multiplier{mult}, offset{off}{}
+
+            
+long double sakurajin::unit_system::{{ name }}::mult() const {return multiplier;}
+long double sakurajin::unit_system::{{ name }}::val() const {return value;}
+long double sakurajin::unit_system::{{ name }}::off() const {return offset;}
+long double sakurajin::unit_system::{{ name }}::rel_err() const {return rel_error;}
+
+long double& sakurajin::unit_system::{{ name }}::mult() {return multiplier;}
+long double& sakurajin::unit_system::{{ name }}::val() {return value;}
+long double& sakurajin::unit_system::{{ name }}::off() {return offset;}
+long double& sakurajin::unit_system::{{ name }}::rel_err() {return rel_error;}
 
 //const functions
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::operator*(long double scalar) const{
@@ -12,11 +23,11 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::operator*
 }
 
 sakurajin::unit_system::{{ name }} operator*(long double scalar, const sakurajin::unit_system::{{ name }}& val){
-    return sakurajin::unit_system::{{ name }}{val.value*scalar, val.multiplier, val.offset};
+    return sakurajin::unit_system::{{ name }}{val.val()*scalar, val.mult(), val.off()};
 }
 
 long double sakurajin::unit_system::{{ name }}::operator/(const sakurajin::unit_system::{{ name }}& other) const{
-    return value/other.convert_like(*this).value;
+    return value/other.convert_like(*this).val();
 }
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::operator/(long double scalar) const{
@@ -25,13 +36,13 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::operator/
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::operator+(const sakurajin::unit_system::{{ name }}& other) const{
     auto retval = convert_like(other);
-    retval.value += other.value;
+    retval.val() += other.val();
     return retval;
 }
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::operator-(const sakurajin::unit_system::{{ name }}& other) const{
     auto retval = convert_like(other);
-    retval.value -= other.value;
+    retval.val() -= other.val();
     return retval;
 }
 
@@ -40,7 +51,7 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::operator-
 }
 
 sakurajin::unit_system::{{ name }}::operator long double() const{
-    return convert_copy(1,0).value;
+    return convert_copy(1,0).val();
 }
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::{{ name }}::convert_multiplier(long double new_multiplier) const{
@@ -78,27 +89,27 @@ int sakurajin::unit_system::{{ name }}::operator<=>(const sakurajin::unit_system
 #endif{% endif %}
 bool sakurajin::unit_system::{{ name }}::operator<(const sakurajin::unit_system::{{ name }}& other) const{
     const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-    return value < retval.value;
+    return value < retval.val();
 }
 
 bool sakurajin::unit_system::{{ name }}::operator>(const sakurajin::unit_system::{{ name }}& other) const{
     const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-    return value > retval.value;
+    return value > retval.val();
 }
 
 bool sakurajin::unit_system::{{ name }}::operator<=(const sakurajin::unit_system::{{ name }}& other) const{
     const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-    return value <= retval.value;
+    return value <= retval.val();
 }
 
 bool sakurajin::unit_system::{{ name }}::operator>=(const sakurajin::unit_system::{{ name }}& other) const{
     const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-    return value >= retval.value;
+    return value >= retval.val();
 }
 
 bool sakurajin::unit_system::{{ name }}::operator==(const sakurajin::unit_system::{{ name }}& other) const{
     const auto retval = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-    return value == retval.value;
+    return value == retval.val();
 }
 
 bool sakurajin::unit_system::{{ name }}::operator!=(const sakurajin::unit_system::{{ name }}& other) const{
@@ -116,24 +127,24 @@ void sakurajin::unit_system::{{ name }}::operator/=(long double scalar){
 
 void sakurajin::unit_system::{{ name }}::operator+=(const sakurajin::unit_system::{{ name }}& other){
     const auto otherVal = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-    value += otherVal.value;
+    value += otherVal.val();
 }
 
 void sakurajin::unit_system::{{ name }}::operator-=(const sakurajin::unit_system::{{ name }}& other){
     const auto otherVal = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-    value -= otherVal.value;
+    value -= otherVal.val();
 }
 
 void sakurajin::unit_system::{{ name }}::operator=(const sakurajin::unit_system::{{ name }}& other){
     const auto otherVal = sakurajin::unit_system::unit_cast(other,multiplier,offset);
-    value = otherVal.value;
+    value = otherVal.val();
 }
 
 {% if divisions|length > 0 %}{% for div in divisions %}
 sakurajin::unit_system::{{ div.result }} sakurajin::unit_system::{{ name }}::operator/(const sakurajin::unit_system::{{ div.divisor }}& other) const{
     sakurajin::unit_system::{{ name }} _v1 = convert_offset(0);
     sakurajin::unit_system::{{ div.divisor }} _v2 = other.convert_offset(0);
-    return sakurajin::unit_system::{{ div.result }}{_v1.value/_v2.value,_v1.multiplier/_v2.multiplier};
+    return sakurajin::unit_system::{{ div.result }}{_v1.val()/_v2.val(),_v1.mult()/_v2.mult()};
 }
 {% endfor %}{% endif %}
 
@@ -141,7 +152,7 @@ sakurajin::unit_system::{{ div.result }} sakurajin::unit_system::{{ name }}::ope
 sakurajin::unit_system::{{ mult.product }} sakurajin::unit_system::{{ name }}::operator*(const sakurajin::unit_system::{{ mult.factor }}& other) const{
     sakurajin::unit_system::{{ name }} _v1 = convert_offset(0);
     sakurajin::unit_system::{{ mult.factor }} _v2 = other.convert_offset(0);
-    return sakurajin::unit_system::{{ mult.product }}{_v1.value*_v2.value,_v1.multiplier*_v2.multiplier};
+    return sakurajin::unit_system::{{ mult.product }}{_v1.val()*_v2.val(),_v1.mult()*_v2.mult()};
 }
 {% endfor %}{% endif %}
 
@@ -176,11 +187,11 @@ sakurajin::unit_system::{{ name }} sakurajin::unit_system::unit_cast(const sakur
 }
 
 sakurajin::unit_system::{{ name }} sakurajin::unit_system::clamp(const sakurajin::unit_system::{{ name }}& unit, const sakurajin::unit_system::{{ name }}& lower, const sakurajin::unit_system::{{ name }}& upper){
-    auto _lower = unit_cast(lower, unit.multiplier, unit.offset);
-    auto _upper = unit_cast(upper, unit.multiplier, unit.offset);
+    auto _lower = unit_cast(lower, unit.mult(), unit.off());
+    auto _upper = unit_cast(upper, unit.mult(), unit.off());
 
-    auto val = unit.value > _lower.value ? ( unit.value < _upper.value ? unit.value : _upper.value ) : _lower.value;
-    return sakurajin::unit_system::{{ name }}{val, unit.multiplier, unit.offset};
+    auto val = unit.val() > _lower.val() ? ( unit.val() < _upper.val() ? unit.val() : _upper.val() ) : _lower.val();
+    return sakurajin::unit_system::{{ name }}{val, unit.mult(), unit.off()};
 }
 
 {% if extra_data.has_std %}
@@ -191,7 +202,7 @@ sakurajin::unit_system::{{ name }} std::abs(const sakurajin::unit_system::{{ nam
 
 std::ostream& sakurajin::unit_system::operator<<(std::ostream& os, const sakurajin::unit_system::{{ name }}& t){
     auto t1 = sakurajin::unit_system::unit_cast(t,1);
-    return os << t1.value << " {{ base_name }}";
+    return os << t1.val() << " {{ base_name }}";
 }
 {% endif %}
 
