@@ -36,8 +36,8 @@ jobs:
     name: ${{ matrix.os }} ${{ matrix.buildType }} msys ${{ matrix.useMsys }} ${{ matrix.cppStd }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pipenv'
@@ -108,7 +108,7 @@ jobs:
         working-directory: output
         run: meson test --verbose -C build
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}

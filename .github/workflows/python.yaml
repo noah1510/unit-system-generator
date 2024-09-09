@@ -17,8 +17,8 @@ jobs:
     name: ${{ matrix.os }} - python ${{ matrix.pythonVersion }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonVersion }}
           cache: 'pipenv'
@@ -39,7 +39,7 @@ jobs:
         working-directory: output
         run: python -m unittest tests/tests.py
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: build-artifact-${{ matrix.os }}-${{ matrix.buildType }}-msys-${{ matrix.useMsys }}
