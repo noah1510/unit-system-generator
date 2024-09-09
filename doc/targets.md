@@ -58,16 +58,18 @@ It is still worse than operator overloading, but it is still a lot better than C
 
 ### languages with dynamic typing
 
-Langauges with dynamic types require the programmer to do more work to ensure that the correct units are passed to the function.
+Languages with dynamic types require the programmer to do more work to ensure that the correct units are passed to the function.
 Python is a good example for this.
 While python has type hints they are not enforced by the interpreter.
 This means each function has to check if the correct units were passed.
 An example of this is shown below:
 
 ```python
-def some_calculation(l1: length, t1: time_si) -> speed:
+from unit_system_py import length, speed, time
+
+def some_calculation(l1: length, t1: time) -> speed:
     # check if the correct units were passed
-    if not l1.isinstance(length) or not t1.isinstance(time_si):
+    if not l1.isinstance(length) or not t1.isinstance(time):
         raise TypeError("Wrong unit passed to function")
     
     # do the calculation
@@ -127,21 +129,166 @@ Unit classes:
 
 If something is missing in this list it might be added later.
 
-## Adding a new target
+## Adding a new language
 
 Before you add a new target please open an issue to discuss the target.
 This is to prevent duplicate work and to ensure that the target is suitable for this project.
 In that issue share your ideas on how to implement the target and what problems you might encounter.
 
+### Overview of the process
+
 Implementing a target consists of the following steps:
 
 * Implement the unit class as jinja2 template
 * Create the rest of the library tooling (e.g. cmake files) if needed as jinja2 templates
-* Add your target to targets.py to actually generate the files
+* Create the target json file
 * Add your target to the documentation
 * Add CI files including the tests for your target
 
-Each target has its own folder in the `generator` folder.
-Since some targets might share code it is recommended to create a subdir for the tooling while keeping the language specific files in the root of the target folder.
+### Creating the unit class and library tooling
+
+Each target has its own folder in the `target_data` folder.
+In there are folders for each language.
+The langauge folders contain a `generic` and a `per_unit` folder.
+In addition to that there are folders for each toolchain that has an implementation in this langauge.
+
+* The `generic` folder contains the jinja2 templates that apply to all toolchains or are the bases for the toolchain specific templates.
+* The `per_unit` folder contains the jinja2 templates that are specific to each unit. These are applied on every unit and only get all the data fields of the unit as input.
+* The toolchain folders contains the data for each toolchain target.
+You can write jinja2 templates that inherit the generic templates and overwrite specific parts of them.
+
+All files with the `.template` extension are jinja2 templates and will be rendered during the generation process.
+The output file will be the same as the input file but without the `.template` extension.
+If you want to specify a template file that should not be copied to the output folder you can use the `.template_local` extension for the file.
+These can be inherited but don't produce a file in the output folder.
+
+All other files will simply be copied to the output folder.
+
+### Format of the target json file
+
+Each toolchain needs its own target json file.
+These go in the `generator_code/targets` folder.
+The file name has to be the same as the toolchain folder name.
+
+#### Target json file format:
+
+* `name` (String): The name of the target. This has to be the same as the toolchain folder name.
+* `group` (String): The language folder name of the target. This is used to create a group target to generate all targets of a language.
+* `help` (String): A short description of the target that is displayed in the help message.
+* `extra_data` (Object): language or target specific extra data that is passed to the jinja2 templates.
+* `per_unit_templates` (Array of template expansions): A list of template expansions that are applied to each unit and which files they produce.
+* `data_override` (data override Object): A dictionary that overrides the data of the unit. This is used to modify the data to work around langauge specific problems.
+* `formatter` (formatter object): A dictionary that specifies the code formatter to use for the target and its arguments.
+* `post_gen_commands` (Array of command objects): A list of commands that are executed after the generation process.
+* `test_commands` (Array of command objects): A list of commands that are executed to run the tests for the target.
+
+#### Template expansion format:
+
+* `filename` (String): The name of the template file. It needs to be in the `per_unit` folder.
+* `output_location` (String): The location of the output file. This is relative to the output folder.
+* `file_pattern` (String): The pattern that is used to generate the file name. This is a jinja2 template that gets the unit data as input.
+
+Here is the data of the arduino target as an example:
+
+```json
+{
+  "filename": "unit.cpp.template",
+  "output_location": "src/units",
+  "output_pattern": "{unit[name]}.cpp"
+}
+```
+This expands the `unit.cpp.template` file in the `per_unit` folder to the `src/units/{unit[name]}.cpp` file.
+`{unit[name]}.cpp` will expand to the name of the unit with the `.cpp` extension.
+For example this will result in `src/units/length.cpp` for the length unit.
+
+#### Data override format:
+
+* `rename_unit` (Object): A dictionary that renames units. The key is the old name and the value is the new name.
+* `literals` (Object): A dictionary that specifies the literals for each unit.
+The key is the unit name and the value is a dictionary that specifies the literals for that unit.
+The key is the literal name and the value is a dictionary that specifies the code literal for that literal.
+
+**NOTE: rename is applied before the literals are applied. Make sure to use the changed unit names when overriding literals.**
+
+This is the data of the arduino target as an example:
+
+```json
+{
+  "rename_unit": {
+    "time": "time_si"
+  },
+  "literals": {
+    "time_si": {
+      "minute": {
+        "code_literal": "minute"
+      }
+    },
+    "force": {
+      "Newton": {
+        "code_literal": "Newton"
+      }
+    },
+    "temperature": {
+      "Celsius": {
+        "code_literal": "Celsius"
+      }
+    }
+  }
+}
+```
+
+Here the time unit is renamed to `time_si` and the literals for the time, force and temperature units are specified.
+They change the code literals from `_N` to `Newton`, `_C` to `Celsius` and `_min` to `minute`.
+This works around some globally defined macros.
+Python uses this to rename `as` to `as_` since `as` is a keyword in python.
+
+#### Formatter format:
+
+* `name` (String): The name of the formatter. This is the program name used to run the formatter in the command line.
+* `args` (Array of Strings): The arguments that are passed to the formatter.
+* `file_patterns` (Array of Strings): The patterns that are used to find the files that should be formatted. They are regex by default.
+
+This is the formatter of the arduino target as an example.
+
+```json
+{
+    "name": "clang-format",
+    "args": ["-i"],
+    "file_patters": [
+      "src/unit_system.hpp",
+      "src/units/*.cpp"
+    ]
+}
+```
+
+Here `clang-format` is used to format the files.
+Because of the `-i` argument the files are formatted in place.
+All files in the `src/units` folder with the `.cpp` extension and the `src/unit_system.hpp` file are formatted.
+
+#### Command format:
+
+* `command` (Array of Strings): The command that is executed. The first element is the program name and the rest are the arguments.
+* `environment` (Object): A dictionary that specifies the environment variables that are set for the command.
+
+This is the meson setup command as an example:
+
+```json
+{
+    "command":[
+        "meson",
+        "setup",
+        "build",
+        "--wipe"
+    ],
+    "environment": {
+        "colorize_console": "1"
+    }
+}
+```
+
+Here the `meson setup build --wipe` command is executed.
+The `colorize_console` environment variable is set to `1` for the command.
+
+### Writing a CI file
 
 For more information on how to write the CI and test file look into the `Ci_and_tests.md` file in the `docs` folder.
