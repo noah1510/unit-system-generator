@@ -37,6 +37,7 @@
     ],
     "file_patters": [
       "include/unit_system.hpp",
+      "include/unit_system_20.hpp",
       "src/*.cpp"
     ]
   },

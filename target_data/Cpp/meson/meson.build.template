@@ -42,12 +42,18 @@ unit_system_dep = declare_dependency(
     version: meson.project_version(),
 )
 
+unit_system_20_dep = declare_dependency(
+    include_directories : incdirs,
+    version: meson.project_version(),
+)
+
 pkg = import('pkgconfig')
 pkg.generate(unit_system, subdirs: 'unit_system')
 
 install_headers('include/unit_system.hpp')
 
 meson.override_dependency('unit-system', unit_system_dep)
+meson.override_dependency('unit-system-20', unit_system_20_dep)
 
 build_tests = get_option('build_tests').enable_auto_if(not meson.is_subproject())
 if build_tests.enabled()

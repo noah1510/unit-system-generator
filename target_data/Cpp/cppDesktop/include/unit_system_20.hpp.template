@@ -1,0 +1,260 @@
+{% extends "generic/unit_system.template_local" %}
+
+{% block include_area %}
+{{ super() }}
+
+#if __cplusplus < 202002L
+    #error "C++ 20 support is required"
+#endif
+
+
+#ifndef UNIT_SYSTEM_DEFAULT_TYPE
+    #define UNIT_SYSTEM_DEFAULT_TYPE long double
+#endif
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <concepts>
+#include <iostream>
+#include <ratio>
+
+#ifndef UNIT_SYSTEM_EXPORT_MACRO
+    #define UNIT_SYSTEM_EXPORT_MACRO
+#endif
+{%endblock%}
+
+{% block base_class_area %}
+namespace sakurajin{
+    namespace unit_system{
+    
+        {% for unit in units %}
+            template <std::floating_point base_type>
+            class {{ unit.name }}_t {
+            private:
+                base_type value{static_cast<base_type>(0.0)};
+                base_type multiplier{static_cast<base_type>(1.0)};
+                base_type offset{static_cast<base_type>(0.0)};
+                base_type rel_error{static_cast<base_type>(0.000001)};
+
+            public:
+                {{ unit.name }}_t()                       = default;
+                {{ unit.name }}_t(const {{ unit.name }}_t& other) = default;
+
+                template <class value_t = base_type, class mult_t = base_type, class offset_t = base_type>
+                    requires std::convertible_to<value_t, base_type> && std::convertible_to<mult_t, base_type> && std::convertible_to<offset_t, base_type>
+                explicit {{ unit.name }}_t(value_t v, mult_t mult = 1.0, offset_t off = 0.0)
+                    : value{static_cast<base_type>(v)}, multiplier{static_cast<base_type>(mult)}, offset{static_cast<base_type>(off)} {}
+                
+                template<std::intmax_t numerator, std::intmax_t denumerator = 1, class value_t = base_type, class offset_t = base_type>
+                explicit {{ unit.name }}_t(value_t v, std::ratio<numerator, denumerator>, offset_t off = 0.0): {{unit.name}}_t{
+                    v, static_cast<long double>(numerator)/static_cast<long double>(denumerator), off
+                }{}
+
+                
+                base_type val() const { return value; }
+                base_type mult() const { return multiplier; }
+                base_type off() const { return offset; }
+                base_type rel_err() const { return rel_error; }
+
+                base_type& val() { return value; }
+                base_type& mult() { return multiplier; }
+                base_type& off() { return offset; }
+                base_type& rel_err() { return rel_error; }
+
+
+                template <class scalar_t> requires std::convertible_to<scalar_t, base_type>
+                {{ unit.name }}_t<base_type> operator*(scalar_t scalar) const {
+                    return {{ unit.name }}_t<base_type>{value * static_cast<base_type>(scalar), multiplier, offset};
+                };
+                
+                template <class scalar_t> requires std::convertible_to<scalar_t, base_type>
+                void operator*=(scalar_t scalar) { value *= static_cast<base_type>(scalar); }
+
+                template <class scalar_t> requires std::convertible_to<scalar_t, base_type>
+                {{ unit.name }}_t<base_type> operator/(scalar_t scalar) const {
+                    return {{ unit.name }}_t<base_type>{value / static_cast<base_type>(scalar), multiplier, offset};
+                }
+                template <class scalar_t> requires std::convertible_to<scalar_t, base_type>
+                void operator/=(scalar_t scalar) { value /= static_cast<base_type>(scalar); }
+
+
+                long double operator/(const {{ unit.name }}_t& other) const {
+                    return static_cast<long double>(this->value) / static_cast<long double>(other.convert_like(*this).val());
+                }
+
+                {{ unit.name }}_t operator+(const {{ unit.name }}_t& other) const {
+                    auto retval = other.convert_like(*this);
+                    retval.val() += this->value;
+                    return retval;
+                }
+                void operator+=(const {{ unit.name }}_t& other) {
+                    auto retval = other.convert_like(*this);
+                    this->value += retval.val();
+                }
+
+                {{ unit.name }}_t operator-(const {{ unit.name }}_t& other) const {
+                    auto retval = this->convert_like(other);
+                    retval.val() -= other.val();
+                    return retval;
+                }
+                void operator-=(const {{ unit.name }}_t& other) {
+                    auto retval = other.convert_like(*this);
+                    this->value -= retval.val();
+                }
+
+                {{ unit.name }}_t operator-() const { return {{ unit.name }}_t{-value, multiplier, offset}; }
+
+                {{ unit.name }}_t& operator=(const {{ unit.name }}_t& other) = default;
+
+                explicit operator long double() const{
+                    return convert_copy(1.0, 0.0).val();
+                }
+
+                template <class mult_t = base_type, class offset_t = base_type>
+                    requires std::convertible_to<mult_t, base_type> && std::convertible_to<offset_t, base_type>
+                [[nodiscard]]{{ unit.name }}_t convert_copy(mult_t new_multiplier, offset_t new_offset) const {
+                    auto new_mult = static_cast<base_type>(new_multiplier);
+                    auto new_off  = static_cast<base_type>(new_offset);
+                    auto new_val  = (value * multiplier + (offset - new_off)) / new_mult;
+                    return {{ unit.name }}_t{new_val, new_mult, new_off};
+                }
+
+                template <class mult_t = base_type>
+                    requires std::convertible_to<mult_t, base_type>
+                [[nodiscard]]
+                auto convert_multiplier(mult_t new_multiplier) const {
+                    return convert_copy(new_multiplier, this->offset);
+                }
+
+                template <class offset_t = base_type>
+                    requires std::convertible_to<offset_t, base_type>
+                [[nodiscard]]
+                auto convert_offset(offset_t new_offset) const {
+                    return convert_copy(this->multiplier, new_offset);
+                }
+
+                // returns a copy of the unit with the same multiplier and offset as the other unit
+                [[nodiscard]]
+                auto convert_like(const {{ unit.name }}_t& other) const {
+                    return convert_copy(other.mult(), other.off());
+                }
+
+                auto operator<=>(const {{ unit.name }}_t& other) const { return this->val() <=> other.convert_like(*this).val(); }
+                
+                auto operator==(const {{ unit.name }}_t& other) const { return this->val() == other.convert_like(*this).val(); }
+                auto operator!=(const {{ unit.name }}_t& other) const { return this->val() != other.convert_like(*this).val(); }
+            };
+
+
+            template <std::floating_point base_type, class sclar_t>
+                requires std::convertible_to<sclar_t, base_type>
+            {{ unit.name }}_t<base_type> operator*(sclar_t scalar, const {{ unit.name }}_t<base_type>& value) {
+                return value * scalar;
+            }
+
+            template <std::floating_point base_type, class mult_t = base_type, class offset_t = base_type>
+                requires std::convertible_to<mult_t, base_type> && std::convertible_to<offset_t, base_type>
+            {{ unit.name }}_t<base_type> unit_cast(const {{ unit.name }}_t<base_type>& unit, mult_t new_multiplier = 1, offset_t new_offset = 0) {
+                return unit.convert_copy(new_multiplier, new_offset);
+            }
+
+            template <std::floating_point base_type>
+            {{ unit.name }}_t<base_type> clamp(const {{ unit.name }}_t<base_type>& unit, const {{ unit.name }}_t<base_type>& lower, const {{ unit.name }}_t<base_type>& upper) {
+                auto low  = lower.convert_like(unit);
+                auto high = upper.convert_like(unit);
+                return {{ unit.name }}_t<base_type>{std::clamp(unit.val(), low.val(), high.val()), unit.mult(), unit.off()};
+            }
+
+            template <std::floating_point base_type>
+            std::ostream& operator<<(std::ostream& os, const {{ unit.name }}_t<base_type>& val) {
+                auto val_raw = val.convert_copy(1.0, 0.0);
+                return os << val_raw.val() << " {{ base_name }}";
+            }
+        
+        {% endfor %}
+    
+        //define all unit combination operators
+        {% for unit in units %}
+        
+            {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
+            template <std::floating_point base_type> 
+            [[nodiscard]]auto operator/(const {{ unit.name }}_t<base_type>& val, const {{ div.divisor }}_t<base_type>& other){
+                auto _v1 = val.convert_offset(0);
+                auto _v2 = other.convert_offset(0);
+                return sakurajin::unit_system::{{ div.result }}_t<base_type>{_v1.val()/_v2.val(),_v1.mult()/_v2.mult()};
+            }
+            {% endfor %}{% endif %}
+
+            {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
+            template <std::floating_point base_type> 
+            [[nodiscard]]auto operator*(const {{ unit.name }}_t<base_type>& val, const {{ mult.factor }}_t<base_type>& other){
+                auto _v1 = val.convert_offset(0);
+                auto _v2 = other.convert_offset(0);
+                return sakurajin::unit_system::{{ mult.product }}_t<base_type>{_v1.val()*_v2.val(),_v1.mult()/_v2.mult()};
+            }
+            {% endfor %}{% endif %}
+
+            {% if unit.square_result != '' %}
+            template <std::floating_point base_type>
+            [[nodiscard]]auto square(const {{ unit.name }}_t<base_type>& val) {return val*val;}{% endif %}
+            
+            {% if unit.sqrt_result != '' %}
+            template <std::floating_point base_type>
+            [[nodiscard]]auto sqrt(const {{ unit.name }}_t<base_type>& val){
+                return sakurajin::unit_system::{{ unit.sqrt_result }}_t<base_type>{ {{ extra_data.sqrt_function }}(val.val()), {{ extra_data.sqrt_function }}(val.mult()), val.off()};
+            }
+            {% endif %}
+        
+        {% endfor %}
+    
+        //forward declare all units
+        {% for unit in units %}
+            UNIT_SYSTEM_EXPORT_MACRO typedef {{ unit.name }}_t<UNIT_SYSTEM_DEFAULT_TYPE> {{ unit.name }};
+        {% endfor %}
+        
+        
+        //define all literals
+        inline namespace literals{
+        {% for unit in units %}
+        {% if unit.literals|length > 0 %}
+            {% for literal in unit.literals %}
+            {{ extra_data.export_macro }} auto operator "" _{{ literal.code_literal }}(long double val){
+                return sakurajin::unit_system::{{ unit.name }}{val,{{ literal.multiplier }}, {{ literal.offset }}};
+            }
+            {{ extra_data.export_macro }} auto operator "" _{{ literal.code_literal }}(unsigned long long int val){
+                return sakurajin::unit_system::{{ unit.name }}{static_cast<long double>(val),{{ literal.multiplier }}, {{ literal.offset }}};
+            }
+            {% endfor %}
+        {% endif %}{% endfor %}
+        }
+    }
+}
+{%endblock%}
+
+{% block std_compat %}{% if extra_data.has_std %}
+namespace std{
+    {% for unit in units %}
+    template <std::floating_point base_type>
+    sakurajin::unit_system::{{ unit.name }}_t<base_type> abs(const sakurajin::unit_system::{{ unit.name }}_t<base_type>& unit){
+        const auto raw_val = unit.val();
+        const auto inv_val = -raw_val;
+        const auto abs_val = (raw_val > inv_val) ? raw_val : inv_val;
+        return sakurajin::unit_system::{{ unit.name }}_t<base_type>{abs_val, unit.mult(), unit.off()};
+    }
+    {% endfor %}
+}
+
+
+//add compatibility with std::chrono
+namespace sakurajin{
+    namespace unit_system{
+        template<class Rep, class Period = std::ratio<1> >
+        time_si unit_cast(const std::chrono::duration<Rep, Period>& other, auto new_multiplier = 1.0){
+            auto t = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1,1>>>(other);
+            auto retval = time_si{t.count(), 1};
+            return retval.convert_multiplier(new_multiplier);
+        }
+    }
+}
+{% endif %}{% endblock %}
