@@ -22,6 +22,8 @@ jobs:
             os: "ubuntu-22.04"
           - useMsys: true
             os: "macos-latest"
+          - cppStd: "c++20"
+            os: "ubuntu-20.04"
           - cppStd: "c++23"
             os: "ubuntu-20.04"
           - cppStd: "c++23"

@@ -66,7 +66,7 @@ namespace sakurajin{
                 template <class scalar_t> requires std::convertible_to<scalar_t, base_type>
                 {{ unit.name }}_t<base_type> operator*(scalar_t scalar) const {
                     return {{ unit.name }}_t<base_type>{value * static_cast<base_type>(scalar), multiplier, offset};
-                };
+                }
                 
                 template <class scalar_t> requires std::convertible_to<scalar_t, base_type>
                 void operator*=(scalar_t scalar) { value *= static_cast<base_type>(scalar); }
