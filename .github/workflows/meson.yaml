@@ -49,7 +49,7 @@ jobs:
 
       - name: setup the project - default
         working-directory: output
-        run: meson setup -Dstd_cpp=c++17 ${{ matrix.setupExtras }} build
+        run: meson setup -Dcpp_std=c++17 ${{ matrix.setupExtras }} build
 
       - name: compile the project - default
         working-directory: output
