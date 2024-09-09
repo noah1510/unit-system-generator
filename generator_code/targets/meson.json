@@ -36,7 +36,7 @@
       "-i"
     ],
     "file_patters": [
-      "include/unit_system.hpp",
+      "include/unit_system_17.hpp",
       "include/unit_system_20.hpp",
       "src/*.cpp"
     ]
@@ -46,7 +46,36 @@
       "command": [
         "meson",
         "setup",
-        "build",
+        "build_17",
+        "-Dcpp_std=c++17",
+        "--wipe"
+      ],
+      "environment": {
+        "colorize_console": "1"
+      }
+    },
+    {
+      "command": [
+        "meson",
+        "compile",
+        "-C",
+        "build_17"
+      ]
+    },
+    {
+      "command": [
+        "meson",
+        "test",
+        "-C",
+        "build_17"
+      ]
+    },
+    
+    {
+      "command": [
+        "meson",
+        "setup",
+        "build_20",
         "-Dcpp_std=c++20",
         "--wipe"
       ],
@@ -59,7 +88,7 @@
         "meson",
         "compile",
         "-C",
-        "build"
+        "build_20"
       ]
     },
     {
@@ -67,7 +96,7 @@
         "meson",
         "test",
         "-C",
-        "build"
+        "build_20"
       ]
     }
   ]

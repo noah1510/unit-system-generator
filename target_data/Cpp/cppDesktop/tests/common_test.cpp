@@ -1,3 +1,5 @@
+#include "test_functions.hpp"
+
 #include <iostream>
 
 using namespace sakurajin::unit_system::literals;
