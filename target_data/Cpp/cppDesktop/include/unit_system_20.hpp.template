@@ -210,7 +210,7 @@ namespace sakurajin{
     
         //forward declare all units
         {% for unit in units %}
-            UNIT_SYSTEM_EXPORT_MACRO typedef {{ unit.name }}_t<UNIT_SYSTEM_DEFAULT_TYPE> {{ unit.name }};
+            typedef {{ unit.name }}_t<UNIT_SYSTEM_DEFAULT_TYPE> {{ unit.name }};
         {% endfor %}
         
         
@@ -219,10 +219,10 @@ namespace sakurajin{
         {% for unit in units %}
         {% if unit.literals|length > 0 %}
             {% for literal in unit.literals %}
-            {{ extra_data.export_macro }} auto operator "" _{{ literal.code_literal }}(long double val){
+            inline auto operator "" _{{ literal.code_literal }}(long double val){
                 return sakurajin::unit_system::{{ unit.name }}{val,{{ literal.multiplier }}, {{ literal.offset }}};
             }
-            {{ extra_data.export_macro }} auto operator "" _{{ literal.code_literal }}(unsigned long long int val){
+            inline auto operator "" _{{ literal.code_literal }}(unsigned long long int val){
                 return sakurajin::unit_system::{{ unit.name }}{static_cast<long double>(val),{{ literal.multiplier }}, {{ literal.offset }}};
             }
             {% endfor %}
