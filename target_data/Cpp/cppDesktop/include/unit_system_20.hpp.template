@@ -169,7 +169,7 @@ namespace sakurajin{
             template <std::floating_point base_type>
             std::ostream& operator<<(std::ostream& os, const {{ unit.name }}_t<base_type>& val) {
                 auto val_raw = val.convert_copy(1.0, 0.0);
-                return os << val_raw.val() << " {{ base_name }}";
+                return os << val_raw.val() << " {{ unit.base_name }}";
             }
         
         {% endfor %}
@@ -191,7 +191,7 @@ namespace sakurajin{
             [[nodiscard]]auto operator*(const {{ unit.name }}_t<base_type>& val, const {{ mult.factor }}_t<base_type>& other){
                 auto _v1 = val.convert_offset(0);
                 auto _v2 = other.convert_offset(0);
-                return sakurajin::unit_system::{{ mult.product }}_t<base_type>{_v1.val()*_v2.val(),_v1.mult()/_v2.mult()};
+                return sakurajin::unit_system::{{ mult.product }}_t<base_type>{_v1.val()*_v2.val(),_v1.mult()*_v2.mult()};
             }
             {% endfor %}{% endif %}
 
