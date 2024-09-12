@@ -4,7 +4,7 @@
     "value": 6.02214076e23
   },
   {
-    "name": "waterFreezingPoint",
+    "name": "water_freezing_point",
     "value": 273.15
   }
 ]

@@ -280,7 +280,7 @@
         "multiplier": 1e0
       },
       {
-        "name": "kilo metre per second",
+        "name": "kilo metre per hour",
         "code_literal": "kmph",
         "multiplier": 0.27777777777777777777777777777
       }
@@ -297,7 +297,7 @@
         "multiplier": 1e0
       },
       {
-        "name": "standard  gravity",
+        "name": "standard gravity",
         "code_literal": "G",
         "multiplier": 9.80665
       }

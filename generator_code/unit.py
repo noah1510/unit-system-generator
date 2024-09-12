@@ -84,6 +84,7 @@ class Unit(Dict):
         super().__init__({
             'name': data['name'],
             'base_name': data['base_name'],
+            'name_pascal': data['name'].replace("_", " ").title().replace(" ", ""),
             'unit_id': data['unit_id'],
             'literals': data.get('literals', []),
             'combinations': data.get('combinations', []),
