@@ -1,0 +1,25 @@
+{
+  "name": "cargo",
+  "group": "rust",
+  "help": "generate the code for cargo",
+  "data_override": {
+    "literals" : {
+      "time": {
+        "attosecond": {
+          "code_literal": "as_"
+        }
+      }
+    }
+  },
+  "formatter": {
+    "name": "rustfmt",
+    "file_patters": [
+      "src/lib.rs"
+    ]
+  },
+  "test_commands": [
+    {
+      "command":["cargo", "test"]
+    }
+  ]
+}

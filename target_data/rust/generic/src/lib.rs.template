@@ -1,0 +1,410 @@
+#![allow(dead_code)]
+#![allow(non_snake_case)]
+
+pub mod constants{
+    {% for constant in constants %}
+    pub const {{ constant.name | upper }}: f64 = {{ constant.value }};{% endfor %}
+}
+
+{% for unit in units %}
+#[derive(Copy, Clone, Debug)]
+pub struct {{ unit.name_pascal }} {
+    value: f64,
+    multiplier: f64,
+    offset: f64,
+}
+{% endfor %}
+
+{% for unit in units %}
+impl {{ unit.name_pascal }} {
+    pub fn new(val: f64) -> {{ unit.name_pascal }} {
+        return {{ unit.name_pascal }}{value: val, ..Default::default()};
+    }
+    {% if unit.literals|length > 0 %}
+        {% for literal in unit.literals %}
+        pub fn {{ literal.code_literal }}(amount: f64) -> {{ unit.name_pascal }}{
+            return {{ unit.name_pascal }}{
+                value: amount,
+                multiplier: {{ literal.multiplier }},
+                offset: {{ literal.offset }}
+            };
+        }
+        
+        {% if literal.name != literal.code_literal %}
+        pub fn {{ literal.name.replace("-", "_").replace(" ", "_").replace("^", "") }}(amount: f64) -> {{ unit.name_pascal }}{
+            return {{ unit.name_pascal }}{
+                value: amount,
+                multiplier: {{ literal.multiplier }},
+                offset: {{ literal.offset }}
+            };
+        }
+        {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    pub fn clamp(&self, lower: {{ unit.name_pascal }}, upper: {{ unit.name_pascal }}) -> {{ unit.name_pascal }}{
+        let low = lower.convert_like(self);
+        let high = upper.convert_like(self);
+
+        return {{ unit.name_pascal }}{
+            value: self.value.clamp(low.value, high.value),
+            multiplier: self.multiplier,
+            offset: self.offset
+        };
+    }
+
+    pub fn abs(&self) -> {{ unit.name_pascal }}{
+        return {{ unit.name_pascal }}{
+            value: self.value.abs(),
+            multiplier: self.multiplier,
+            offset: self.offset
+        };
+    }
+
+    pub fn convert_copy(&self, new_mult: f64, new_off: f64) -> {{ unit.name_pascal }}{
+        let new_val = (self.value * self.multiplier + (self.offset - new_off)) / new_mult;
+        return {{ unit.name_pascal }}{value: new_val, multiplier: new_mult, offset: new_off};
+    }
+
+    pub fn convert_multiplier(&self, new_mult: f64) -> Self{
+        return self.convert_copy(new_mult, self.offset);
+    }
+
+    pub fn convert_offset(&self, new_off: f64) -> Self{
+        return self.convert_copy(self.multiplier, new_off);
+    }
+
+    pub fn convert_like(&self, other: &Self) -> Self{
+        return self.convert_copy(other.multiplier, self.offset);
+    }
+}
+
+impl std::ops::Add<{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    type Output = {{ unit.name_pascal }};
+
+    fn add(self, _rhs: {{ unit.name_pascal }}) -> {{ unit.name_pascal }} {
+        let mut conved = _rhs.convert_like(&self);
+        conved.value += self.value;
+        return conved;
+    }
+}
+impl std::ops::Add<&{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    type Output = {{ unit.name_pascal }};
+
+    fn add(self, _rhs: &{{ unit.name_pascal }}) -> {{ unit.name_pascal }} {
+        let mut conved = _rhs.convert_like(&self);
+        conved.value += self.value;
+        return conved;
+    }
+}
+
+impl std::ops::AddAssign<{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    fn add_assign(&mut self, other: Self) {
+        let conved = other.convert_like(self);
+        self.value += conved.value;
+    }
+}
+impl std::ops::AddAssign<&{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    fn add_assign(&mut self, other: &Self) {
+        let conved = other.convert_like(self);
+        self.value += conved.value;
+    }
+}
+
+impl std::ops::Sub<{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    type Output = {{ unit.name_pascal }};
+
+    fn sub(self, _rhs: {{ unit.name_pascal }}) -> {{ unit.name_pascal }} {
+        let mut conved = _rhs.convert_like(&self);
+        conved.value = self.value - conved.value;
+        return conved;
+    }
+}
+impl std::ops::Sub<&{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    type Output = {{ unit.name_pascal }};
+
+    fn sub(self, _rhs: &{{ unit.name_pascal }}) -> {{ unit.name_pascal }} {
+        let mut conved = _rhs.convert_like(&self);
+        conved.value = self.value - conved.value;
+        return conved;
+    }
+}
+
+impl std::ops::SubAssign<{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    fn sub_assign(&mut self, other: Self) {
+        let conved = other.convert_like(self);
+        self.value -= conved.value;
+    }
+}
+impl std::ops::SubAssign<&{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    fn sub_assign(&mut self, other: &Self) {
+        let conved = other.convert_like(self);
+        self.value -= conved.value;
+    }
+}
+
+impl std::ops::Mul<f64> for {{ unit.name_pascal }} {
+    type Output = {{ unit.name_pascal }};
+
+    fn mul(self, _rhs: f64) -> {{ unit.name_pascal }} {
+        return {{ unit.name_pascal }}{value: self.value * _rhs, multiplier: self.multiplier, offset: self.offset};
+    }
+}
+impl std::ops::Mul<&f64> for {{ unit.name_pascal }} {
+    type Output = {{ unit.name_pascal }};
+
+    fn mul(self, _rhs: &f64) -> {{ unit.name_pascal }} {
+        return {{ unit.name_pascal }}{value: self.value * _rhs, multiplier: self.multiplier, offset: self.offset};
+    }
+}
+
+impl std::ops::Mul<{{ unit.name_pascal }}> for f64 {
+    type Output = {{ unit.name_pascal }};
+
+    fn mul(self, _rhs: {{ unit.name_pascal }}) -> {{ unit.name_pascal }} {
+        return {{ unit.name_pascal }}{value: _rhs.value * self, multiplier: _rhs.multiplier, offset: _rhs.offset};
+    }
+}
+impl std::ops::Mul<&{{ unit.name_pascal }}> for f64 {
+    type Output = {{ unit.name_pascal }};
+
+    fn mul(self, _rhs: &{{ unit.name_pascal }}) -> {{ unit.name_pascal }} {
+        return {{ unit.name_pascal }}{value: _rhs.value * self, multiplier: _rhs.multiplier, offset: _rhs.offset};
+    }
+}
+
+impl std::ops::MulAssign<f64> for {{ unit.name_pascal }} {
+    fn mul_assign(&mut self, other: f64) {
+        self.value *= other;
+    }
+}
+impl std::ops::MulAssign<&f64> for {{ unit.name_pascal }} {
+    fn mul_assign(&mut self, other: &f64) {
+        self.value *= other;
+    }
+}
+
+
+impl std::ops::Div<f64> for {{ unit.name_pascal }} {
+    type Output = {{ unit.name_pascal }};
+
+    fn div(self, _rhs: f64) -> {{ unit.name_pascal }} {
+        return {{ unit.name_pascal }}{value: self.value / _rhs, multiplier: self.multiplier, offset: self.offset};
+    }
+}
+impl std::ops::Div<&f64> for {{ unit.name_pascal }} {
+    type Output = {{ unit.name_pascal }};
+
+    fn div(self, _rhs: &f64) -> {{ unit.name_pascal }} {
+        return {{ unit.name_pascal }}{value: self.value / _rhs, multiplier: self.multiplier, offset: self.offset};
+    }
+}
+
+impl std::ops::DivAssign<f64> for {{ unit.name_pascal }} {
+    fn div_assign(&mut self, other: f64) {
+        self.value /= other;
+    }
+}
+impl std::ops::DivAssign<&f64> for {{ unit.name_pascal }} {
+    fn div_assign(&mut self, other: &f64) {
+        self.value /= other;
+    }
+}
+
+
+impl std::ops::Div<{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    type Output = f64;
+
+    fn div(self, _rhs: {{ unit.name_pascal }}) -> f64 {
+        let conved = _rhs.convert_like(&self);
+        return self.value / conved.value;
+    }
+}
+impl std::ops::Div<&{{ unit.name_pascal }}> for {{ unit.name_pascal }} {
+    type Output = f64;
+
+    fn div(self, _rhs: &{{ unit.name_pascal }}) -> f64 {
+        let conved = _rhs.convert_like(&self);
+        return self.value / conved.value;
+    }
+}
+
+impl std::ops::Neg for {{ unit.name_pascal }} {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        let negated = {{ unit.name_pascal }}{
+            value: - self.value,
+            multiplier: self.multiplier,
+            offset: self.offset
+        };
+        return negated;
+    }
+}
+
+impl std::cmp::PartialEq for {{ unit.name_pascal }} {
+    fn eq(&self, other: &{{ unit.name_pascal }}) -> bool{
+        let converted = other.convert_like(self);
+        return self.value.eq(&converted.value);
+    }
+}
+
+impl std::cmp::PartialOrd for {{ unit.name_pascal }}{
+    fn partial_cmp(&self, other: &{{ unit.name_pascal }}) -> Option<std::cmp::Ordering>{
+        let converted = other.convert_like(self);
+        return self.value.partial_cmp(&converted.value);
+    }
+
+}
+
+impl Eq for {{ unit.name_pascal }} {}
+impl std::cmp::Ord for {{ unit.name_pascal }} {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering{
+        let converted = other.convert_like(self);
+        return self.value.total_cmp(&converted.value);
+    }
+}
+
+
+impl approx::AbsDiffEq for {{ unit.name_pascal }}{
+    type Epsilon = f64;
+
+    fn default_epsilon() -> Self::Epsilon {
+        f64::default_epsilon()
+    }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        let converted = other.convert_like(self);
+        self.value.abs_diff_eq(&converted.value, epsilon)
+    }
+}
+
+impl approx::RelativeEq for {{ unit.name_pascal }}{
+    fn default_max_relative() -> Self::Epsilon {
+        f64::default_max_relative()
+    }
+
+    fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+        let converted = other.convert_like(self);
+        self.value.relative_eq(&converted.value, epsilon, max_relative)
+    }
+}
+
+impl approx::UlpsEq for {{ unit.name_pascal }}{
+    fn default_max_ulps() -> u32 {
+        f64::default_max_ulps()
+    }
+
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        let converted = other.convert_like(self);
+        self.value.ulps_eq(&converted.value, epsilon, max_ulps)
+    }
+}
+
+
+impl From<{{ unit.name_pascal }}> for f64 {
+    fn from(val: {{ unit.name_pascal }}) -> Self {
+        return val.convert_copy(1.0, 0.0).value;
+    }
+}
+impl From<&{{ unit.name_pascal }}> for f64 {
+    fn from(val: &{{ unit.name_pascal }}) -> Self {
+        return val.convert_copy(1.0, 0.0).value;
+    }
+}
+
+impl Default for {{ unit.name_pascal }} {
+    fn default() -> {{ unit.name_pascal }} { 
+        return {{ unit.name_pascal }}{value: 0.0, multiplier: 1.0, offset: 0.0};
+    }
+}
+
+impl std::fmt::Display for {{ unit.name_pascal }} {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let converted = self.convert_copy(1.0, 0.0);
+        write!(f, "{} seconds", converted.value)
+    }
+}
+{% endfor %}
+
+{% for unit in units %}
+
+    {% if unit.divisions|length > 0 %}{% for div in unit.divisions %}
+    impl std::ops::Div<{{ div.divisor.replace("_", " ").title().replace(" ", "") }}> for {{ unit.name_pascal }} {
+        type Output = {{ div.result.replace("_", " ").title().replace(" ", "") }};
+
+        fn div(self, _rhs: {{ div.divisor.replace("_", " ").title().replace(" ", "") }}) -> Self::Output {
+            let v1 = self.convert_offset(0.0);
+            let v2 = _rhs.convert_offset(0.0);
+            
+            return Self::Output {
+                value: v1.value / v2.value,
+                multiplier: v1.multiplier / v2.multiplier,
+                offset: 0.0
+            };
+        }
+    }
+    impl std::ops::Div<&{{ div.divisor.replace("_", " ").title().replace(" ", "") }}> for {{ unit.name_pascal }} {
+        type Output = {{ div.result.replace("_", " ").title().replace(" ", "") }};
+
+        fn div(self, _rhs: &{{ div.divisor.replace("_", " ").title().replace(" ", "") }}) -> Self::Output {
+            let v1 = self.convert_offset(0.0);
+            let v2 = _rhs.convert_offset(0.0);
+            
+            return Self::Output {
+                value: v1.value / v2.value,
+                multiplier: v1.multiplier / v2.multiplier,
+                offset: 0.0
+            };
+        }
+    }
+    {% endfor %}{% endif %}
+
+    {% if unit.multiplications|length > 0 %}{% for mult in unit.multiplications %}
+    impl std::ops::Mul<{{ mult.factor.replace("_", " ").title().replace(" ", "") }}> for {{ unit.name_pascal }} {
+        type Output = {{ mult.product.replace("_", " ").title().replace(" ", "") }};
+
+        fn mul(self, _rhs: {{ mult.factor.replace("_", " ").title().replace(" ", "") }}) -> Self::Output {
+            let v1 = self.convert_offset(0.0);
+            let v2 = _rhs.convert_offset(0.0);
+            
+            return Self::Output {
+                value: v1.value * v2.value,
+                multiplier: v1.multiplier * v2.multiplier,
+                offset: 0.0
+            };
+        }
+    }
+    impl std::ops::Mul<&{{ mult.factor.replace("_", " ").title().replace(" ", "") }}> for {{ unit.name_pascal }} {
+        type Output = {{ mult.product.replace("_", " ").title().replace(" ", "") }};
+
+        fn mul(self, _rhs: &{{ mult.factor.replace("_", " ").title().replace(" ", "") }}) -> Self::Output {
+            let v1 = self.convert_offset(0.0);
+            let v2 = _rhs.convert_offset(0.0);
+            
+            return Self::Output {
+                value: v1.value * v2.value,
+                multiplier: v1.multiplier * v2.multiplier,
+                offset: 0.0
+            };
+        }
+    }
+    {% endfor %}{% endif %}
+
+    {% if unit.square_result != '' %}
+    pub fn square(val: {{ unit.name_pascal }}) -> {{ unit.square_result.replace("_", " ").title().replace(" ", "") }} {
+        return val * val;
+    }
+    {% endif %}
+    
+    {% if unit.sqrt_result != '' %}
+    pub fn sqrt(val: {{ unit.name_pascal }}) -> {{ unit.sqrt_result.replace("_", " ").title().replace(" ", "") }} {
+        return {{ unit.sqrt_result.replace("_", " ").title().replace(" ", "") }} {
+            value: val.value.sqrt(),
+            multiplier: val.multiplier.sqrt(),
+            offset: val.offset
+        };
+    }
+    {% endif %}
+
+{% endfor %}
